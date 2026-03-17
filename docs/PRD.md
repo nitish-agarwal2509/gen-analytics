@@ -38,9 +38,9 @@ Cross-functional teams (business, product, data, engineering) depend on data ana
 
 ## 4. Feature Breakdown by Phase
 
-### MVP (Phase 1) -- $0 cost, all free tools
+### MVP (Phase 1) -- minimal cost
 
-**Constraint**: Every tool must be free. No paid API keys.
+**Constraint**: Use free tools where possible. Gemini via Vertex AI (pay-as-go, ~$0.0003/query).
 
 Features are built incrementally across development phases 1-5:
 
@@ -120,4 +120,4 @@ User: "Compare against average"
 | Correct table selection | 75% | 90% | 95% |
 | Answer correctness | 60% | 80% | 88% |
 | Simple query e2e latency | <10s | <10s | <5s |
-| Avg LLM cost per query | $0 (free tier) | <$0.03 | <$0.02 |
+| Avg LLM cost per query | ~$0.0003 (Vertex AI) | <$0.03 | <$0.02 |

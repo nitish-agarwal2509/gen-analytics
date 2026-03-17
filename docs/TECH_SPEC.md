@@ -34,12 +34,12 @@
               |
 +------------------------+
 |    LLM LAYER           |
-| MVP (free):            |
+| MVP:                   |
 |  - Gemini 2.5 Flash    |
-|    (Google AI Studio)   |
-| V1+ (paid):            |
+|    (Vertex AI)          |
+| V1+:                   |
 |  - + Claude Sonnet/Opus |
-|    (via Vertex AI)      |
+|    (Vertex AI)          |
 +------------------------+
 ```
 
@@ -52,8 +52,8 @@
 | Component | Tool | Cost | License | Notes |
 |-----------|------|------|---------|-------|
 | Backend | Python + FastAPI | Free | MIT | Best AI/ML ecosystem |
-| Agent Framework | **Google ADK** | Free | Apache 2.0 | Works with Gemini free tier, has built-in dev UI (`adk web`) |
-| LLM | **Gemini 2.5 Flash** (Google AI Studio) | Free | Free tier | 10 RPM, 250 RPD, 250K TPM. No credit card needed. |
+| Agent Framework | **Google ADK** | Free | Apache 2.0 | Works with Vertex AI, has built-in dev UI (`adk web`) |
+| LLM | **Gemini 2.5 Flash** (Vertex AI) | Pay-as-go | GCP | No rate limits. Auth via service account. |
 | Schema Strategy | Full terse schema in system prompt | Free | N/A | ~250K tokens for 500 tables. Fits in Gemini's 1M context. No vector DB needed for MVP. |
 | Frontend | **Streamlit** | Free | Apache 2.0 | Runs as separate process from FastAPI (port 8501 vs 8000) |
 | Charts | Plotly (via Streamlit) | Free | MIT | |
@@ -73,8 +73,7 @@
 | Deployment | Cloud Run | Pay-as-go | Serverless |
 
 ### Why Google ADK over Claude Agent SDK for MVP
-- Claude Agent SDK requires paid Claude API calls -- no free tier
-- Google ADK works with Gemini free tier = truly $0
+- Google ADK works natively with Gemini via Vertex AI
 - ADK has built-in dev UI (`adk web`) and FastAPI server (`adk api_server`)
 - ADK is model-agnostic -- can switch to Claude/LangGraph later
 
@@ -159,7 +158,7 @@ User Question -> [PLANNER] -> [SCHEMA AGENT] -> [SQL AGENT] -> [VALIDATOR] -> [V
 - Question + response: ~5K tokens
 - Total: ~265K tokens (fits in Gemini's 1M context with room to spare)
 
-**Free tier note:** 250K TPM limit means ~1 query per minute on free tier. Fine for development.
+**Note:** Using Vertex AI — no TPM/RPD rate limits that affect development.
 
 ### V1+: Add RAG as Supplement (Not Replacement)
 
@@ -184,11 +183,11 @@ Claude Sonnet/Opus have 200K context -- full schema doesn't fit. For Claude-rout
 
 ## 5. Model Routing
 
-### MVP -- Gemini Free Tier Only
+### MVP -- Gemini via Vertex AI
 
 | Complexity | Model | Cost/Query |
 |------------|-------|------------|
-| ALL | Gemini 2.5 Flash (Google AI Studio free tier) | $0 |
+| ALL | Gemini 2.5 Flash (Vertex AI) | ~$0.0003 |
 
 ### V1+ -- Paid Hybrid Routing
 
@@ -290,8 +289,8 @@ gen-analytics/
 
 | Decision | Chosen | Why |
 |----------|--------|-----|
-| Google ADK for MVP | Free + learns agent patterns | Works with Gemini free tier, $0 cost |
-| Gemini free tier for MVP | $0 cost | 10 RPM/250 RPD enough for local dev |
+| Google ADK for MVP | Free + learns agent patterns | Works with Vertex AI, native Gemini support |
+| Gemini via Vertex AI | No rate limits | Pay-as-go, auth via service account |
 | Full schema in context for MVP | Highest accuracy | Gemini's 1M context fits 500 tables (~250K tokens). Eliminates RAG retrieval errors. |
 | RAG as supplement in V1+ | Belt + suspenders | Full schema stays; RAG adds glossary, examples, rich metadata. NOT for table discovery. |
 | gemini-embedding-001 for V1+ | Free | Same API key as LLM |
