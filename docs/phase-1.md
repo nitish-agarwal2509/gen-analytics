@@ -174,8 +174,8 @@
 
 ## Definition of Done for Phase 1
 
-- [ ] Project structure created with all dependencies installed
-- [ ] BigQuery connection works, can list datasets/tables
+- [x] Project structure created with all dependencies installed
+- [x] BigQuery connection works, can list datasets/tables
 - [ ] `execute_sql` tool works with DML rejection
 - [ ] Gemini 2.5 Flash responds to prompts via free API key
 - [ ] Google ADK agent generates SQL from natural language and executes it
