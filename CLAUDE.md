@@ -55,4 +55,4 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 1, Chunk 1.3: `execute_sql` tool
 - [x] Phase 1, Chunk 1.4: Gemini API key + test
 - [x] Phase 1, Chunk 1.5: First Google ADK agent
-- [ ] Phase 1, Chunk 1.6: Streamlit chat UI
+- [x] Phase 1, Chunk 1.6: Streamlit chat UI
