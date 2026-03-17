@@ -5,10 +5,15 @@ import sys
 import os
 
 # Add backend to path for direct agent import (MVP -- no FastAPI layer yet)
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "backend"))
+BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "backend"))
+sys.path.insert(0, BACKEND_DIR)
 
 from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", "backend", ".env"))
+load_dotenv(os.path.join(BACKEND_DIR, ".env"))
+
+# Resolve relative GOOGLE_APPLICATION_CREDENTIALS to backend dir
+if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") and not os.path.isabs(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(BACKEND_DIR, os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
 
 import streamlit as st
 from google.genai import types
