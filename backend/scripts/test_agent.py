@@ -77,8 +77,8 @@ async def main():
 
     questions = [
         "How many total accounts are in the users_prod.account table?",
-        "How many active vs inactive accounts are there?",
-        "What are the top 5 countries by user count in user_profile?",
+        "What are the top 5 banks by number of UPI accounts?",
+        "What is the total cashback redeemed vs credited across all wallets?",
     ]
 
     for q in questions:
