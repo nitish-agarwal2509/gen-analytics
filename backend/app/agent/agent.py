@@ -4,7 +4,6 @@ from google.adk.agents import LlmAgent
 from google.adk.tools import FunctionTool
 
 from app.agent.tools.execute_sql import execute_sql
-from app.config import settings
 
 SYSTEM_PROMPT = """\
 You are GenAnalytics, a data analyst agent for BigQuery.

@@ -39,12 +39,12 @@ streamlit run app.py                   # Streamlit on port 8501
 - Config loaded from `backend/.env` via pydantic-settings
 - BigQuery auth: service account key JSON (`GOOGLE_APPLICATION_CREDENTIALS`)
 - GCP Project: `sm-apps-core` (76 datasets, 500+ tables)
-- LLM: Gemini 2.5 Flash via Google AI Studio free tier (`GOOGLE_API_KEY`)
+- LLM: Gemini 2.5 Flash via Vertex AI (`GOOGLE_GENAI_USE_VERTEXAI=true`)
 
 ## Key Decisions
 
 - **Full terse schema in system prompt** (not RAG) for MVP — Gemini's 1M context fits all tables
-- **Google ADK** for agent framework (free, works with Gemini free tier)
+- **Google ADK** for agent framework, Gemini via Vertex AI (no free tier rate limits)
 - **RAG deferred to V1+** as supplement only (glossary + examples), not for table discovery
 - All scripts run from `backend/` directory with venv activated
 

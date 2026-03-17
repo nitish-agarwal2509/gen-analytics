@@ -7,7 +7,7 @@ import os
 # Add backend to path so we can import app modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Load .env so GOOGLE_API_KEY is available to ADK
+# Load .env so Vertex AI env vars are available to ADK
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -81,10 +81,7 @@ async def main():
         "What are the top 5 countries by user count in user_profile?",
     ]
 
-    for i, q in enumerate(questions):
-        if i > 0:
-            print("\n⏳ Waiting 20s for rate limit...")
-            await asyncio.sleep(20)
+    for q in questions:
         await ask(runner, "test_user", session.id, q)
 
 
