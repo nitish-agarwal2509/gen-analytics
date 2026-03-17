@@ -176,8 +176,8 @@
 
 - [x] Project structure created with all dependencies installed
 - [x] BigQuery connection works, can list datasets/tables
-- [ ] `execute_sql` tool works with DML rejection
-- [ ] Gemini 2.5 Flash responds to prompts via free API key
+- [x] `execute_sql` tool works with DML rejection
+- [x] Gemini 2.5 Flash responds to prompts via free API key
 - [ ] Google ADK agent generates SQL from natural language and executes it
 - [ ] Streamlit chat UI displays questions, SQL, and results
 - [ ] At least 3 out of 5 simple questions return correct results
