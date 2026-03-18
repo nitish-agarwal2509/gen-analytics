@@ -180,4 +180,4 @@
 - [x] Gemini 2.5 Flash responds to prompts via free API key
 - [x] Google ADK agent generates SQL from natural language and executes it
 - [x] Streamlit chat UI displays questions, SQL, and results
-- [ ] At least 3 out of 5 simple questions return correct results
+- [x] At least 3 out of 5 simple questions return correct results
