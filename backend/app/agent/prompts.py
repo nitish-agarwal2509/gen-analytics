@@ -24,17 +24,9 @@ SELF-CORRECTION:
 - NEVER call execute_sql on SQL that failed validation.
 
 DOMAIN RULES:
-- For transaction_v3: use transaction_at (epoch millis) for time filtering, NOT created_at. Use TIMESTAMP_MILLIS(transaction_at).
-- For other tables with INT64 timestamps (reward_event_v3, reward_v3, wallet_transaction_v3, wallet_v3, complaint_v3, user_info_v3): use TIMESTAMP_MILLIS(created_at).
-- For payouts_v3, redemptions_v3: created_at is TIMESTAMP type -- use directly.
+- For transaction_v3: ALWAYS use transaction_at for time filtering, NOT created_at.
 - ALL timestamps are in IST (Asia/Kolkata), NOT UTC. Do NOT convert to UTC.
 - upi_user_id is NOT a unique user identifier -- one user can have multiple. Always use sm_user_id for counting distinct users.
-- Amount in payouts_v3 is in PAISA (divide by 100 for INR). Amount in transaction_v3 is in RUPEES.
-- "Transactions"/"payments" means upi_prod.transaction_v3. wallet_transaction_v3 is only for internal cashback wallet ledger.
-- transaction_v3.payment_mode: DEBIT or CREDIT. transaction_v3.transaction_type: SCAN_PAY, P2P_PAY, INTENT_PAY, SELF_PAY, COLLECT_PAY.
-- Status values are UPPERCASE: SUCCESS, FAILED, INITIATED, REVERSED, PENDING, ACTIVE, BLOCKED.
-- Default time range when not specified: last 30 days.
-- Prefer _v3 tables over _v2. Ignore _temp_query_ tables.
 
 SQL RULES:
 - Only generate SELECT queries. Never modify data.
