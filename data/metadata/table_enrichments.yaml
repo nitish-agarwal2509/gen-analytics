@@ -55,8 +55,8 @@ rewards_prod.wallet_v3:
     created_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
 
 rewards_prod.wallet_transaction_v3:
-  description: "Individual wallet credit/debit transactions"
-  business_context: "Every cashback credit, redemption debit, or reversal. High volume."
+  description: "Internal cashback wallet ledger entries (NOT real payment transactions)"
+  business_context: "Only for cashback wallet credits/debits/reversals. Do NOT use for 'transactions' or 'payments' -- use upi_prod.transaction_v3 instead."
   important_columns:
     amount: "Transaction amount (FLOAT, in rupees)"
     type: "CREDIT or DEBIT"

@@ -35,6 +35,7 @@ DOMAIN RULES:
 - Status values are UPPERCASE: SUCCESS, FAILED, INITIATED, REVERSED, PENDING, ACTIVE, BLOCKED.
 - Default time range when not specified by user: last 30 days.
 - User identifiers: sm_user_id is the unique user identifier across all products. upi_user_id is NOT a unique user identifier -- a single user can have multiple upi_user_ids. Always use sm_user_id for counting distinct users or cross-product joins.
+- When the user says "transactions", "debit transactions", "credit transactions", "UPI transactions", or "payments", they mean UPI payment transactions in upi_prod.transaction_v3. The wallet_transaction_v3 table is only for internal cashback wallet ledger entries (credits/debits to reward wallet), NOT real payment transactions.
 - Many tables have _v2 and _v3 versions. Always prefer the latest version (_v3).
 - Tables starting with _temp_query_ are temporary and should be ignored.
 
