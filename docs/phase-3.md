@@ -105,6 +105,27 @@
 
 ---
 
+## Chunk 3.6: Human-in-the-Loop for Expensive Queries
+
+**Goal**: Agent asks user for approval before executing queries that scan large amounts of data.
+
+**Learning**: Human-in-the-loop — the agent defers to the user for high-stakes decisions rather than acting autonomously. This is a core agentic pattern alongside tool use and self-correction.
+
+**Steps**:
+1. Add `APPROVAL_THRESHOLD_BYTES` (5 GB) to `backend/app/bigquery/safety.py`
+2. Update `validate_sql` to return `requires_approval: true` when scan exceeds threshold
+3. Update agent prompt: if `requires_approval` is true, ask the user before calling `execute_sql`
+4. Update Streamlit UI to show warning for expensive queries
+
+**Flow**:
+- Query < 5 GB: auto-execute (no change)
+- Query > 5 GB: agent tells user estimated scan/cost, waits for "yes" before executing
+- User says "cancel": agent does not execute, shows message
+
+**Test**: Ask "Show total amount from all wallet transactions" (~23 GB) -> agent asks for approval -> user says "yes" -> executes
+
+---
+
 ## Definition of Done for Phase 3
 
 - [x] `validate_sql` correctly validates/rejects SQL via BigQuery dry-run
@@ -114,3 +135,4 @@
 - [x] Agent writes correct SQL on first attempt due to full schema context (self-correction is a safety net)
 - [x] Streamlit shows validation status, cost estimate, and self-correction attempts
 - [x] Test script defaults to dry-run mode ($0 BQ cost)
+- [x] Human-in-the-loop: expensive queries (>5 GB) require user approval before execution

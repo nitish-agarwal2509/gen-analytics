@@ -117,7 +117,10 @@ def _render_assistant_message(msg):
         v = validations[0]
         est = _fmt_bytes(v.get("estimated_bytes", 0))
         cost = v.get("estimated_cost_usd", 0)
-        st.caption(f"✅ Validated | Scan: {est} | Est. cost: ${cost:.6f}")
+        if v.get("requires_approval"):
+            st.warning(f"⚠️ Expensive query | Scan: {est} | Est. cost: ${cost:.6f} | User approval requested")
+        else:
+            st.caption(f"✅ Validated | Scan: {est} | Est. cost: ${cost:.6f}")
 
     # Show SQL
     if msg.get("sql"):

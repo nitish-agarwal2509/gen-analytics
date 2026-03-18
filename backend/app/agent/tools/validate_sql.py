@@ -1,7 +1,7 @@
 """Validate SQL tool -- dry-run queries against BigQuery to check syntax and estimate cost."""
 
 from app.bigquery.client import get_client
-from app.bigquery.safety import is_read_only, check_cost_limit, estimate_cost_usd
+from app.bigquery.safety import is_read_only, check_cost_limit, estimate_cost_usd, APPROVAL_THRESHOLD_BYTES
 from google.cloud.bigquery import QueryJobConfig
 
 
@@ -42,12 +42,21 @@ def validate_sql(sql: str) -> dict:
                 "estimated_cost_usd": cost_usd,
             }
 
-        return {
+        requires_approval = estimated_bytes > APPROVAL_THRESHOLD_BYTES
+        result = {
             "is_valid": True,
             "errors": [],
             "estimated_bytes": estimated_bytes,
             "estimated_cost_usd": cost_usd,
+            "requires_approval": requires_approval,
         }
+        if requires_approval:
+            est_gb = estimated_bytes / 1024 ** 3
+            result["approval_message"] = (
+                f"This query will scan {est_gb:.1f} GB (estimated cost: ${cost_usd:.6f}). "
+                "Ask the user if they want to proceed before executing."
+            )
+        return result
 
     except Exception as e:
         error_str = str(e)
