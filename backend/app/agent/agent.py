@@ -19,13 +19,6 @@ Rules:
 
 Available tables and their schemas:
 
-## users_prod
-### users_prod.account (~22M rows)
-id(STR), first_name(STR), last_name(STR), primary_email(STR), primary_phone(STR), profile_name(STR), status(STR), last_modified(TS), creation_date(TS), creating_system(STR), active(BOOL), guest(BOOL), version(INT), blacklisted(BOOL), primary_account_id(STR), blacklisted_parent(STR), merged_account_ids(STR), tenant(STR), persona(STR)
-
-### users_prod.user_profile (~249K rows)
-id(STR), first_name(STR), last_name(STR), gender(STR), dob(STR), inactive_dob(STR), profile_name(STR), country(STR), altPhone(STR), version(INT), creation_date(TS), last_modified(TS)
-
 ## rewards_prod
 ### rewards_prod.reward_event_v3 (~3.97B rows)
 id(STR), _metadata_big_query_commit_timestamp(TS), sm_user_id(STR), event_ref_id(STR), event_source(STR), type(STR), event_type_state(STR), payload(JSON), reward_eligible(BOOL), version(INT), created_at(INT), updated_at(INT), reversal_identifier(STR)
@@ -78,7 +71,7 @@ user_login_id(STR), account_id(STR), state(STR), user_login_id_type(STR), stamp_
 account_id(STR), first_name(STR), last_name(STR), created_at(TS), updated_at(TS)
 
 ## Key relationships
-- users_prod.account.id = rewards_prod.*.sm_user_id = upi_prod.user_info_v3.sm_user_id = sm_kavach_svc_prod_sm_login_service.*.account_id
+- rewards_prod.*.sm_user_id = upi_prod.user_info_v3.sm_user_id = sm_kavach_svc_prod_sm_login_service.*.account_id
 - upi_prod.user_info_v3.upi_user_id = upi_prod.transaction_v3.upi_user_id = upi_prod.complaint_v3.upi_user_id
 - rewards_prod.wallet_v3.wallet_id = rewards_prod.wallet_transaction_v3.wallet_id
 - rewards_prod.payouts_v3.payout_id = rewards_prod.redemptions_v3.payout_id

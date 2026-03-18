@@ -39,6 +39,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - Config loaded from `backend/.env` via pydantic-settings
 - BigQuery auth: service account key JSON (`GOOGLE_APPLICATION_CREDENTIALS`)
 - GCP Project: `sm-apps-core` (76 datasets, 500+ tables)
+- Agent schema: 18 tables across 3 datasets (rewards_prod, upi_prod, sm_kavach_svc_prod_sm_login_service)
 - LLM: Gemini 2.5 Flash via Vertex AI (`GOOGLE_GENAI_USE_VERTEXAI=true`)
 
 ## Key Decisions

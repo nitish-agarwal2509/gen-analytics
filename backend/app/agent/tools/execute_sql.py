@@ -52,8 +52,11 @@ def execute_sql(sql: str, max_rows: int = 100) -> dict:
 
 def _serialize(value):
     """Convert BigQuery values to JSON-serializable types."""
+    from decimal import Decimal
     if hasattr(value, "isoformat"):
         return value.isoformat()
     if isinstance(value, bytes):
         return value.decode("utf-8", errors="replace")
+    if isinstance(value, Decimal):
+        return float(value)
     return value
