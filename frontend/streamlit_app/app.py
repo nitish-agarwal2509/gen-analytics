@@ -23,12 +23,23 @@ from google.adk.sessions import InMemorySessionService
 
 from app.agent.agent import create_agent
 from components.chart_renderer import render_chart
+from components.styles import inject_custom_css
 
+# ---- Page config ----
 st.set_page_config(page_title="GenAnalytics", page_icon="📊", layout="wide")
-st.title("📊 GenAnalytics")
-st.caption("Ask questions about your data in plain English")
+
+inject_custom_css()
+
+# ---- Header ----
+st.markdown("""
+<div class="app-header">
+    <h1>GenAnalytics</h1>
+    <p>Ask questions about your data in plain English</p>
+</div>
+""", unsafe_allow_html=True)
 
 
+# ---- Agent setup ----
 @st.cache_resource
 def get_runner():
     """Create agent and runner once, cached across reruns."""
@@ -59,11 +70,7 @@ _TOOL_LABELS = {
 
 
 async def run_agent(runner, session_id: str, question: str, status=None) -> dict:
-    """Run the agent and collect SQL + results + final answer.
-
-    Args:
-        status: Optional st.status() container to update with thinking steps.
-    """
+    """Run the agent and collect SQL + results + final answer."""
     message = types.Content(
         role="user", parts=[types.Part(text=question)]
     )
@@ -72,7 +79,7 @@ async def run_agent(runner, session_id: str, question: str, status=None) -> dict
     query_results = []
     validations = []
     viz_config = None
-    tool_calls = []  # track tool call sequence
+    tool_calls = []
     final_text = ""
     start_time = time.time()
 
@@ -99,7 +106,6 @@ async def run_agent(runner, session_id: str, question: str, status=None) -> dict
                 if fc.name == "validate_sql" and fc.args and "sql" in fc.args:
                     sql_queries.append(fc.args["sql"])
                 elif fc.name == "execute_sql" and fc.args and "sql" in fc.args:
-                    # Only add if not already captured from validate_sql
                     if not sql_queries or sql_queries[-1] != fc.args["sql"]:
                         sql_queries.append(fc.args["sql"])
 
@@ -139,10 +145,12 @@ async def run_agent(runner, session_id: str, question: str, status=None) -> dict
     }
 
 
+# ---- Rendering ----
 def _render_assistant_message(msg):
     """Render an assistant message with validation, SQL, results, and answer."""
-    # Show validation attempts if there were retries
     validations = msg.get("validations", [])
+
+    # Self-correction expander
     if len(validations) > 1:
         with st.expander(f"🔄 Self-correction ({len(validations)} attempts)"):
             for i, v in enumerate(validations):
@@ -151,47 +159,52 @@ def _render_assistant_message(msg):
                 else:
                     st.error(f"Attempt {i+1}: {', '.join(v.get('errors', ['Unknown error']))}")
 
-    # Show validation status for single successful validation
+    # Validation badge
     if len(validations) == 1 and validations[0].get("is_valid"):
         v = validations[0]
         est = _fmt_bytes(v.get("estimated_bytes", 0))
         cost = v.get("estimated_cost_usd", 0)
         if v.get("requires_approval"):
-            st.warning(f"⚠️ Expensive query | Scan: {est} | Est. cost: ${cost:.6f} | User approval requested")
+            st.markdown(
+                f'<div class="validation-badge expensive">⚠️ Expensive query &middot; Scan: {est} &middot; Est. cost: ${cost:.6f} &middot; Approval requested</div>',
+                unsafe_allow_html=True,
+            )
         else:
-            st.caption(f"✅ Validated | Scan: {est} | Est. cost: ${cost:.6f}")
+            st.markdown(
+                f'<div class="validation-badge valid">✓ Validated &middot; Scan: {est} &middot; Est. cost: ${cost:.6f}</div>',
+                unsafe_allow_html=True,
+            )
 
-    # Show SQL with metadata
+    # SQL expander with metadata
     if msg.get("sql"):
-        with st.expander("🔍 SQL Query"):
+        with st.expander("SQL Query", icon="🔍"):
             st.code(msg["sql"][-1], language="sql")
-            # Metadata row
-            meta_parts = []
-            # Scan size from last valid validation
+            # Build metadata HTML
+            meta_html_parts = []
             for v in reversed(validations):
                 if v.get("is_valid"):
-                    meta_parts.append(f"Scan: {_fmt_bytes(v.get('estimated_bytes', 0))}")
+                    meta_html_parts.append(f'<span class="meta-item"><span class="meta-label">Scan:</span>{_fmt_bytes(v.get("estimated_bytes", 0))}</span>')
                     cost = v.get("estimated_cost_usd", 0)
                     if cost:
-                        meta_parts.append(f"Est. cost: ${cost:.6f}")
+                        meta_html_parts.append(f'<span class="meta-item"><span class="meta-label">Cost:</span>${cost:.6f}</span>')
                     break
             if msg.get("elapsed_seconds"):
-                meta_parts.append(f"Time: {msg['elapsed_seconds']}s")
+                meta_html_parts.append(f'<span class="meta-item"><span class="meta-label">Time:</span>{msg["elapsed_seconds"]}s</span>')
             if msg.get("tool_calls"):
-                meta_parts.append(f"Tools: {' → '.join(msg['tool_calls'])}")
-            if meta_parts:
-                st.caption(" | ".join(meta_parts))
+                tools = " → ".join(msg["tool_calls"])
+                meta_html_parts.append(f'<span class="meta-item"><span class="meta-label">Tools:</span>{tools}</span>')
+            if meta_html_parts:
+                st.markdown(f'<div class="meta-row">{"".join(meta_html_parts)}</div>', unsafe_allow_html=True)
 
-    # Show chart if viz config exists
+    # Chart
     viz_config = msg.get("viz_config")
     if viz_config and viz_config.get("chart_type") != "table":
         render_chart(viz_config, msg.get("results", []))
 
-    # Show results
+    # Results table
     if msg.get("results"):
         for result in msg["results"]:
             if "rows" in result and result["rows"]:
-                # Skip dataframe for metric cards (already rendered as st.metric)
                 if not viz_config or viz_config.get("chart_type") != "metric_card":
                     st.dataframe(result["rows"], use_container_width=True)
             if "total_rows" in result:
@@ -199,7 +212,7 @@ def _render_assistant_message(msg):
             if "error" in result:
                 st.error(result["error"])
 
-    # Show answer
+    # Answer
     st.markdown(msg["answer"])
 
 
@@ -214,7 +227,7 @@ def _fmt_bytes(n: int) -> str:
     return f"{n} B"
 
 
-# Initialize state
+# ---- Initialize state ----
 runner, session_service = get_runner()
 
 if "session_id" not in st.session_state:
@@ -223,23 +236,28 @@ if "session_id" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Sidebar: session history
+
+# ---- Sidebar ----
 with st.sidebar:
-    st.header("Session History")
+    st.markdown("## Session History")
     user_questions = [m["content"] for m in st.session_state.messages if m["role"] == "user"]
     if user_questions:
         for i, q in enumerate(user_questions, 1):
-            truncated = q[:60] + "..." if len(q) > 60 else q
-            st.text(f"{i}. {truncated}")
+            truncated = q[:55] + "..." if len(q) > 55 else q
+            st.markdown(
+                f'<div class="sidebar-query-item"><span class="sidebar-query-num">{i}.</span>{truncated}</div>',
+                unsafe_allow_html=True,
+            )
     else:
         st.caption("No queries yet. Ask a question to get started.")
-    st.divider()
-    if st.button("Clear Session"):
+    st.markdown("<div style='height: 1rem'></div>", unsafe_allow_html=True)
+    if st.button("🗑  Clear Session", use_container_width=True):
         st.session_state.messages = []
         st.session_state.session_id = asyncio.run(create_session(session_service))
         st.rerun()
 
-# Example questions (shown when no messages yet)
+
+# ---- Example questions ----
 _EXAMPLE_QUESTIONS = [
     "What was the total payout amount last month?",
     "How many successful payouts in the last 7 days?",
@@ -248,7 +266,8 @@ _EXAMPLE_QUESTIONS = [
     "Top 10 reward events by count last month",
 ]
 
-# Display chat history
+
+# ---- Chat history ----
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         if msg["role"] == "assistant":
@@ -256,29 +275,37 @@ for msg in st.session_state.messages:
         else:
             st.markdown(msg["content"])
 
-# Show example questions when chat is empty
+# ---- Welcome state with pill buttons ----
 if not st.session_state.messages:
-    st.markdown("**Try an example question:**")
-    cols = st.columns(len(_EXAMPLE_QUESTIONS))
-    for i, (col, q) in enumerate(zip(cols, _EXAMPLE_QUESTIONS)):
-        with col:
-            if st.button(q[:40] + "..." if len(q) > 40 else q, key=f"example_{i}", use_container_width=True):
-                st.session_state["_pending_question"] = q
-                st.rerun()
+    st.markdown("""
+    <div class="welcome-container">
+        <h3>What would you like to know?</h3>
+        <p>Ask any question about your data, or try one of these examples:</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Chat input
+    # Render pills as real buttons (2 rows)
+    row1 = st.columns(3)
+    row2 = st.columns(3)
+    all_cols = row1 + row2
+    for i, q in enumerate(_EXAMPLE_QUESTIONS):
+        if i < len(all_cols):
+            with all_cols[i]:
+                if st.button(q, key=f"example_{i}", use_container_width=True):
+                    st.session_state["_pending_question"] = q
+                    st.rerun()
+
+
+# ---- Chat input ----
 prompt = st.chat_input("Ask a question about your data...")
-# Handle example button click
 if not prompt and st.session_state.get("_pending_question"):
     prompt = st.session_state.pop("_pending_question")
 
 if prompt:
-    # Display user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Run agent
     with st.chat_message("assistant"):
         try:
             with st.status("Thinking...", expanded=True) as status:
@@ -288,7 +315,6 @@ if prompt:
 
             _render_assistant_message(response)
 
-            # Save to history
             st.session_state.messages.append({
                 "role": "assistant",
                 "sql": response["sql"],
@@ -303,6 +329,6 @@ if prompt:
         except Exception as e:
             error_msg = str(e)
             if "RESOURCE_EXHAUSTED" in error_msg or "429" in error_msg:
-                st.error("⚠️ Gemini free tier rate limit reached. Please wait a minute and try again.")
+                st.error("⚠️ Gemini rate limit reached. Please wait a minute and try again.")
             else:
                 st.error(f"Error: {error_msg}")
