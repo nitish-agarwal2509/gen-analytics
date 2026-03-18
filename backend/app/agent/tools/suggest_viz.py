@@ -4,7 +4,7 @@ import re
 
 # Column name patterns for type detection
 _DATE_PATTERNS = re.compile(
-    r"(date|day|week|month|quarter|year|time|timestamp|created_at|updated_at|period)",
+    r"(date|day|week|month|quarter|year|time|timestamp|_at$|period)",
     re.IGNORECASE,
 )
 _CATEGORICAL_PATTERNS = re.compile(

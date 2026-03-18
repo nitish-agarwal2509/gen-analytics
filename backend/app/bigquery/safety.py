@@ -16,7 +16,7 @@ DEFAULT_MAX_BYTES = 500 * 1024 ** 3  # 500 GB
 DEFAULT_MAX_ROWS = 1000
 
 # Queries scanning more than this require user approval before execution
-APPROVAL_THRESHOLD_BYTES = 5 * 1024 ** 3  # 5 GB
+APPROVAL_THRESHOLD_BYTES = 500 * 1024 ** 3  # 500 GB (same as max -- auto-approve everything under max)
 
 
 def is_read_only(sql: str) -> tuple[bool, str | None]:
