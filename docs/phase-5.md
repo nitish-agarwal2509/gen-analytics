@@ -136,9 +136,9 @@
 
 ## Definition of Done for Phase 5
 
-- [ ] 20-30 tables have enriched descriptions in terse schema
-- [ ] 20-30 business glossary terms in system prompt
-- [ ] 15-20 few-shot SQL examples in system prompt
-- [ ] Domain-specific rules cover paisa/epoch/status patterns
-- [ ] Unified context loader with token budget monitoring
+- [x] 20-30 tables have enriched descriptions in terse schema
+- [x] 20-30 business glossary terms in system prompt
+- [x] 15-20 few-shot SQL examples in system prompt
+- [x] Domain-specific rules cover paisa/epoch/status patterns
+- [x] Unified context loader with token budget monitoring
 - [ ] Agent handles domain-specific questions better than before enrichments

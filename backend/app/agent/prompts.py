@@ -23,27 +23,54 @@ SELF-CORRECTION:
 - Maximum 3 validation attempts. After 3 failures, explain the issue to the user.
 - NEVER call execute_sql on SQL that failed validation.
 
-Rules:
+DOMAIN RULES:
+- Amount in payouts_v3 is in PAISA -- always divide by 100 for INR display.
+- Amount in transaction_v3 is in RUPEES (NUMERIC) -- no conversion needed.
+- Amount in wallet_transaction_v3 is in RUPEES (FLOAT) -- no conversion needed.
+- Timestamp handling varies by table:
+  - payouts_v3, redemptions_v3: created_at is TIMESTAMP type -- use directly.
+  - transaction_v3, reward_event_v3, reward_v3, wallet_transaction_v3, wallet_v3, complaint_v3, user_info_v3: created_at is INT64 (epoch millis) -- use TIMESTAMP_MILLIS(created_at).
+- Status values are UPPERCASE: SUCCESS, FAILED, INITIATED, REVERSED, PENDING, ACTIVE, BLOCKED.
+- Default time range when not specified by user: last 30 days.
+- User identifiers: use sm_user_id for cross-product joins, upi_user_id for UPI-specific queries.
+- Many tables have _v2 and _v3 versions. Always prefer the latest version (_v3).
+- Tables starting with _temp_query_ are temporary and should be ignored.
+
+SQL RULES:
 - Only generate SELECT queries. Never modify data.
 - Always qualify table names with dataset: `dataset.table`
 - Do NOT just return SQL text -- always use the tools.
 - Write ONE well-crafted query per question. Do NOT run multiple exploratory queries.
-- Many tables have _v2 and _v3 versions. Prefer the latest version (_v3) unless asked otherwise.
-- Many timestamp columns (created_at, updated_at) are INT (epoch millis). Use TIMESTAMP_MILLIS() to convert.
-- Tables starting with _temp_query_ are temporary and should be ignored.
 
 Key relationships:
 - rewards_prod.*.sm_user_id = upi_prod.user_info_v3.sm_user_id = sm_kavach_svc_prod_sm_login_service.*.account_id
 - upi_prod.user_info_v3.upi_user_id = upi_prod.transaction_v3.upi_user_id = upi_prod.complaint_v3.upi_user_id
 - rewards_prod.wallet_v3.wallet_id = rewards_prod.wallet_transaction_v3.wallet_id
 - rewards_prod.payouts_v3.payout_id = rewards_prod.redemptions_v3.payout_id
-
+{glossary_section}
+{examples_section}
 Available tables and their schemas:
 
 {schema}
 """
 
 
-def build_system_prompt(terse_schema: str) -> str:
-    """Build the full system prompt with schema injected."""
-    return SYSTEM_PROMPT_TEMPLATE.format(schema=terse_schema)
+def build_system_prompt(
+    terse_schema: str,
+    glossary: str = "",
+    examples: str = "",
+) -> str:
+    """Build the full system prompt with schema, glossary, and examples injected."""
+    glossary_section = ""
+    if glossary:
+        glossary_section = f"\nBUSINESS GLOSSARY:\n{glossary}\n"
+
+    examples_section = ""
+    if examples:
+        examples_section = f"\nFEW-SHOT EXAMPLES (use these patterns as reference):\n{examples}\n"
+
+    return SYSTEM_PROMPT_TEMPLATE.format(
+        schema=terse_schema,
+        glossary_section=glossary_section,
+        examples_section=examples_section,
+    )

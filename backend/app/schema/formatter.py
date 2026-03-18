@@ -42,18 +42,20 @@ def _human_row_count(n: int) -> str:
     return str(n)
 
 
-def format_terse_schema(metadata: list[dict]) -> str:
+def format_terse_schema(metadata: list[dict], enrichments: dict | None = None) -> str:
     """Convert metadata list into a compact terse schema string.
 
     Format per table (one line):
-        dataset.table (~NM rows): col1(TYPE), col2(TYPE), ...
+        dataset.table (~NM rows) [description]: col1(TYPE), col2(TYPE)[note], ...
 
     Args:
         metadata: List of table metadata dicts from extract_all_metadata().
+        enrichments: Optional dict of table enrichments keyed by full_name.
 
     Returns:
         Terse schema string ready for system prompt injection.
     """
+    enrichments = enrichments or {}
     lines = []
     current_dataset = None
 
@@ -63,12 +65,19 @@ def format_terse_schema(metadata: list[dict]) -> str:
             current_dataset = table["dataset"]
             lines.append(f"\n## {current_dataset}")
 
+        full_name = table["full_name"]
+        enrichment = enrichments.get(full_name, {})
+        col_notes = enrichment.get("important_columns", {})
+
         cols = ", ".join(
             f"{c['name']}({_abbreviate_type(c['type'])})"
+            + (f"[{col_notes[c['name']]}]" if c["name"] in col_notes else "")
             for c in table["columns"]
         )
         row_str = _human_row_count(table["row_count"])
-        lines.append(f"{table['full_name']} (~{row_str} rows): {cols}")
+        desc = enrichment.get("description", "")
+        desc_part = f" [{desc}]" if desc else ""
+        lines.append(f"{full_name} (~{row_str} rows){desc_part}: {cols}")
 
     return "\n".join(lines).strip()
 

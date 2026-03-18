@@ -1,0 +1,122 @@
+# Business glossary -- domain terms mapped to SQL patterns and tables
+# Injected into agent system prompt for better query understanding
+
+GMV:
+  definition: "Gross Merchandise Value -- total transaction value"
+  sql_hint: "SUM(amount) from upi_prod.transaction_v3. Amount is in rupees (NUMERIC). Filter by transaction_status = 'SUCCESS' for net GMV."
+  related_tables: ["upi_prod.transaction_v3"]
+  synonyms: ["gross merchandise value", "total transaction value", "TPV", "total payment volume"]
+
+MAU:
+  definition: "Monthly Active Users -- distinct users with at least one activity in a calendar month"
+  sql_hint: "COUNT(DISTINCT sm_user_id) or COUNT(DISTINCT upi_user_id) grouped by month. Use TIMESTAMP_MILLIS(created_at) for date extraction."
+  related_tables: ["upi_prod.transaction_v3", "rewards_prod.reward_event_v3", "sm_kavach_svc_prod_sm_login_service.AccountLoginEntity"]
+  synonyms: ["monthly active users", "active users per month"]
+
+DAU:
+  definition: "Daily Active Users -- distinct users with at least one activity per day"
+  sql_hint: "COUNT(DISTINCT sm_user_id) grouped by DATE(TIMESTAMP_MILLIS(created_at))"
+  related_tables: ["upi_prod.transaction_v3", "rewards_prod.reward_event_v3"]
+  synonyms: ["daily active users", "active users per day"]
+
+retention:
+  definition: "Users who performed activity in consecutive time periods"
+  sql_hint: "Use DATE_TRUNC + COUNT(DISTINCT user_id) grouped by cohort period. Compare users present in period N and period N+1."
+  related_tables: ["upi_prod.transaction_v3", "rewards_prod.wallet_transaction_v3"]
+  synonyms: ["retained users", "repeat users", "returning users"]
+
+churn:
+  definition: "Users who were active in a prior period but not in the current period"
+  sql_hint: "Find users in period N-1 who are NOT in period N. Use LEFT JOIN or NOT EXISTS."
+  related_tables: ["upi_prod.transaction_v3", "rewards_prod.wallet_transaction_v3"]
+  synonyms: ["churned users", "lost users", "inactive users"]
+
+success_rate:
+  definition: "Percentage of transactions/payouts that completed successfully"
+  sql_hint: "COUNTIF(status = 'SUCCESS') / COUNT(*) * 100. Status field varies: transaction_status for UPI, payout_status for payouts."
+  related_tables: ["upi_prod.transaction_v3", "rewards_prod.payouts_v3"]
+  synonyms: ["SR", "completion rate", "conversion rate"]
+
+cashback:
+  definition: "Reward amount credited to user wallet after eligible activity"
+  sql_hint: "Use rewards_prod.wallet_transaction_v3 with type='CREDIT' and source_type='CASHBACK'. Amount is in rupees (FLOAT)."
+  related_tables: ["rewards_prod.wallet_transaction_v3", "rewards_prod.reward_v3", "rewards_prod.payouts_v3"]
+  synonyms: ["cb", "reward amount", "cashback amount"]
+
+payout:
+  definition: "Disbursement of cashback from wallet to user's bank/UPI"
+  sql_hint: "Use rewards_prod.payouts_v3. Amount is in paisa (divide by 100 for INR). Filter payout_status for status."
+  related_tables: ["rewards_prod.payouts_v3", "rewards_prod.redemptions_v3"]
+  synonyms: ["disbursement", "cashout", "withdrawal"]
+
+wallet_balance:
+  definition: "Current available cashback balance in user's reward wallet"
+  sql_hint: "Use rewards_prod.wallet_v3.redeemable_cashback. Amount is in rupees (FLOAT)."
+  related_tables: ["rewards_prod.wallet_v3"]
+  synonyms: ["available balance", "redeemable balance", "cashback balance"]
+
+reward_event:
+  definition: "An upstream event that triggers reward eligibility check"
+  sql_hint: "Use rewards_prod.reward_event_v3. Check reward_eligible for whether it qualified. created_at is epoch millis."
+  related_tables: ["rewards_prod.reward_event_v3"]
+  synonyms: ["trigger event", "eligibility event"]
+
+P2P:
+  definition: "Person-to-Person UPI payment"
+  sql_hint: "Filter upi_prod.transaction_v3 WHERE mcc IS NULL or transaction_type = 'PAY' and payee is a person VPA."
+  related_tables: ["upi_prod.transaction_v3"]
+  synonyms: ["peer to peer", "person to person"]
+
+P2M:
+  definition: "Person-to-Merchant UPI payment"
+  sql_hint: "Filter upi_prod.transaction_v3 WHERE mcc IS NOT NULL (merchant category code present)."
+  related_tables: ["upi_prod.transaction_v3"]
+  synonyms: ["peer to merchant", "merchant payment"]
+
+VPA:
+  definition: "Virtual Payment Address -- UPI ID like user@bank"
+  sql_hint: "Found in payee_vpa/payer_vpa columns of transaction_v3, or in upi_prod.vpa_info_v3."
+  related_tables: ["upi_prod.vpa_info_v3", "upi_prod.user_vpa_info_v3", "upi_prod.transaction_v3"]
+  synonyms: ["UPI ID", "UPI handle", "payment address"]
+
+mandate:
+  definition: "Recurring payment authorization (autopay) via UPI"
+  sql_hint: "Use upi_prod.mandate_v3 or upi_prod.lite_mandate_v3."
+  related_tables: ["upi_prod.mandate_v3", "upi_prod.lite_mandate_v3"]
+  synonyms: ["autopay", "recurring payment", "standing instruction"]
+
+collect_request:
+  definition: "UPI collect/pull payment -- requesting money from another user"
+  sql_hint: "Use upi_prod.collect_request_v3."
+  related_tables: ["upi_prod.collect_request_v3"]
+  synonyms: ["collect", "pull payment", "payment request"]
+
+KYC:
+  definition: "Know Your Customer -- user verification status"
+  sql_hint: "Check sm_kavach_svc_prod_sm_login_service.basic_details_v2 for KYC-related fields."
+  related_tables: ["sm_kavach_svc_prod_sm_login_service.basic_details_v2"]
+  synonyms: ["verification", "identity verification"]
+
+cohort:
+  definition: "Group of users segmented by their first activity date"
+  sql_hint: "First find MIN(created_at) per user as signup_date, then group by DATE_TRUNC(signup_date, MONTH) for monthly cohorts."
+  related_tables: ["upi_prod.transaction_v3", "sm_kavach_svc_prod_sm_login_service.user_profile"]
+  synonyms: ["user cohort", "signup cohort"]
+
+funnel:
+  definition: "Sequential steps users go through (signup → first transaction → cashback)"
+  sql_hint: "Count distinct users at each step using conditional aggregation or CTEs per step."
+  related_tables: ["sm_kavach_svc_prod_sm_login_service.user_profile", "upi_prod.transaction_v3", "rewards_prod.reward_v3"]
+  synonyms: ["conversion funnel", "user funnel"]
+
+WoW:
+  definition: "Week-over-Week comparison of a metric"
+  sql_hint: "Use two CTEs: one for current week, one for previous week. Join and compute percentage change."
+  related_tables: []
+  synonyms: ["week over week", "weekly comparison", "weekly trend"]
+
+MoM:
+  definition: "Month-over-Month comparison of a metric"
+  sql_hint: "Use two CTEs: one for current month, one for previous month. Join and compute percentage change."
+  related_tables: []
+  synonyms: ["month over month", "monthly comparison", "monthly trend"]

@@ -1,0 +1,165 @@
+# Table enrichments -- human-authored descriptions and business context
+# Merged into terse schema output for better agent understanding
+
+# ── Rewards Domain ──────────────────────────────────────────────
+
+rewards_prod.payouts_v3:
+  description: "Payout disbursements to users (cashback, rewards)"
+  business_context: "Primary table for payout/cashback reporting. Each row is a single payout attempt."
+  important_columns:
+    amount: "Amount in paisa (divide by 100 for INR)"
+    payout_status: "INITIATED, SUCCESS, FAILED, REVERSED"
+    payment_mode: "UPI, BANK_TRANSFER, etc."
+    created_at: "Timestamp (already TIMESTAMP type in v3)"
+    sm_user_id: "SuperMoney user ID -- use for cross-product joins"
+
+rewards_prod.redemptions_v3:
+  description: "Cashback redemption requests linked to payouts"
+  business_context: "Each redemption maps to a payout via payout_id. Used for tracking redemption funnel."
+  important_columns:
+    redemption_status: "INITIATED, SUCCESS, FAILED"
+    redemption_type: "Type of redemption (CASHBACK, etc.)"
+    qty: "Quantity redeemed (NUMERIC)"
+    payout_id: "FK to payouts_v3.payout_id"
+
+rewards_prod.reward_event_v3:
+  description: "Events that trigger reward eligibility checks"
+  business_context: "Upstream of rewards -- an event fires, then a reward may be created. Highest volume table in rewards."
+  important_columns:
+    type: "Event type (e.g., UPI_TRANSACTION, LOAN_DISBURSEMENT)"
+    event_type_state: "Processing state of the event"
+    reward_eligible: "Whether this event qualified for a reward"
+    created_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
+    updated_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
+
+rewards_prod.reward_v3:
+  description: "Rewards granted to users from eligible events"
+  business_context: "Core rewards table. Links events to actual cashback/reward grants."
+  important_columns:
+    status: "CREATED, SETTLED, REVERSED, EXPIRED"
+    type: "Reward type (CASHBACK, SCRATCH_CARD, etc.)"
+    flow: "CREDIT or DEBIT"
+    created_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
+    updated_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
+
+rewards_prod.wallet_v3:
+  description: "User cashback wallets with balance breakdown"
+  business_context: "One wallet per user. Balance = redeemable_cashback. Total earned = creditted_cashback."
+  important_columns:
+    status: "ACTIVE, BLOCKED"
+    redeemable_cashback: "Available balance (FLOAT, in rupees)"
+    creditted_cashback: "Total ever credited (FLOAT, in rupees)"
+    redeemed_cashback: "Total ever redeemed (FLOAT, in rupees)"
+    reversed_cashback: "Total reversed (FLOAT, in rupees)"
+    onthe_way_cashback: "Pending cashback not yet available"
+    created_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
+
+rewards_prod.wallet_transaction_v3:
+  description: "Individual wallet credit/debit transactions"
+  business_context: "Every cashback credit, redemption debit, or reversal. High volume."
+  important_columns:
+    amount: "Transaction amount (FLOAT, in rupees)"
+    type: "CREDIT or DEBIT"
+    source_type: "What triggered this: CASHBACK, REDEMPTION, REVERSAL"
+    status: "SUCCESS, FAILED, PENDING"
+    created_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
+
+rewards_prod.wallet_compartment_v3:
+  description: "Wallet sub-compartments for earmarked cashback"
+  business_context: "Cashback can be earmarked for specific use (e.g., loan EMI). Each compartment tracks a bucket."
+  important_columns:
+    status: "ACTIVE, EXPIRED, REDEEMED"
+
+rewards_prod.rule_engine_metadata_v3:
+  description: "Rule engine configuration snapshots for reward eligibility"
+  business_context: "Metadata about which rules were active. Useful for debugging why rewards were/weren't granted."
+
+rewards_prod.source_request_log_v3:
+  description: "Incoming reward trigger requests from partner systems"
+  business_context: "Logs of external systems calling the rewards service. Low volume."
+
+rewards_prod.user_reward_detail_v3:
+  description: "Aggregated reward summary per user"
+  business_context: "Denormalized view of user reward stats. Useful for user-level reporting."
+
+# ── UPI Domain ──────────────────────────────────────────────────
+
+upi_prod.transaction_v3:
+  description: "UPI payment transactions (P2P and P2M)"
+  business_context: "Highest volume table. Every UPI payment attempt. Core for GMV, TPV, success rate."
+  important_columns:
+    amount: "Transaction amount (NUMERIC, in rupees)"
+    transaction_status: "SUCCESS, FAILED, PENDING, DEEMED"
+    transaction_type: "PAY, COLLECT, MANDATE"
+    payment_mode: "UPI payment sub-mode"
+    created_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
+    transaction_at: "Epoch millis INT -- actual transaction time"
+    mcc: "Merchant Category Code (for P2M transactions)"
+    upi_user_id: "UPI user ID -- use for UPI-specific joins"
+    sm_user_id: "SuperMoney user ID -- use for cross-product joins"
+
+upi_prod.user_info_v3:
+  description: "UPI user profiles linking UPI ID to SuperMoney ID"
+  business_context: "Bridge table between UPI and rewards domains via sm_user_id."
+  important_columns:
+    status: "ACTIVE, BLOCKED, DEREGISTERED"
+    upi_user_id: "Primary key for UPI domain"
+    sm_user_id: "FK to rewards/kavach domains"
+    created_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
+
+upi_prod.account_info_v3:
+  description: "Bank accounts linked to UPI users"
+  business_context: "Users can have multiple linked bank accounts."
+
+upi_prod.complaint_v3:
+  description: "UPI transaction complaints/disputes"
+  business_context: "Customer complaints about failed/stuck transactions."
+  important_columns:
+    complaint_status: "PENDING, RESOLVED, REJECTED, DEEMED"
+    complaint_category: "Category of complaint"
+    created_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
+
+upi_prod.collect_request_v3:
+  description: "UPI collect (pull) payment requests"
+  business_context: "When someone requests money from another user."
+
+upi_prod.mandate_v3:
+  description: "UPI recurring payment mandates (autopay)"
+  business_context: "Recurring payment authorizations for EMIs, subscriptions, etc."
+
+upi_prod.device_info_v3:
+  description: "Device information for UPI users"
+  business_context: "Mobile device details -- useful for device analytics."
+
+upi_prod.payment_address_info_v3:
+  description: "UPI VPA (Virtual Payment Address) details"
+  business_context: "Maps VPAs to users. Very high volume table."
+
+upi_prod.user_vpa_info_v3:
+  description: "User to VPA mapping"
+  business_context: "Which VPAs belong to which user."
+
+upi_prod.vpa_info_v3:
+  description: "VPA metadata"
+  business_context: "Details about Virtual Payment Addresses."
+
+# ── Auth/Login Domain ───────────────────────────────────────────
+
+sm_kavach_svc_prod_sm_login_service.user_profile:
+  description: "User profile details (name, gender, DOB)"
+  business_context: "Demographics table. Join via id = sm_user_id from other tables."
+  important_columns:
+    id: "Same as sm_user_id in other tables"
+    creation_date: "Account creation timestamp"
+
+sm_kavach_svc_prod_sm_login_service.AccountLoginEntity:
+  description: "User login/session events"
+  business_context: "Track login activity, DAU/MAU, session patterns."
+
+sm_kavach_svc_prod_sm_login_service.MerchantAccountMapping:
+  description: "Merchant to account linking"
+  business_context: "Maps merchant accounts to SuperMoney accounts."
+
+sm_kavach_svc_prod_sm_login_service.basic_details_v2:
+  description: "Basic user details (phone, KYC status)"
+  business_context: "Minimal user info for quick lookups."
