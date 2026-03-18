@@ -12,7 +12,7 @@ _DML_PATTERN = re.compile(
 _COST_PER_TB = 6.25
 
 # Default limits
-DEFAULT_MAX_BYTES = 50 * 1024 ** 3  # 50 GB
+DEFAULT_MAX_BYTES = 500 * 1024 ** 3  # 500 GB
 DEFAULT_MAX_ROWS = 1000
 
 # Queries scanning more than this require user approval before execution

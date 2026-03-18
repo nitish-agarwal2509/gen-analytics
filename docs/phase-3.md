@@ -34,7 +34,7 @@
 **Steps**:
 1. Write `backend/app/bigquery/safety.py`:
    - `is_read_only(sql)` -> reject DML/DDL keywords
-   - `check_cost_limit(estimated_bytes, max_bytes=10GB)` -> reject expensive queries
+   - `check_cost_limit(estimated_bytes, max_bytes=500GB)` -> reject expensive queries
    - `has_partition_filter(sql, partition_column)` -> warn if missing
    - `enforce_row_limit(sql, max_rows=1000)` -> add LIMIT if missing
 
@@ -129,7 +129,7 @@
 ## Definition of Done for Phase 3
 
 - [x] `validate_sql` correctly validates/rejects SQL via BigQuery dry-run
-- [x] Safety module catches DML, cost overruns (50 GB limit), with `maximumBytesBilled` enforcement
+- [x] Safety module catches DML, cost overruns (500 GB limit), with `maximumBytesBilled` enforcement
 - [x] Agent always validates before executing (verified: tool sequence is validate_sql -> execute_sql)
 - [x] Self-correction instructions in prompt: agent retries up to 3 times on validation failure
 - [x] Agent writes correct SQL on first attempt due to full schema context (self-correction is a safety net)

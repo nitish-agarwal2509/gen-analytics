@@ -49,7 +49,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - **Google ADK** for agent framework, Gemini via Vertex AI (no free tier rate limits)
 - **RAG deferred to V1+** as supplement only (glossary + examples), not for table discovery
 - **Validate-before-execute**: Agent always calls `validate_sql` (dry-run) before `execute_sql`
-- **Cost guard**: `maximumBytesBilled` set to 50 GB on every query execution
+- **Cost guard**: `maximumBytesBilled` set to 500 GB on every query execution
 - **Human-in-the-loop**: Queries scanning >5 GB require user approval before execution
 - All scripts run from `backend/` directory with venv activated
 - Test script defaults to dry-run mode ($0 BQ cost): `python scripts/test_agent.py`
