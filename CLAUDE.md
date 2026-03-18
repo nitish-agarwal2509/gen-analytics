@@ -50,7 +50,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - **RAG deferred to V1+** as supplement only (glossary + examples), not for table discovery
 - **Validate-before-execute**: Agent always calls `validate_sql` (dry-run) before `execute_sql`
 - **Cost guard**: `maximumBytesBilled` set to 500 GB on every query execution
-- **Human-in-the-loop**: Queries scanning >5 GB require user approval before execution
+- **Human-in-the-loop**: Queries scanning >500 GB require user approval before execution
 - All scripts run from `backend/` directory with venv activated
 - Test script defaults to dry-run mode ($0 BQ cost): `python scripts/test_agent.py`
 
@@ -60,7 +60,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 2: Full Schema Extraction (101 tables, dynamic loading, 8/8 test queries pass)
 - [x] Phase 3: Validation & Self-Correction (validate_sql, safety module, cost guards, human-in-the-loop)
 - [x] Phase 4: Visualization & Polish (suggest_viz, Plotly charts, thinking steps, session sidebar)
-- [ ] Phase 5: Business & Domain Context (table enrichments, glossary, few-shot examples -- all in prompt, no RAG)
+- [x] Phase 5: Business & Domain Context (table enrichments, 3 domain rules, glossary/examples as data files for eval)
 - [ ] Phase 6: Complex Query Handling (SQL recipes, retention/WoW/funnel patterns, eval harness)
 - [ ] Phase 7: Multi-Turn Conversations (conversation history, pronoun resolution, follow-ups)
 - [ ] Phase 8: Model Routing & Paid Models (complexity classifier, Claude via Vertex AI, escalation)
