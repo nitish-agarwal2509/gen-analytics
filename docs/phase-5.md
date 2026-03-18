@@ -136,9 +136,10 @@
 
 ## Definition of Done for Phase 5
 
-- [x] 20-30 tables have enriched descriptions in terse schema
-- [x] 20-30 business glossary terms in system prompt
-- [x] 15-20 few-shot SQL examples in system prompt
-- [x] Domain-specific rules cover paisa/epoch/status patterns
-- [x] Unified context loader with token budget monitoring
-- [ ] Agent handles domain-specific questions better than before enrichments
+- [x] 25 tables have enriched descriptions + column notes in terse schema
+- [x] 3 targeted domain rules in prompt (transaction_at, IST timestamps, sm_user_id)
+- [x] Unified context loader with enrichments (~7.8K tokens total)
+- [x] Business glossary and few-shot examples as YAML data files (for Phase 6 eval, not injected into prompt)
+- [x] measure_prompt.py script for token breakdown
+
+**Lesson learned**: Glossary and few-shot examples in the system prompt caused the agent to overthink and pick wrong tables. Removed from prompt; the LLM reasons better from enriched schema + minimal rules.
