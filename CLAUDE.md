@@ -39,7 +39,8 @@ streamlit run app.py                   # Streamlit on port 8501
 - Config loaded from `backend/.env` via pydantic-settings
 - BigQuery auth: service account key JSON (`GOOGLE_APPLICATION_CREDENTIALS`)
 - GCP Project: `sm-apps-core` (76 datasets, 500+ tables)
-- Agent schema: 18 tables across 3 datasets (rewards_prod, upi_prod, sm_kavach_svc_prod_sm_login_service)
+- Agent schema: dynamically loaded from `backend/data/schema_metadata.json` (101 tables, ~6.8K tokens)
+- Schema refresh: `cd backend && python scripts/extract_schema.py <datasets...>`
 - LLM: Gemini 2.5 Flash via Vertex AI (`GOOGLE_GENAI_USE_VERTEXAI=true`)
 
 ## Key Decisions
@@ -57,3 +58,4 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 1, Chunk 1.4: Gemini API key + test
 - [x] Phase 1, Chunk 1.5: First Google ADK agent
 - [x] Phase 1, Chunk 1.6: Streamlit chat UI
+- [x] Phase 2: Full schema extraction (101 tables, dynamic loading, 8/8 test queries pass)

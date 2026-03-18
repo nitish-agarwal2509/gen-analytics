@@ -79,6 +79,11 @@ async def main():
         "How many unique users have a rewards wallet?",
         "What are the top 5 banks by number of UPI accounts?",
         "What is the total cashback redeemed vs credited across all wallets?",
+        "How many UPI complaints were filed in the last 30 days by category?",
+        "What are the top 3 payout partners by total payout amount?",
+        "How many active vs blocked mandates are there?",
+        "Show the total number of login entities by state",
+        "What is the average redemption amount by redemption type?",
     ]
 
     for q in questions:

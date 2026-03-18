@@ -129,10 +129,10 @@
 
 ## Definition of Done for Phase 2
 
-- [ ] Metadata extracted from all BigQuery tables
-- [ ] Terse schema formatter produces compact, token-efficient output
-- [ ] Full schema injected into agent system prompt (~250K tokens)
-- [ ] `get_sample_data` tool works for any table
-- [ ] Agent dynamically discovers tables from full schema (no hardcoded schemas)
-- [ ] Schema refresh mechanism works
-- [ ] At least 6/8 test questions find correct tables and generate valid SQL
+- [x] Metadata extracted from all BigQuery tables
+- [x] Terse schema formatter produces compact, token-efficient output
+- [x] Full schema injected into agent system prompt (~6,758 tokens for 101 tables)
+- [x] `get_sample_data` tool works for any table
+- [x] Agent dynamically discovers tables from full schema (no hardcoded schemas)
+- [x] Schema refresh mechanism works
+- [x] At least 6/8 test questions find correct tables and generate valid SQL (8/8 passed)
