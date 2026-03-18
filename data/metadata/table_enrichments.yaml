@@ -89,8 +89,8 @@ upi_prod.transaction_v3:
   business_context: "Highest volume table. Every UPI payment attempt. Core for GMV, TPV, success rate."
   important_columns:
     amount: "Transaction amount (NUMERIC, in rupees)"
-    transaction_status: "SUCCESS, FAILED, PENDING, DEEMED"
-    transaction_type: "PAY, COLLECT, MANDATE"
+    transaction_status: "SUCCESS, FAILED, DEEMED, DECLINED, PENDING, EXPIRED"
+    transaction_type: "SCAN_PAY, P2P_PAY, INTENT_PAY, SELF_PAY, COLLECT_PAY -- there is NO plain 'PAY' value. All debit/credit transactions use these types."
     payment_mode: "UPI payment sub-mode"
     transaction_at: "Epoch millis INT -- ALWAYS use this for transaction time, not created_at. Use TIMESTAMP_MILLIS()"
     created_at: "Epoch millis INT -- record creation time, prefer transaction_at for queries"

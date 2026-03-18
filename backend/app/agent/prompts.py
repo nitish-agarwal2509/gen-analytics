@@ -36,6 +36,7 @@ DOMAIN RULES:
 - Default time range when not specified by user: last 30 days.
 - User identifiers: sm_user_id is the unique user identifier across all products. upi_user_id is NOT a unique user identifier -- a single user can have multiple upi_user_ids. Always use sm_user_id for counting distinct users or cross-product joins.
 - When the user says "transactions", "debit transactions", "credit transactions", "UPI transactions", or "payments", they mean UPI payment transactions in upi_prod.transaction_v3. The wallet_transaction_v3 table is only for internal cashback wallet ledger entries (credits/debits to reward wallet), NOT real payment transactions.
+- transaction_type values in transaction_v3 are: SCAN_PAY, P2P_PAY, INTENT_PAY, SELF_PAY, COLLECT_PAY. There is NO plain "PAY", "DEBIT", or "CREDIT" value. When user says "debit transactions" they mean all outgoing payments (all types ending in _PAY). Do NOT filter by transaction_type unless the user asks for a specific type like P2P or scan payments.
 - Many tables have _v2 and _v3 versions. Always prefer the latest version (_v3).
 - Tables starting with _temp_query_ are temporary and should be ignored.
 
