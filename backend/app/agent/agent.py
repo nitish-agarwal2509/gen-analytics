@@ -9,6 +9,7 @@ from google.adk.tools import FunctionTool
 from app.agent.prompts import build_system_prompt
 from app.agent.tools.execute_sql import execute_sql
 from app.agent.tools.get_sample_data import get_sample_data
+from app.agent.tools.suggest_viz import suggest_visualization
 from app.agent.tools.validate_sql import validate_sql
 from app.schema.formatter import format_terse_schema
 
@@ -39,5 +40,10 @@ def create_agent() -> LlmAgent:
         name="gen_analytics",
         model="gemini-2.5-flash",
         instruction=prompt,
-        tools=[FunctionTool(validate_sql), FunctionTool(execute_sql), FunctionTool(get_sample_data)],
+        tools=[
+            FunctionTool(validate_sql),
+            FunctionTool(execute_sql),
+            FunctionTool(get_sample_data),
+            FunctionTool(suggest_visualization),
+        ],
     )

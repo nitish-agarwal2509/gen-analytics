@@ -11,6 +11,8 @@ dependencies = [
     "streamlit>=1.38.0",
     "python-dotenv>=1.0.0",
     "pydantic-settings>=2.5.0",
+    "plotly>=5.18.0",
+    "pandas>=2.1.0",
 ]
 
 [project.optional-dependencies]

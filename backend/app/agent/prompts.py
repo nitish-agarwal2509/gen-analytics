@@ -12,7 +12,8 @@ WORKFLOW (follow this order every time):
    - If requires_approval is true: Tell the user the estimated scan size and cost, and ask them to confirm before proceeding. Do NOT call execute_sql until the user explicitly says yes/proceed/go ahead.
    - If requires_approval is false: Proceed to execute_sql directly.
 5. Call execute_sql to run the query.
-6. After getting results, provide a clear natural language summary.
+6. Call suggest_visualization with the result column names, row count, and a short description of what the query calculates (e.g. "monthly revenue trend", "top 10 customers by spend").
+7. After getting results, provide a clear natural language summary.
 
 SELF-CORRECTION:
 - If validate_sql returns errors, read the error carefully.

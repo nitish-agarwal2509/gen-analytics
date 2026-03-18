@@ -59,7 +59,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 1: Hello World Agent (scaffolding, BigQuery, execute_sql, Gemini, ADK agent, Streamlit UI)
 - [x] Phase 2: Full Schema Extraction (101 tables, dynamic loading, 8/8 test queries pass)
 - [x] Phase 3: Validation & Self-Correction (validate_sql, safety module, cost guards, human-in-the-loop)
-- [ ] Phase 4: Visualization & Polish (suggest_viz, Plotly charts, thinking steps, session sidebar)
+- [x] Phase 4: Visualization & Polish (suggest_viz, Plotly charts, thinking steps, session sidebar)
 - [ ] Phase 5: Business & Domain Context (table enrichments, glossary, few-shot examples -- all in prompt, no RAG)
 - [ ] Phase 6: Complex Query Handling (SQL recipes, retention/WoW/funnel patterns, eval harness)
 - [ ] Phase 7: Multi-Turn Conversations (conversation history, pronoun resolution, follow-ups)

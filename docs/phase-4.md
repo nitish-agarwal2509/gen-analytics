@@ -114,9 +114,9 @@
 
 ## Definition of Done for Phase 4
 
-- [ ] `suggest_viz` tool recommends correct chart type (metric, bar, line, table)
-- [ ] Plotly charts render in Streamlit for each chart type
-- [ ] SQL display includes metadata (scan size, cost, execution time)
-- [ ] Agent thinking steps visible as tool calls stream
-- [ ] Session history sidebar with clear button
-- [ ] 5-7 demo questions work end-to-end with charts
+- [x] `suggest_viz` tool recommends correct chart type (metric, bar, line, table)
+- [x] Plotly charts render in Streamlit for each chart type
+- [x] SQL display includes metadata (scan size, cost, execution time)
+- [x] Agent thinking steps visible as tool calls stream
+- [x] Session history sidebar with clear button
+- [x] 5 demo questions work end-to-end with charts
