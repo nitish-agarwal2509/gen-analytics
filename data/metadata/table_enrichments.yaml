@@ -92,11 +92,11 @@ upi_prod.transaction_v3:
     transaction_status: "SUCCESS, FAILED, PENDING, DEEMED"
     transaction_type: "PAY, COLLECT, MANDATE"
     payment_mode: "UPI payment sub-mode"
-    created_at: "Epoch millis INT -- use TIMESTAMP_MILLIS()"
-    transaction_at: "Epoch millis INT -- actual transaction time"
+    transaction_at: "Epoch millis INT -- ALWAYS use this for transaction time, not created_at. Use TIMESTAMP_MILLIS()"
+    created_at: "Epoch millis INT -- record creation time, prefer transaction_at for queries"
     mcc: "Merchant Category Code (for P2M transactions)"
-    upi_user_id: "UPI user ID -- use for UPI-specific joins"
-    sm_user_id: "SuperMoney user ID -- use for cross-product joins"
+    sm_user_id: "SuperMoney user ID -- the unique user identifier for counting users"
+    upi_user_id: "UPI user ID -- NOT unique per user (one user can have multiple). Use sm_user_id for distinct user counts"
 
 upi_prod.user_info_v3:
   description: "UPI user profiles linking UPI ID to SuperMoney ID"

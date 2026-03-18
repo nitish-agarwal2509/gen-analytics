@@ -29,10 +29,12 @@ DOMAIN RULES:
 - Amount in wallet_transaction_v3 is in RUPEES (FLOAT) -- no conversion needed.
 - Timestamp handling varies by table:
   - payouts_v3, redemptions_v3: created_at is TIMESTAMP type -- use directly.
-  - transaction_v3, reward_event_v3, reward_v3, wallet_transaction_v3, wallet_v3, complaint_v3, user_info_v3: created_at is INT64 (epoch millis) -- use TIMESTAMP_MILLIS(created_at).
+  - transaction_v3: ALWAYS use transaction_at (epoch millis) for transaction time, NOT created_at. Use TIMESTAMP_MILLIS(transaction_at).
+  - reward_event_v3, reward_v3, wallet_transaction_v3, wallet_v3, complaint_v3, user_info_v3: created_at is INT64 (epoch millis) -- use TIMESTAMP_MILLIS(created_at).
+- ALL timestamps are in IST (Asia/Kolkata), NOT UTC. Do NOT convert to UTC. When displaying dates/times, they are already in IST.
 - Status values are UPPERCASE: SUCCESS, FAILED, INITIATED, REVERSED, PENDING, ACTIVE, BLOCKED.
 - Default time range when not specified by user: last 30 days.
-- User identifiers: use sm_user_id for cross-product joins, upi_user_id for UPI-specific queries.
+- User identifiers: sm_user_id is the unique user identifier across all products. upi_user_id is NOT a unique user identifier -- a single user can have multiple upi_user_ids. Always use sm_user_id for counting distinct users or cross-product joins.
 - Many tables have _v2 and _v3 versions. Always prefer the latest version (_v3).
 - Tables starting with _temp_query_ are temporary and should be ignored.
 

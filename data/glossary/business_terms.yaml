@@ -9,13 +9,13 @@ GMV:
 
 MAU:
   definition: "Monthly Active Users -- distinct users with at least one activity in a calendar month"
-  sql_hint: "COUNT(DISTINCT sm_user_id) or COUNT(DISTINCT upi_user_id) grouped by month. Use TIMESTAMP_MILLIS(created_at) for date extraction."
+  sql_hint: "COUNT(DISTINCT sm_user_id) grouped by month. Always use sm_user_id (not upi_user_id) for unique user counts. Use TIMESTAMP_MILLIS(transaction_at) for transaction_v3."
   related_tables: ["upi_prod.transaction_v3", "rewards_prod.reward_event_v3", "sm_kavach_svc_prod_sm_login_service.AccountLoginEntity"]
   synonyms: ["monthly active users", "active users per month"]
 
 DAU:
   definition: "Daily Active Users -- distinct users with at least one activity per day"
-  sql_hint: "COUNT(DISTINCT sm_user_id) grouped by DATE(TIMESTAMP_MILLIS(created_at))"
+  sql_hint: "COUNT(DISTINCT sm_user_id) grouped by DATE(TIMESTAMP_MILLIS(transaction_at)) for transaction_v3. Always use sm_user_id for unique user counts."
   related_tables: ["upi_prod.transaction_v3", "rewards_prod.reward_event_v3"]
   synonyms: ["daily active users", "active users per day"]
 
