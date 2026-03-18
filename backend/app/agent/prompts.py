@@ -24,23 +24,17 @@ SELF-CORRECTION:
 - NEVER call execute_sql on SQL that failed validation.
 
 DOMAIN RULES:
-- Amount in payouts_v3 is in PAISA -- always divide by 100 for INR display.
-- Amount in transaction_v3 is in RUPEES (NUMERIC) -- no conversion needed.
-- Amount in wallet_transaction_v3 is in RUPEES (FLOAT) -- no conversion needed.
-- Timestamp handling varies by table:
-  - payouts_v3, redemptions_v3: created_at is TIMESTAMP type -- use directly.
-  - transaction_v3: ALWAYS use transaction_at (epoch millis) for transaction time, NOT created_at. Use TIMESTAMP_MILLIS(transaction_at).
-  - reward_event_v3, reward_v3, wallet_transaction_v3, wallet_v3, complaint_v3, user_info_v3: created_at is INT64 (epoch millis) -- use TIMESTAMP_MILLIS(created_at).
-- ALL timestamps are in IST (Asia/Kolkata), NOT UTC. Do NOT convert to UTC. When displaying dates/times, they are already in IST.
+- For transaction_v3: use transaction_at (epoch millis) for time filtering, NOT created_at. Use TIMESTAMP_MILLIS(transaction_at).
+- For other tables with INT64 timestamps (reward_event_v3, reward_v3, wallet_transaction_v3, wallet_v3, complaint_v3, user_info_v3): use TIMESTAMP_MILLIS(created_at).
+- For payouts_v3, redemptions_v3: created_at is TIMESTAMP type -- use directly.
+- ALL timestamps are in IST (Asia/Kolkata), NOT UTC. Do NOT convert to UTC.
+- upi_user_id is NOT a unique user identifier -- one user can have multiple. Always use sm_user_id for counting distinct users.
+- Amount in payouts_v3 is in PAISA (divide by 100 for INR). Amount in transaction_v3 is in RUPEES.
+- "Transactions"/"payments" means upi_prod.transaction_v3. wallet_transaction_v3 is only for internal cashback wallet ledger.
+- transaction_v3.payment_mode: DEBIT or CREDIT. transaction_v3.transaction_type: SCAN_PAY, P2P_PAY, INTENT_PAY, SELF_PAY, COLLECT_PAY.
 - Status values are UPPERCASE: SUCCESS, FAILED, INITIATED, REVERSED, PENDING, ACTIVE, BLOCKED.
-- Default time range when not specified by user: last 30 days.
-- User identifiers: sm_user_id is the unique user identifier across all products. upi_user_id is NOT a unique user identifier -- a single user can have multiple upi_user_ids. Always use sm_user_id for counting distinct users or cross-product joins.
-- When the user says "transactions", "debit transactions", "credit transactions", "UPI transactions", or "payments", they mean UPI payment transactions in upi_prod.transaction_v3. The wallet_transaction_v3 table is only for internal cashback wallet ledger entries (credits/debits to reward wallet), NOT real payment transactions.
-- transaction_v3 has two key classification columns:
-  - payment_mode: DEBIT or CREDIT. "Debit transactions" = payment_mode = 'DEBIT'. "Credit transactions" = payment_mode = 'CREDIT'.
-  - transaction_type: SCAN_PAY, P2P_PAY, INTENT_PAY, SELF_PAY, COLLECT_PAY. Use this only when user asks for a specific type (P2P, scan, collect, etc.).
-- Many tables have _v2 and _v3 versions. Always prefer the latest version (_v3).
-- Tables starting with _temp_query_ are temporary and should be ignored.
+- Default time range when not specified: last 30 days.
+- Prefer _v3 tables over _v2. Ignore _temp_query_ tables.
 
 SQL RULES:
 - Only generate SELECT queries. Never modify data.
@@ -53,30 +47,13 @@ Key relationships:
 - upi_prod.user_info_v3.upi_user_id = upi_prod.transaction_v3.upi_user_id = upi_prod.complaint_v3.upi_user_id
 - rewards_prod.wallet_v3.wallet_id = rewards_prod.wallet_transaction_v3.wallet_id
 - rewards_prod.payouts_v3.payout_id = rewards_prod.redemptions_v3.payout_id
-{glossary_section}
-{examples_section}
+
 Available tables and their schemas:
 
 {schema}
 """
 
 
-def build_system_prompt(
-    terse_schema: str,
-    glossary: str = "",
-    examples: str = "",
-) -> str:
-    """Build the full system prompt with schema, glossary, and examples injected."""
-    glossary_section = ""
-    if glossary:
-        glossary_section = f"\nBUSINESS GLOSSARY:\n{glossary}\n"
-
-    examples_section = ""
-    if examples:
-        examples_section = f"\nFEW-SHOT EXAMPLES (use these patterns as reference):\n{examples}\n"
-
-    return SYSTEM_PROMPT_TEMPLATE.format(
-        schema=terse_schema,
-        glossary_section=glossary_section,
-        examples_section=examples_section,
-    )
+def build_system_prompt(terse_schema: str) -> str:
+    """Build the full system prompt with schema injected."""
+    return SYSTEM_PROMPT_TEMPLATE.format(schema=terse_schema)

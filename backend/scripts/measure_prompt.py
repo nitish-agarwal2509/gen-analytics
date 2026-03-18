@@ -12,22 +12,19 @@ from app.schema.formatter import estimate_tokens
 
 def main():
     context = load_full_context()
-    prompt = build_system_prompt(
-        terse_schema=context["schema"],
-        glossary=context["glossary"],
-        examples=context["examples"],
-    )
+    prompt = build_system_prompt(terse_schema=context["schema"])
+
+    prompt_tokens = estimate_tokens(prompt)
+    overhead = prompt_tokens - context["total_tokens"]
 
     print("=" * 60)
     print("System Prompt Token Breakdown")
     print("=" * 60)
-    for section, tokens in context["token_counts"].items():
-        if section != "total":
-            print(f"  {section:20s}: {tokens:>6,} tokens")
-    print(f"  {'prompt overhead':20s}: {estimate_tokens(prompt) - context['total_tokens']:>6,} tokens")
+    print(f"  {'schema (with enrichments)':30s}: {context['token_counts']['schema']:>6,} tokens")
+    print(f"  {'prompt (rules/workflow)':30s}: {overhead:>6,} tokens")
     print("-" * 60)
-    print(f"  {'TOTAL PROMPT':20s}: {estimate_tokens(prompt):>6,} tokens")
-    print(f"  {'Character count':20s}: {len(prompt):>6,} chars")
+    print(f"  {'TOTAL':30s}: {prompt_tokens:>6,} tokens")
+    print(f"  {'Character count':30s}: {len(prompt):>6,} chars")
     print("=" * 60)
 
     if "--full" in sys.argv:

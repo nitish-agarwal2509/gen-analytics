@@ -14,11 +14,7 @@ from app.agent.tools.validate_sql import validate_sql
 def create_agent() -> LlmAgent:
     """Create and return the GenAnalytics ADK agent."""
     context = load_full_context()
-    prompt = build_system_prompt(
-        terse_schema=context["schema"],
-        glossary=context["glossary"],
-        examples=context["examples"],
-    )
+    prompt = build_system_prompt(terse_schema=context["schema"])
     return LlmAgent(
         name="gen_analytics",
         model="gemini-2.5-flash",
