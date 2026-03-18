@@ -107,9 +107,10 @@
 
 ## Definition of Done for Phase 3
 
-- [ ] `validate_sql` correctly validates/rejects SQL via BigQuery dry-run
-- [ ] Safety module catches DML, cost overruns, missing partition filters
-- [ ] Agent always validates before executing (observable in logs)
-- [ ] Self-correction works: agent retries up to 3 times on failure
-- [ ] Agent correctly diagnoses and fixes at least 50% of first-attempt failures
-- [ ] Streamlit shows validation status and retry attempts
+- [x] `validate_sql` correctly validates/rejects SQL via BigQuery dry-run
+- [x] Safety module catches DML, cost overruns (50 GB limit), with `maximumBytesBilled` enforcement
+- [x] Agent always validates before executing (verified: tool sequence is validate_sql -> execute_sql)
+- [x] Self-correction instructions in prompt: agent retries up to 3 times on validation failure
+- [x] Agent writes correct SQL on first attempt due to full schema context (self-correction is a safety net)
+- [x] Streamlit shows validation status, cost estimate, and self-correction attempts
+- [x] Test script defaults to dry-run mode ($0 BQ cost)

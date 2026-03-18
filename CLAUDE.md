@@ -48,7 +48,10 @@ streamlit run app.py                   # Streamlit on port 8501
 - **Full terse schema in system prompt** (not RAG) for MVP — Gemini's 1M context fits all tables
 - **Google ADK** for agent framework, Gemini via Vertex AI (no free tier rate limits)
 - **RAG deferred to V1+** as supplement only (glossary + examples), not for table discovery
+- **Validate-before-execute**: Agent always calls `validate_sql` (dry-run) before `execute_sql`
+- **Cost guard**: `maximumBytesBilled` set to 50 GB on every query execution
 - All scripts run from `backend/` directory with venv activated
+- Test script defaults to dry-run mode ($0 BQ cost): `python scripts/test_agent.py`
 
 ## Phase Status
 
@@ -59,3 +62,4 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 1, Chunk 1.5: First Google ADK agent
 - [x] Phase 1, Chunk 1.6: Streamlit chat UI
 - [x] Phase 2: Full schema extraction (101 tables, dynamic loading, 8/8 test queries pass)
+- [x] Phase 3: Validation & self-correction (validate_sql, safety module, cost guards, UI updates)

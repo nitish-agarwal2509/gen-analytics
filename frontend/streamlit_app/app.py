@@ -56,6 +56,8 @@ async def run_agent(runner, session_id: str, question: str) -> dict:
 
     sql_queries = []
     query_results = []
+    validations = []
+    tool_calls = []  # track tool call sequence
     final_text = ""
 
     async for event in runner.run_async(
@@ -69,14 +71,22 @@ async def run_agent(runner, session_id: str, question: str) -> dict:
         for part in event.content.parts:
             if part.function_call:
                 fc = part.function_call
-                if fc.args and "sql" in fc.args:
+                tool_calls.append(fc.name)
+                if fc.name == "validate_sql" and fc.args and "sql" in fc.args:
                     sql_queries.append(fc.args["sql"])
+                elif fc.name == "execute_sql" and fc.args and "sql" in fc.args:
+                    # Only add if not already captured from validate_sql
+                    if not sql_queries or sql_queries[-1] != fc.args["sql"]:
+                        sql_queries.append(fc.args["sql"])
 
             if part.function_response:
                 fr = part.function_response
                 resp = fr.response
                 if isinstance(resp, dict):
-                    query_results.append(resp)
+                    if fr.name == "validate_sql":
+                        validations.append(resp)
+                    elif fr.name == "execute_sql":
+                        query_results.append(resp)
 
             if part.text:
                 final_text = part.text
@@ -84,8 +94,60 @@ async def run_agent(runner, session_id: str, question: str) -> dict:
     return {
         "sql": sql_queries,
         "results": query_results,
+        "validations": validations,
+        "tool_calls": tool_calls,
         "answer": final_text,
     }
+
+
+def _render_assistant_message(msg):
+    """Render an assistant message with validation, SQL, results, and answer."""
+    # Show validation attempts if there were retries
+    validations = msg.get("validations", [])
+    if len(validations) > 1:
+        with st.expander(f"🔄 Self-correction ({len(validations)} attempts)"):
+            for i, v in enumerate(validations):
+                if v.get("is_valid"):
+                    st.success(f"Attempt {i+1}: Valid (scan: {_fmt_bytes(v.get('estimated_bytes', 0))})")
+                else:
+                    st.error(f"Attempt {i+1}: {', '.join(v.get('errors', ['Unknown error']))}")
+
+    # Show validation status for single successful validation
+    if len(validations) == 1 and validations[0].get("is_valid"):
+        v = validations[0]
+        est = _fmt_bytes(v.get("estimated_bytes", 0))
+        cost = v.get("estimated_cost_usd", 0)
+        st.caption(f"✅ Validated | Scan: {est} | Est. cost: ${cost:.6f}")
+
+    # Show SQL
+    if msg.get("sql"):
+        # Show only the final (successful) SQL
+        with st.expander("🔍 SQL Query"):
+            st.code(msg["sql"][-1], language="sql")
+
+    # Show results
+    if msg.get("results"):
+        for result in msg["results"]:
+            if "rows" in result and result["rows"]:
+                st.dataframe(result["rows"], use_container_width=True)
+            if "total_rows" in result:
+                st.caption(f"Total rows: {result['total_rows']:,} | Bytes processed: {_fmt_bytes(result.get('bytes_processed', 0))}")
+            if "error" in result:
+                st.error(result["error"])
+
+    # Show answer
+    st.markdown(msg["answer"])
+
+
+def _fmt_bytes(n: int) -> str:
+    """Format byte count to human-readable string."""
+    if n >= 1024 ** 3:
+        return f"{n / 1024 ** 3:.2f} GB"
+    if n >= 1024 ** 2:
+        return f"{n / 1024 ** 2:.1f} MB"
+    if n >= 1024:
+        return f"{n / 1024:.0f} KB"
+    return f"{n} B"
 
 
 # Initialize state
@@ -101,22 +163,7 @@ if "messages" not in st.session_state:
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         if msg["role"] == "assistant":
-            # Show SQL in expandable section
-            if msg.get("sql"):
-                for sql in msg["sql"]:
-                    with st.expander("🔍 SQL Query"):
-                        st.code(sql, language="sql")
-            # Show results as table
-            if msg.get("results"):
-                for result in msg["results"]:
-                    if "rows" in result and result["rows"]:
-                        st.dataframe(result["rows"], use_container_width=True)
-                    if "total_rows" in result:
-                        st.caption(f"Total rows: {result['total_rows']:,} | Bytes processed: {result.get('bytes_processed', 0):,}")
-                    if "error" in result:
-                        st.error(result["error"])
-            # Show answer
-            st.markdown(msg["answer"])
+            _render_assistant_message(msg)
         else:
             st.markdown(msg["content"])
 
@@ -135,28 +182,14 @@ if prompt := st.chat_input("Ask a question about your data..."):
                     run_agent(runner, st.session_state.session_id, prompt)
                 )
 
-                # Show SQL
-                for sql in response["sql"]:
-                    with st.expander("🔍 SQL Query"):
-                        st.code(sql, language="sql")
-
-                # Show results
-                for result in response["results"]:
-                    if "rows" in result and result["rows"]:
-                        st.dataframe(result["rows"], use_container_width=True)
-                    if "total_rows" in result:
-                        st.caption(f"Total rows: {result['total_rows']:,} | Bytes processed: {result.get('bytes_processed', 0):,}")
-                    if "error" in result:
-                        st.error(result["error"])
-
-                # Show answer
-                st.markdown(response["answer"])
+                _render_assistant_message(response)
 
                 # Save to history
                 st.session_state.messages.append({
                     "role": "assistant",
                     "sql": response["sql"],
                     "results": response["results"],
+                    "validations": response.get("validations", []),
                     "answer": response["answer"],
                 })
 
