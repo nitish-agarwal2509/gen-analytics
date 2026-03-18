@@ -1,136 +1,144 @@
-# Phase 5: Visualization & Polish (Weeks 5-6)
+# Phase 5: Business & Domain Context (Week 5-6)
 
-**Milestone**: MVP demo -- ask questions, get charts, see SQL, working multi-turn
+**Milestone**: Agent understands domain-specific terminology and produces better SQL for business questions
 
-**Learning Focus**: End-to-end integration, visualization decisions, result presentation
+**Learning Focus**: Prompt engineering with domain knowledge, YAML-driven configuration, schema enrichment
+
+**Key Design Decision**: Terse schema is ~6.8K tokens. Glossary + examples + enrichments add ~5-10K tokens. Total ~15-20K -- trivially fits in Gemini's 1M context. No ChromaDB/RAG needed; everything is injected directly into the system prompt.
 
 ---
 
-## Chunk 5.1: `suggest_viz` Tool
+## Chunk 5.1: Table Enrichments
 
-**Goal**: Agent recommends the right chart type based on result shape.
+**Goal**: Add human-authored descriptions and business context to tables, merge into terse schema output.
 
 **Steps**:
-1. Write `backend/app/agent/tools/suggest_viz.py`:
-   ```python
-   def suggest_visualization(columns: list, row_count: int, query_intent: str) -> dict:
-       # Rules:
-       # - 1 row, 1 numeric column -> metric card
-       # - 1 categorical + 1 numeric -> bar chart
-       # - 1 date/time + 1 numeric -> line chart
-       # - 2+ numeric columns -> scatter or table
-       # - Many rows, many columns -> table
-       # Return {chart_type, x_axis, y_axis, title, color_by}
+1. Create `data/metadata/table_enrichments.yaml`:
+   ```yaml
+   rewards_prod.payouts_v3:
+     description: "Payout disbursements to users (cashback, rewards)"
+     business_context: "Primary table for payout/cashback reporting"
+     important_columns:
+       status: "INITIATED, SUCCESS, FAILED, REVERSED"
+       amount: "Amount in paisa (divide by 100 for INR)"
    ```
-2. Start with rule-based heuristics, can add LLM suggestion later
+2. Start with 20-30 most queried tables
+3. Write `backend/app/schema/enrichments.py` -- YAML loader
+4. Update `backend/app/schema/formatter.py` -- `format_terse_schema(metadata, enrichments=None)`
+   - Append description after table line: `rewards_prod.payouts_v3 (~32M rows) [Payout disbursements]: col1(TYPE)...`
+   - Append column notes: `amount(INT)[paisa/100=INR]`
+5. Update `backend/app/agent/agent.py` -- load enrichments and pass to formatter
 
-**Test**:
-- Single revenue number -> metric card
-- Category + value -> bar chart
-- Date + value -> line chart
-
----
-
-## Chunk 5.2: Plotly Chart Rendering in Streamlit
-
-**Goal**: Render charts based on `suggest_viz` recommendations.
-
-**Steps**:
-1. Write `frontend/streamlit_app/components/chart_renderer.py`:
-   - `render_chart(chart_config, data)` dispatches to the right Plotly chart
-   - Support: metric card (`st.metric`), bar chart, line chart, table (`st.dataframe`)
-2. Integrate into chat messages -- after results, show the chart
-
-**Test**: Each chart type renders correctly with sample data
+**Test**: Run `format_terse_schema` with enrichments, verify descriptions appear in output. Measure token delta.
 
 ---
 
-## Chunk 5.3: SQL Display with Syntax Highlighting
+## Chunk 5.2: Business Glossary
 
-**Goal**: Show generated SQL in a readable, highlighted format.
-
-**Steps**:
-1. Use Streamlit's `st.code(sql, language="sql")` for syntax highlighting
-2. Wrap in `st.expander("View SQL")` so it's collapsible
-3. Show metadata alongside: tables used, estimated scan size, execution time
-
-**Test**: SQL displays with proper highlighting and is collapsible
-
----
-
-## Chunk 5.4: Agent Thinking Steps Display
-
-**Goal**: Show the user what the agent is doing at each step.
+**Goal**: Map domain terms (retention, GMV, MAU, churn, etc.) to SQL patterns and table references.
 
 **Steps**:
-1. Capture agent tool calls: "Searching for tables...", "Found: orders, customers", "Generating SQL...", "Validating (est. 450MB)...", "Executing..."
-2. Display as a progress indicator or expandable "thinking" section
-3. On self-correction: "Validation error. Retrying (attempt 2/3)..."
+1. Create `data/glossary/business_terms.yaml`:
+   ```yaml
+   retention:
+     definition: "Users who performed activity in consecutive time periods"
+     sql_hint: "Use DATE_TRUNC + COUNT(DISTINCT user_id) grouped by cohort period"
+     related_tables: ["rewards_prod.wallet_transaction_v3", "upi_prod.transaction_v3"]
+     synonyms: ["retained users", "repeat users"]
 
-**Test**: Ask a question -> see step-by-step progress as agent works
-
----
-
-## Chunk 5.5: Expand to More Tables
-
-**Goal**: Ingest more tables to test the system with a larger schema.
-
-**Steps**:
-1. Expand metadata ingestion from 10-20 to 30-50 tables
-2. Re-run `ingest_metadata.py`
-3. Test that `search_tables` still finds the right tables with more candidates
-4. Identify any accuracy degradation and note for Phase 6
-
-**Test**: 8 out of 10 test questions find correct tables from the expanded set
-
----
-
-## Chunk 5.6: Session History Panel
-
-**Goal**: Show a sidebar with previous queries in the current session.
-
-**Steps**:
-1. Add Streamlit sidebar with session history:
-   ```python
-   with st.sidebar:
-       st.header("Query History")
-       for i, turn in enumerate(conversation.turns):
-           if turn.role == "user":
-               if st.button(turn.content[:50], key=f"hist_{i}"):
-                   # Re-run this query
+   GMV:
+     definition: "Gross Merchandise Value - total transaction value before discounts"
+     sql_hint: "SUM(amount) from transaction tables. Amount is typically in paisa."
+     related_tables: ["upi_prod.transaction_v3"]
    ```
-2. Clicking a history item shows the results again (from memory, no re-execution)
+2. Write `backend/app/schema/glossary.py`:
+   - `load_glossary(path) -> list[dict]`
+   - `format_glossary_for_prompt(glossary) -> str`
+3. Update `backend/app/agent/prompts.py` -- add `{glossary}` placeholder between rules and schema
+4. Update `backend/app/agent/agent.py` -- load glossary, format, pass to prompt builder
 
-**Test**: Ask 3 questions -> all appear in sidebar -> clicking shows the result
+**Test**: Ask "What is the GMV this month?" -- agent uses the glossary hint to correctly SUM(amount) from transaction tables.
 
 ---
 
-## Chunk 5.7: MVP Demo Prep
+## Chunk 5.3: Few-Shot SQL Examples
 
-**Goal**: Prepare a polished demo flow.
+**Goal**: Provide curated question-to-SQL examples directly in the system prompt as few-shot learning.
 
 **Steps**:
-1. Prepare 5-7 demo questions that showcase:
-   - Simple metric lookup
-   - Multi-table query
-   - Self-correction (intentionally tricky question)
-   - Multi-turn follow-up
-   - Schema exploration
-2. Test each demo question end-to-end
-3. Fix any rough edges in the UI
-4. Document known limitations
+1. Create `data/examples/query_examples.yaml`:
+   ```yaml
+   - question: "Total payouts last month"
+     sql: |
+       SELECT COUNT(*) as total_payouts, SUM(amount)/100 as total_amount_inr
+       FROM rewards_prod.payouts_v3
+       WHERE TIMESTAMP_MILLIS(created_at) >= TIMESTAMP_TRUNC(TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 MONTH), MONTH)
+         AND TIMESTAMP_MILLIS(created_at) < TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MONTH)
+     explanation: "Note: created_at is epoch millis, amount is paisa"
+     complexity: "LOW"
 
-**Test**: Full demo flow works without errors for all prepared questions
+   - question: "Daily active UPI users this week"
+     sql: |
+       SELECT DATE(TIMESTAMP_MILLIS(created_at)) as day, COUNT(DISTINCT upi_user_id) as dau
+       FROM upi_prod.transaction_v3
+       WHERE TIMESTAMP_MILLIS(created_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
+       GROUP BY day ORDER BY day
+     complexity: "MEDIUM"
+   ```
+2. Curate 15-20 examples spanning LOW, MEDIUM, HIGH complexity
+3. Write `backend/app/schema/examples.py` -- loader + formatter
+4. Update `backend/app/agent/prompts.py` -- add `{examples}` placeholder
+5. Update `backend/app/agent/agent.py` -- load and inject examples
+
+**Test**: Queries similar to examples get better first-attempt accuracy. Measure total prompt token count.
 
 ---
 
-## Definition of Done for Phase 5 (MVP Complete)
+## Chunk 5.4: Domain-Specific Prompt Rules
 
-- [ ] Charts render for different result shapes (metric, bar, line, table)
-- [ ] SQL displayed with syntax highlighting, collapsible
-- [ ] Agent thinking steps visible to user
-- [ ] 30-50 tables ingested in ChromaDB
-- [ ] Session history in sidebar
-- [ ] Demo flow of 5-7 questions works end-to-end
-- [ ] Multi-turn context works across demo questions
-- [ ] Self-correction works for at least 1 demo question
+**Goal**: Add domain-specific rules and conventions beyond the glossary.
+
+**Steps**:
+1. Update `backend/app/agent/prompts.py` -- expand the Rules section:
+   - Amount fields are in paisa (divide by 100 for INR)
+   - Status fields use uppercase values: SUCCESS, FAILED, INITIATED, REVERSED
+   - For daily metrics use `DATE(TIMESTAMP_MILLIS(created_at))`
+   - Default time range when unspecified: last 30 days
+   - User identifier guidance: sm_user_id for cross-product, upi_user_id for UPI-specific
+   - Exclude test data: `sm_user_id NOT LIKE 'test%'`
+
+**Test**: Ask domain-specific questions that require paisa conversion and epoch millis handling. Verify agent applies rules without explicit instruction.
+
+---
+
+## Chunk 5.5: Unified Context Loader
+
+**Goal**: Single entry point that assembles schema + enrichments + glossary + examples with token budget monitoring.
+
+**Steps**:
+1. Write `backend/app/agent/context_loader.py`:
+   ```python
+   def load_full_context() -> dict:
+       # Loads and assembles all context pieces:
+       # - Terse schema with enrichments
+       # - Glossary
+       # - Few-shot examples
+       # Returns {"schema": str, "glossary": str, "examples": str, "total_tokens": int}
+   ```
+   - Token budget check: warn if total exceeds 50K tokens
+   - Log token counts for each section
+2. Update `backend/app/agent/agent.py` -- use `load_full_context()` instead of `_load_terse_schema()`
+3. Write `backend/scripts/measure_prompt.py` -- script that prints token breakdown by section
+
+**Test**: Run `measure_prompt.py`, verify all sections load, total tokens < 25K.
+
+---
+
+## Definition of Done for Phase 5
+
+- [ ] 20-30 tables have enriched descriptions in terse schema
+- [ ] 20-30 business glossary terms in system prompt
+- [ ] 15-20 few-shot SQL examples in system prompt
+- [ ] Domain-specific rules cover paisa/epoch/status patterns
+- [ ] Unified context loader with token budget monitoring
+- [ ] Agent handles domain-specific questions better than before enrichments

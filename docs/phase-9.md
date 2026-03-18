@@ -1,193 +1,130 @@
-# Phase 9: Multi-Agent & Production (Weeks 13-16)
+# Phase 9: Next.js Frontend (Weeks 12-13)
 
-**Milestone**: LangGraph multi-agent system, auth, audit logging, Cloud Run deployment
+**Milestone**: Production-quality chat UI with SSE streaming, rich charts, saved queries
 
-**Learning Focus**: Multi-agent coordination, state management, production deployment, monitoring
-
----
-
-## Chunk 9.1: LangGraph Setup
-
-**Goal**: Set up LangGraph and understand the graph abstraction.
-
-**Steps**:
-1. Install `langgraph`
-2. Write `backend/app/agent/langgraph/state.py`:
-   ```python
-   class QueryState(TypedDict):
-       user_question: str
-       conversation_history: list
-       complexity: str
-       relevant_tables: list
-       table_schemas: dict
-       generated_sql: str
-       validation_result: dict
-       query_results: dict
-       visualization: dict
-       retry_count: int
-       error_history: list
-   ```
-3. Create a simple 2-node graph (just to learn the API): input -> process -> output
-
-**Test**: Simple graph executes and passes state between nodes
+**Learning Focus**: SSE streaming, React patterns, frontend-backend API contract
 
 ---
 
-## Chunk 9.2: Specialized Agents
+## Chunk 9.1: FastAPI SSE Endpoints
 
-**Goal**: Split the single agent into specialized agents.
+**Goal**: Backend streams agent responses via Server-Sent Events.
 
 **Steps**:
-1. Write `backend/app/agent/langgraph/agents/planner.py`:
-   - Receives question + context
-   - Classifies complexity, creates execution plan
-   - Decides which tables to investigate
+1. Write `backend/app/api/routes/query.py`:
+   - `POST /api/v1/query` -> accepts question, returns `query_id`
+   - `GET /api/v1/query/{id}/stream` -> SSE stream
+2. SSE events:
+   - `status`: thinking steps ("Searching tables...", "Generating SQL...")
+   - `sql`: the generated SQL
+   - `results`: query results as JSON
+   - `visualization`: chart config
+   - `explanation`: NL explanation
+   - `done`: final metadata (execution time, cost, model used)
+   - `error`: if something fails
+3. Use FastAPI `StreamingResponse` with `text/event-stream` content type
 
-2. Write `backend/app/agent/langgraph/agents/schema_agent.py`:
-   - Receives planner output
-   - Calls `search_tables`, `get_schema`
-   - Resolves join paths between tables
-
-3. Write `backend/app/agent/langgraph/agents/sql_agent.py`:
-   - Receives schema context
-   - Generates SQL (model varies by complexity)
-
-4. Write `backend/app/agent/langgraph/agents/validator.py`:
-   - Receives SQL
-   - Calls `validate_sql`, handles self-correction
-   - Routes back to sql_agent on failure (conditional edge)
-
-5. Write `backend/app/agent/langgraph/agents/viz_agent.py`:
-   - Receives query results
-   - Determines visualization, formats response
-
-**Test**: Each agent works independently with mock inputs
+**Test**: `curl` the SSE endpoint -> see events streaming in order
 
 ---
 
-## Chunk 9.3: LangGraph State Graph
+## Chunk 9.2: Next.js Project Setup
 
-**Goal**: Wire agents together as a LangGraph graph.
+**Goal**: Scaffold the Next.js frontend.
 
 **Steps**:
-1. Write `backend/app/agent/langgraph/graph.py`:
-   ```python
-   graph = StateGraph(QueryState)
-   graph.add_node("planner", planner_agent)
-   graph.add_node("schema", schema_agent)
-   graph.add_node("sql", sql_agent)
-   graph.add_node("validator", validator_agent)
-   graph.add_node("viz", viz_agent)
+1. Create `frontend/nextjs_app/` with `npx create-next-app@latest`
+2. Install dependencies: TanStack Query, Recharts or ECharts, CodeMirror (SQL viewer)
+3. Set up basic layout: sidebar + main chat area
+4. Configure proxy to FastAPI backend
 
-   graph.add_edge("planner", "schema")
-   graph.add_edge("schema", "sql")
-   graph.add_edge("sql", "validator")
-   graph.add_conditional_edges("validator", route_after_validation,
-       {"valid": "viz", "invalid": "sql", "give_up": END})
-   graph.add_edge("viz", END)
-   ```
-2. Replace single agent with multi-agent graph
-3. Compare accuracy: single-agent vs multi-agent
-
-**Test**: Full query flows through all agents correctly. Multi-agent matches or exceeds single-agent accuracy.
+**Test**: Next.js dev server runs, shows placeholder UI
 
 ---
 
-## Chunk 9.4: User Authentication
+## Chunk 9.3: SSE Client Hook
 
-**Goal**: Add Google OAuth 2.0 login.
-
-**Steps**:
-1. Set up OAuth 2.0 client in GCP Console
-2. Add auth middleware to FastAPI
-3. JWT token management for sessions
-4. Associate queries with authenticated users
-5. Update Next.js with login/logout flow
-
-**Test**: Login with Google account -> access granted. No login -> redirected to login page.
-
----
-
-## Chunk 9.5: Audit Logging
-
-**Goal**: Log every query for security and analytics.
+**Goal**: React hook that consumes the SSE stream.
 
 **Steps**:
-1. Create audit log table (SQLite for MVP, BigQuery or Cloud SQL for production):
-   ```
-   audit_log: {
-     id, user_email, timestamp, question, generated_sql,
-     tables_accessed, model_used, bytes_scanned, execution_time,
-     success, error_message, cost_usd
+1. Write `frontend/nextjs_app/src/hooks/useQueryStream.ts`:
+   ```typescript
+   function useQueryStream(queryId: string) {
+     // EventSource connection to /api/v1/query/{id}/stream
+     // Parse events into state: {status, sql, results, visualization, error}
+     // Return reactive state that updates as events arrive
    }
    ```
-2. Write audit log entry on every query execution
-3. Admin view to browse audit log
+2. Handle reconnection, error states, cleanup
 
-**Test**: Every query creates an audit log entry with complete metadata
-
----
-
-## Chunk 9.6: Cloud Run Deployment
-
-**Goal**: Deploy to GCP Cloud Run.
-
-**Steps**:
-1. Write `backend/Dockerfile` for FastAPI + agent
-2. Write `frontend/nextjs_app/Dockerfile` for Next.js
-3. Write `docker-compose.yml` for local testing
-4. Configure Cloud Run services:
-   - Backend service (port 8000)
-   - Frontend service (port 3000)
-5. Set up environment variables via Secret Manager
-6. Configure custom domain (optional)
-7. Set up auto-scaling rules
-
-**Test**: Application accessible via Cloud Run URL, all features work
+**Test**: Hook receives and parses all SSE event types correctly
 
 ---
 
-## Chunk 9.7: Monitoring & Alerting
+## Chunk 9.4: Chat Components
 
-**Goal**: Production observability.
+**Goal**: Build the core chat UI components.
 
 **Steps**:
-1. Structured logging (JSON format) for Cloud Logging
-2. Key metrics to track:
-   - Query success rate
-   - Average latency by model
-   - LLM cost per day
-   - BigQuery cost per day
-   - Error rate by type
-3. Alerting: Email if error rate > 20% or daily cost > threshold
-4. Health check endpoint: `GET /health`
+1. `ChatInput.tsx` - Message input with submit button
+2. `ChatMessage.tsx` - Message bubble supporting:
+   - User message (plain text)
+   - Assistant message (thinking steps + SQL + results + chart + explanation)
+3. `ThinkingSteps.tsx` - Animated progress indicator for agent steps
+4. `StreamingIndicator.tsx` - "Agent is thinking..." animation
 
-**Test**: Logs appear in Cloud Logging, health check returns 200
+**Test**: Chat flow works with mock data
 
 ---
 
-## Chunk 9.8: Performance Optimization
+## Chunk 9.5: Results Components
 
-**Goal**: Optimize for production load.
+**Goal**: Rich display of query results.
 
 **Steps**:
-1. Add semantic query cache (if same intent, return cached result)
-2. Cache schema metadata in-memory (refresh hourly)
-3. Connection pooling for BigQuery client
-4. Migrate ChromaDB to pgvector/AlloyDB if needed for concurrent access
-5. Load test: simulate 10 concurrent users
+1. `SqlViewer.tsx` - CodeMirror with SQL syntax highlighting, collapsible
+2. `ResultTable.tsx` - Sortable, paginated data table
+3. `ChartRenderer.tsx` - Renders bar, line, metric card based on viz config
+4. `MetricCard.tsx` - Single large number with label
 
-**Test**: 10 concurrent queries don't cause errors or excessive latency
+**Test**: Each component renders correctly with sample data
+
+---
+
+## Chunk 9.6: Saved Queries (V1 feature)
+
+**Goal**: Users can save and reuse queries.
+
+**Steps**:
+1. Add `POST /api/v1/queries/saved` and `GET /api/v1/queries/saved` endpoints
+2. Store in SQLite: name, description, original question, SQL, created_at
+3. Frontend: "Save this query" button on each result, saved queries list in sidebar
+
+**Test**: Save a query -> appears in sidebar -> clicking re-runs it
+
+---
+
+## Chunk 9.7: Polish & Responsive Design
+
+**Goal**: Production-quality UI.
+
+**Steps**:
+1. Mobile-responsive layout
+2. Dark mode support
+3. Loading states and error boundaries
+4. Keyboard shortcuts (Enter to submit, Ctrl+K to focus search)
+5. Smooth animations for thinking steps
+
+**Test**: UI looks good on desktop and mobile, all interactions are smooth
 
 ---
 
 ## Definition of Done for Phase 9
 
-- [ ] LangGraph multi-agent graph works end-to-end
-- [ ] Multi-agent accuracy matches or exceeds single-agent
-- [ ] Google OAuth authentication working
-- [ ] Audit logging captures every query
-- [ ] Deployed on Cloud Run (backend + frontend)
-- [ ] Monitoring and alerting set up
-- [ ] Semantic query cache reduces redundant LLM calls
-- [ ] System handles 10 concurrent users
+- [ ] FastAPI streams responses via SSE
+- [ ] Next.js consumes SSE stream with reactive state
+- [ ] Chat UI with message history, thinking steps, SQL, charts
+- [ ] SQL viewer with syntax highlighting
+- [ ] Charts render based on viz config
+- [ ] Saved queries feature works
+- [ ] Responsive design, polished UX

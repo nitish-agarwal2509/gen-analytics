@@ -56,11 +56,13 @@ streamlit run app.py                   # Streamlit on port 8501
 
 ## Phase Status
 
-- [x] Phase 1, Chunk 1.1: Project scaffolding
-- [x] Phase 1, Chunk 1.2: BigQuery connection
-- [x] Phase 1, Chunk 1.3: `execute_sql` tool
-- [x] Phase 1, Chunk 1.4: Gemini API key + test
-- [x] Phase 1, Chunk 1.5: First Google ADK agent
-- [x] Phase 1, Chunk 1.6: Streamlit chat UI
-- [x] Phase 2: Full schema extraction (101 tables, dynamic loading, 8/8 test queries pass)
-- [x] Phase 3: Validation & self-correction (validate_sql, safety module, cost guards, human-in-the-loop, UI updates)
+- [x] Phase 1: Hello World Agent (scaffolding, BigQuery, execute_sql, Gemini, ADK agent, Streamlit UI)
+- [x] Phase 2: Full Schema Extraction (101 tables, dynamic loading, 8/8 test queries pass)
+- [x] Phase 3: Validation & Self-Correction (validate_sql, safety module, cost guards, human-in-the-loop)
+- [ ] Phase 4: Visualization & Polish (suggest_viz, Plotly charts, thinking steps, session sidebar)
+- [ ] Phase 5: Business & Domain Context (table enrichments, glossary, few-shot examples -- all in prompt, no RAG)
+- [ ] Phase 6: Complex Query Handling (SQL recipes, retention/WoW/funnel patterns, eval harness)
+- [ ] Phase 7: Multi-Turn Conversations (conversation history, pronoun resolution, follow-ups)
+- [ ] Phase 8: Model Routing & Paid Models (complexity classifier, Claude via Vertex AI, escalation)
+- [ ] Phase 9: Next.js Frontend (SSE streaming, React UI, saved queries)
+- [ ] Phase 10: Multi-Agent & Production (LangGraph, auth, audit, Cloud Run)

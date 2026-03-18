@@ -1,136 +1,122 @@
-# Phase 4: Multi-Turn Conversations (Week 4)
+# Phase 4: Visualization & Polish (Week 4)
 
-**Milestone**: Follow-up questions understand previous Q&A context
+**Milestone**: Charts render for different result shapes, polished SQL display, agent thinking steps visible
 
-**Learning Focus**: Multi-turn context management, conversation memory, pronoun resolution
+**Learning Focus**: Chart selection heuristics, Plotly integration, Streamlit UX patterns
 
 ---
 
-## Chunk 4.1: Conversation History Data Model
+## Chunk 4.1: `suggest_viz` Tool
 
-**Goal**: Define how conversation history is stored and structured.
+**Goal**: Rule-based tool that recommends a chart type based on result shape.
 
 **Steps**:
-1. Write `backend/app/models/conversation.py`:
+1. Write `backend/app/agent/tools/suggest_viz.py`:
    ```python
-   class ConversationTurn:
-       role: str           # "user" or "assistant"
-       content: str        # The message text
-       sql: str | None     # Generated SQL (if assistant)
-       results_summary: str | None  # Brief summary of results (if assistant)
-       timestamp: datetime
-
-   class Conversation:
-       session_id: str
-       turns: list[ConversationTurn]
+   def suggest_visualization(columns: list[dict], row_count: int, query_intent: str) -> dict:
+       # Rules:
+       # - 1 row, 1 numeric column -> metric card
+       # - 1 categorical + 1 numeric -> bar chart
+       # - 1 date/time + 1 numeric -> line chart
+       # - 2+ numeric columns -> scatter or table
+       # - Many rows, many columns -> table
+       # Return {chart_type, x_axis, y_axis, title, color_by}
    ```
-2. Store in Streamlit session state for MVP (in-memory, per session)
-
-**Test**: Create a Conversation, add turns, verify serialization
-
----
-
-## Chunk 4.2: Context Window for Agent
-
-**Goal**: Build conversation context into the agent prompt.
-
-**Steps**:
-1. Write `backend/app/agent/context.py`:
-   - Function `build_conversation_context(conversation: Conversation, max_turns: int = 10) -> str`
-   - Formats previous turns as:
-     ```
-     Previous conversation:
-     User: "What are the top 10 customers by revenue?"
-     Assistant: [SQL: SELECT ... ] [Result: 10 rows showing customer names and revenue]
-
-     User: "Show their retention over time"
-     ```
-   - Truncate to last N turns to manage context window
-   - Include results summary (not full data) to keep context manageable
-2. Pass this context to the agent alongside the new question
-
-**Test**: Build context from 5 turns -> verify it's well-formatted and under token limit
-
----
-
-## Chunk 4.3: Results Summarization
-
-**Goal**: Summarize query results for inclusion in conversation context.
-
-**Steps**:
-1. Write a summarizer function:
-   ```python
-   def summarize_results(columns, rows, sql) -> str:
-       # "Returned 10 rows with columns: customer_name, total_revenue.
-       #  Top result: Acme Corp ($1.2M). Results range from $50K to $1.2M."
-   ```
-2. Keep summaries concise (under 200 tokens) -- enough for the LLM to understand what was returned without including all data
-
-**Test**: Summarize a 10-row result -> readable summary under 200 tokens
-
----
-
-## Chunk 4.4: Multi-Turn Agent Integration
-
-**Goal**: Agent receives and uses conversation context.
-
-**Steps**:
-1. Update agent to accept conversation history:
-   - Prepend conversation context to the system prompt or user message
-   - Agent can reference previous queries: "The user previously asked about X and got Y"
-2. Update system prompt:
-   ```
-   You have access to the conversation history. When the user says "their", "that",
-   "those", etc., refer to the previous context to understand what they mean.
-   If the user says "break that down by X", modify the previous query to add GROUP BY X.
-   ```
+2. Register as `FunctionTool` in `backend/app/agent/agent.py`
+3. Add prompt instruction: after getting results, call `suggest_visualization` with column metadata
 
 **Test**:
-- Ask "Top 10 customers by revenue" -> get results
-- Follow up "Show me just the enterprise ones" -> agent understands "them" = previous customers, adds filter
-- Follow up "Now by quarter" -> agent adds time dimension to the previous query
+- Single revenue number -> metric card
+- Category + value -> bar chart
+- Date + value -> line chart
 
 ---
 
-## Chunk 4.5: Streamlit Multi-Turn UI
+## Chunk 4.2: Plotly Chart Rendering in Streamlit
 
-**Goal**: Streamlit chat maintains and displays conversation history.
+**Goal**: Render charts based on `suggest_viz` recommendations.
+
+**Steps**:
+1. Write `frontend/streamlit_app/components/chart_renderer.py`:
+   - `render_chart(chart_config, data)` dispatches to the right Plotly chart
+   - Support: metric card (`st.metric`), bar chart, line chart, table (`st.dataframe`)
+2. Update `frontend/streamlit_app/app.py`:
+   - Capture `suggest_visualization` function response from agent events
+   - Call `render_chart()` in `_render_assistant_message()` if viz config exists
+
+**Test**: Each chart type renders correctly with real agent responses
+
+---
+
+## Chunk 4.3: SQL Display Enhancement
+
+**Goal**: Show generated SQL with metadata in a readable, highlighted format.
+
+**Steps**:
+1. Update `frontend/streamlit_app/app.py` -- `_render_assistant_message()`:
+   - SQL already shows in `st.expander` with `st.code()`. Enhance to also show:
+     - Estimated scan size and cost (from validation)
+     - Execution time (add timing to `run_agent`)
+     - Tool call sequence: e.g., "validate_sql -> execute_sql -> suggest_visualization"
+
+**Test**: SQL expander shows metadata alongside syntax-highlighted SQL
+
+---
+
+## Chunk 4.4: Agent Thinking Steps Display
+
+**Goal**: Show real-time progress as the agent works through its tool calls.
 
 **Steps**:
 1. Update `frontend/streamlit_app/app.py`:
-   - Maintain `st.session_state.conversation` as a `Conversation` object
-   - Each user message appends to conversation
-   - Each agent response (with SQL and results summary) appends to conversation
-   - Pass full conversation to agent on each new question
-   - Display full chat history with expandable SQL for each response
-2. Add "New Conversation" button to reset context
+   - Replace `st.spinner("Thinking...")` with `st.status()` (expandable status container)
+   - Map tool calls to human-readable labels:
+     - `validate_sql` -> "Validating SQL..."
+     - `execute_sql` -> "Executing query..."
+     - `suggest_visualization` -> "Choosing visualization..."
+     - `get_sample_data` -> "Inspecting table data..."
+   - Update status container as events stream in
+   - Show validation results (pass/fail), retry count, and final status
 
-**Test**:
-1. Ask a question -> see result
-2. Ask a follow-up -> agent uses context from previous answer
-3. Click "New Conversation" -> context is cleared
+**Test**: Ask a question -> see step-by-step progress. Trigger self-correction -> see retry steps.
 
 ---
 
-## Chunk 4.6: Context-Aware Self-Correction
+## Chunk 4.5: Session History Sidebar
 
-**Goal**: Self-correction also benefits from conversation context.
+**Goal**: Sidebar showing past queries in the current session.
 
 **Steps**:
-1. When self-correction triggers, include conversation history in the retry prompt
-   - "The user has been asking about customer data. The previous query returned top customers. Now they're asking about retention. My SQL failed because..."
-2. This helps the agent make better corrections when the follow-up question is ambiguous
+1. Update `frontend/streamlit_app/app.py`:
+   - Add `st.sidebar` section with session history
+   - Show truncated question (first 60 chars) for each past query
+   - Add "Clear Session" button that resets messages and creates a new ADK session
 
-**Test**: Ask a follow-up that causes an error -> self-correction uses conversation context to fix it correctly
+**Test**: Ask 3 questions -> all appear in sidebar. Click "Clear Session" -> history resets.
+
+---
+
+## Chunk 4.6: Demo Prep and Polish
+
+**Goal**: End-to-end demo with curated questions, example suggestions in UI.
+
+**Steps**:
+1. Create `docs/demo_questions.md` with 5-7 curated demo questions
+2. Update `frontend/streamlit_app/app.py`:
+   - Add clickable example questions below chat input using `st.columns` + `st.button`
+   - Questions showcase: simple metric, filtered query, aggregation, schema exploration
+3. Test all demo questions end-to-end
+4. Fix any rough edges in the UI
+
+**Test**: All demo questions produce correct SQL, charts render, thinking steps display
 
 ---
 
 ## Definition of Done for Phase 4
 
-- [ ] Conversation history stored with question + SQL + results summary per turn
-- [ ] Agent receives conversation context with each new question
-- [ ] Follow-up questions with pronouns ("their", "those") resolve correctly
-- [ ] "Break that down by X" modifies the previous query appropriately
-- [ ] Streamlit displays full conversation with expandable SQL
-- [ ] "New Conversation" button resets context
-- [ ] At least 3 out of 5 multi-turn test sequences complete correctly
+- [ ] `suggest_viz` tool recommends correct chart type (metric, bar, line, table)
+- [ ] Plotly charts render in Streamlit for each chart type
+- [ ] SQL display includes metadata (scan size, cost, execution time)
+- [ ] Agent thinking steps visible as tool calls stream
+- [ ] Session history sidebar with clear button
+- [ ] 5-7 demo questions work end-to-end with charts

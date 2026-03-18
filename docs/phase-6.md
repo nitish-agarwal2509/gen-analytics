@@ -1,147 +1,163 @@
-# Phase 6: RAG Supplement & Evaluation (Weeks 7-8)
+# Phase 6: Complex Query Handling (Weeks 7-8)
 
-**Milestone**: 70%+ success rate on 30+ test questions, RAG supplements full schema with business context
+**Milestone**: Agent handles retention, week-on-week, funnels, cohort analysis. 70%+ success on complex test suite.
 
-**Learning Focus**: RAG as supplement layer, evaluation-driven development, business glossary, few-shot examples
-
-**Key principle**: Full terse schema stays in the system prompt for table discovery. RAG adds business context, glossary, and examples on top -- it does NOT replace the schema.
+**Learning Focus**: SQL recipe templates, window functions, CTE patterns, evaluation-driven improvement
 
 ---
 
-## Chunk 6.1: ChromaDB Setup + Embeddings
+## Chunk 6.1: SQL Recipe Templates
 
-**Goal**: Set up ChromaDB and embedding infrastructure for supplementary RAG.
-
-**Steps**:
-1. Install `chromadb` and add to dependencies
-2. Write `backend/app/rag/embeddings.py`:
-   - Use `gemini-embedding-001` via Google AI Studio API
-   - Function `embed_text(text: str) -> list[float]`
-3. Write `backend/app/rag/collections.py`:
-   - Initialize ChromaDB client (persistent, local directory)
-   - Create collections: `business_glossary`, `query_examples`
-   - Helper functions for upsert and query
-
-**Test**: ChromaDB initializes, collections created, can embed and store a test document
-
----
-
-## Chunk 6.2: Metadata Enrichment
-
-**Goal**: Add business context to raw metadata for better agent understanding.
+**Goal**: Create a library of reusable SQL pattern templates for complex analytics.
 
 **Steps**:
-1. Create `data/metadata/table_enrichments.yaml`:
+1. Create `data/examples/sql_recipes.yaml`:
    ```yaml
-   orders:
-     description: "Customer orders with line items"
-     business_context: "Primary table for revenue reporting"
-     common_queries: ["total revenue", "average order value", "order volume"]
-     tags: ["revenue", "sales", "transactions"]
-   ```
-2. Start with 20-30 most important tables
-3. Merge enrichments into terse schema (append business context to table line)
-4. Re-generate terse schema with enrichments
+   week_on_week_comparison:
+     description: "Compare a metric between current week and previous week"
+     pattern: |
+       WITH current_week AS (
+         SELECT {metric} as value FROM {table}
+         WHERE {date_col} >= DATE_TRUNC(CURRENT_DATE(), WEEK)
+       ),
+       previous_week AS (
+         SELECT {metric} as value FROM {table}
+         WHERE {date_col} >= DATE_SUB(DATE_TRUNC(CURRENT_DATE(), WEEK), INTERVAL 7 DAY)
+           AND {date_col} < DATE_TRUNC(CURRENT_DATE(), WEEK)
+       )
+       SELECT current_week.value as this_week, previous_week.value as last_week,
+         ROUND((current_week.value - previous_week.value) / previous_week.value * 100, 2) as pct_change
+       FROM current_week, previous_week
 
-**Test**: Enriched tables have richer descriptions in the schema, improving agent table selection
+   retention_cohort:
+     description: "User retention by signup cohort"
+     pattern: |
+       WITH cohorts AS (
+         SELECT {user_id}, DATE_TRUNC({signup_date}, {period}) as cohort
+         FROM {user_table}
+       ),
+       activity AS (
+         SELECT {user_id}, DATE_TRUNC({activity_date}, {period}) as activity_period
+         FROM {activity_table}
+       )
+       SELECT cohort, activity_period,
+         DATE_DIFF(activity_period, cohort, {period}) as periods_since_signup,
+         COUNT(DISTINCT a.{user_id}) as active_users
+       FROM cohorts c JOIN activity a USING ({user_id})
+       GROUP BY 1, 2, 3 ORDER BY 1, 3
+   ```
+2. Include 10-15 recipes: WoW/MoM comparison, retention cohort, funnel analysis, moving average, top-N per group, cumulative sum, percentile, pivot
+3. Write `backend/app/schema/recipes.py` -- loader + formatter
+4. Update `backend/app/agent/prompts.py` -- add `{recipes}` section
+5. Update `backend/app/agent/context_loader.py` -- load recipes into context
+
+**Test**: "Week on week payout count" -> agent uses WoW pattern. "User retention by month" -> agent uses retention pattern.
 
 ---
 
-## Chunk 6.3: Business Glossary
+## Chunk 6.2: Complex Query Prompt Strategy
 
-**Goal**: Map business terms to SQL patterns.
+**Goal**: Improve agent instructions for handling multi-step analytical questions.
 
 **Steps**:
-1. Create `data/glossary/business_terms.yaml`:
-   ```yaml
-   churn:
-     definition: "Customer who cancelled their subscription"
-     sql_pattern: "WHERE status = 'cancelled' AND cancel_date IS NOT NULL"
-     related_tables: ["subscriptions", "subscription_events"]
-     synonyms: ["attrition", "cancellation"]
-
-   MRR:
-     definition: "Monthly Recurring Revenue"
-     sql_pattern: "SUM(monthly_amount) FROM subscriptions WHERE status = 'active'"
-     related_tables: ["subscriptions", "plans"]
+1. Update `backend/app/agent/prompts.py` -- add COMPLEX QUERY STRATEGIES section:
    ```
-2. Write `backend/scripts/seed_glossary.py` to embed and store in ChromaDB `business_glossary` collection
-3. At query time, search glossary for matching terms and include context in agent prompt
+   COMPLEX QUERY STRATEGIES:
+   - For "week on week" or "month on month": Use CTEs to compute both periods, then compare
+   - For "retention": Define cohorts by first activity date, then join with subsequent activity
+   - For "funnel": Use conditional aggregation or sequential CTEs for each funnel step
+   - For "trend": Use DATE_TRUNC to group by period, ORDER BY date ascending
+   - For "top N per group": Use ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...) then filter
+   - When the question is ambiguous about time period, default to last 30 days
+   - When the question involves "users", use sm_user_id unless context suggests upi_user_id
+   - Break complex questions into steps: identify the metric, the grouping, the time range, and any filters
+   ```
 
-**Test**: "What's our churn rate?" triggers glossary match and includes subscription tables + SQL pattern in context
+**Test**: Ask complex questions without explicit SQL guidance, verify agent follows the strategies.
 
 ---
 
-## Chunk 6.4: Curated Query Examples
+## Chunk 6.3: `get_table_stats` Tool
 
-**Goal**: Provide few-shot examples for SQL generation.
-
-**Steps**:
-1. Create `data/examples/query_examples.yaml`:
-   ```yaml
-   - question: "Total revenue last month"
-     sql: "SELECT SUM(order_total) FROM `project.dataset.orders` WHERE ..."
-     tables: ["orders"]
-     complexity: "LOW"
-   - question: "Monthly active users trend"
-     sql: "SELECT DATE_TRUNC(event_date, MONTH), COUNT(DISTINCT user_id) ..."
-     tables: ["events"]
-     complexity: "MEDIUM"
-   ```
-2. Curate 15-20 examples covering different complexity levels
-3. Write `backend/scripts/seed_examples.py` to embed and store in ChromaDB `query_examples` collection
-4. At query time, retrieve top 2-3 similar examples and include as few-shot in prompt
-
-**Test**: Queries similar to examples get higher first-attempt accuracy
-
----
-
-## Chunk 6.5: RAG Integration into Agent
-
-**Goal**: Agent prompt is augmented with glossary matches and similar examples.
+**Goal**: New tool that returns quick summary statistics to help the agent understand data before writing complex queries.
 
 **Steps**:
-1. Write `backend/app/rag/retriever.py`:
+1. Write `backend/app/agent/tools/get_table_stats.py`:
    ```python
-   def get_supplementary_context(question: str) -> dict:
-       # 1. Search business_glossary for matching terms
-       # 2. Search query_examples for similar questions
-       # 3. Return {glossary_matches: [...], similar_examples: [...]}
+   def get_table_stats(table_name: str, column_name: str = None) -> dict:
+       # No column: returns row count, min/max of date columns (time range)
+       # With column: returns distinct count, min, max, null count, sample values
+       # Uses APPROX_COUNT_DISTINCT for efficiency
+       # Cost guard: always uses LIMIT and maximumBytesBilled
    ```
-2. Update agent prompt builder to append supplementary context after the terse schema
-3. Agent now has: full schema + glossary context + few-shot examples
+2. Register as `FunctionTool` in `backend/app/agent/agent.py`
+3. Add prompt instruction: "For complex queries, consider calling get_table_stats first to understand date ranges and available values"
 
-**Test**: Agent produces better SQL for domain-specific queries (e.g., "churn rate") with glossary context
+**Test**: Agent calls `get_table_stats` when building a retention query to discover the date range.
 
 ---
 
-## Chunk 6.6: Evaluation Harness
+## Chunk 6.4: Evaluation Harness
 
-**Goal**: Systematically measure and track accuracy.
+**Goal**: Automated test suite to measure agent accuracy across simple, medium, and complex queries.
 
 **Steps**:
-1. Write `backend/scripts/evaluate.py`:
-   - Load test cases from YAML files
-   - For each test case:
-     - Run the agent
-     - Check: Were the right tables selected? Did SQL validate? Did it execute? Are results reasonable?
-   - Output: accuracy metrics per category
-2. Create test case files:
-   - `tests/eval/simple_queries.yaml` (15+ cases)
-   - `tests/eval/medium_queries.yaml` (10+ cases)
-   - `tests/eval/complex_queries.yaml` (5+ cases)
-3. Track metrics over time (log to file)
+1. Create test case files:
+   - `backend/tests/eval/simple_queries.yaml` (15+ cases)
+   - `backend/tests/eval/medium_queries.yaml` (10+ cases)
+   - `backend/tests/eval/complex_queries.yaml` (10+ cases: retention, WoW, funnel, etc.)
+2. Write `backend/scripts/evaluate.py`:
+   - Load test cases from YAML
+   - For each: run agent, check validation success, check expected tables appear in SQL, check SQL pattern match
+   - Supports `--dry-run` mode (validate only, no execute) for $0 cost
+   - Output: per-category accuracy, overall accuracy, failure details
+   - Results saved to `backend/tests/eval/results/` with timestamp
 
-**Test**: Evaluation runs and reports metrics. Target: 70%+ end-to-end success
+**Test**: Evaluation runs. Baseline target: 80%+ simple, 60%+ medium, 40%+ complex.
+
+---
+
+## Chunk 6.5: Iterative Prompt Tuning Based on Eval
+
+**Goal**: Use evaluation results to identify failure patterns and systematically improve.
+
+**Process** (iterative, 2-3 rounds):
+1. Run evaluation harness
+2. Analyze failures -- categorize as: wrong table, wrong column, wrong aggregation, wrong time filter, syntax error, missing domain knowledge
+3. Fix per category:
+   - Wrong table -> update table enrichment in `data/metadata/table_enrichments.yaml`
+   - Wrong column -> add column notes to enrichments
+   - Wrong aggregation -> add example to `data/examples/query_examples.yaml`
+   - Wrong time filter -> add domain rule to prompts
+   - Missing domain knowledge -> add glossary term
+   - Complex pattern failure -> add/refine recipe in `data/examples/sql_recipes.yaml`
+4. Re-run evaluation, measure improvement
+
+**Target after tuning**: 90%+ simple, 75%+ medium, 55%+ complex.
+
+---
+
+## Chunk 6.6: Error Logging & Analysis
+
+**Goal**: Structured logging of agent failures for ongoing improvement.
+
+**Steps**:
+1. Write `backend/app/agent/error_tracker.py`:
+   - `log_query_attempt(question, sql, validation_result, execution_result, retries) -> dict`
+   - Categorizes errors: syntax, wrong_table, wrong_column, timeout, cost_exceeded, unknown
+   - Writes to `backend/logs/query_attempts.jsonl` (append-only JSONL)
+2. Update `frontend/streamlit_app/app.py` -- call error tracker after each agent run
+3. Write `backend/scripts/analyze_errors.py` -- reads JSONL log, outputs error category distribution
+
+**Test**: Run 10 queries (mix of easy and hard), verify all logged. Run analysis script, see meaningful breakdown.
 
 ---
 
 ## Definition of Done for Phase 6
 
-- [ ] ChromaDB set up with business_glossary and query_examples collections
-- [ ] 20-30 tables have enriched metadata
-- [ ] Business glossary with 15-20 terms
-- [ ] 15-20 curated query examples as few-shot
-- [ ] RAG supplements agent context (glossary + examples alongside full schema)
-- [ ] Evaluation harness with 30+ test cases
-- [ ] 70%+ end-to-end success rate on test suite
+- [ ] 10-15 SQL recipe templates for complex patterns (WoW, retention, funnel, etc.)
+- [ ] Agent handles week-on-week, retention, funnel, top-N questions
+- [ ] `get_table_stats` tool helps agent understand data before complex queries
+- [ ] Evaluation harness runs 35+ test cases across 3 complexity levels
+- [ ] Error logging and analysis pipeline works
+- [ ] Accuracy targets met after iterative tuning (90%+ simple, 75%+ medium, 55%+ complex)
