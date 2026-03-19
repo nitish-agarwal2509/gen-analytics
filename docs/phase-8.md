@@ -94,10 +94,10 @@
 
 ## Chunk 8.5: Multi-Turn UI Integration
 
-**Goal**: Next.js chat maintains and displays conversation history.
+**Goal**: React chat UI maintains and displays conversation history.
 
 **Steps**:
-1. Update Next.js frontend:
+1. Update React frontend:
    - Maintain conversation state across messages
    - Each user message appends to conversation
    - Each agent response (with SQL and results summary) appends to conversation

@@ -102,7 +102,7 @@
 2. Add auth middleware to FastAPI
 3. JWT token management for sessions
 4. Associate queries with authenticated users
-5. Update Next.js with login/logout flow
+5. Update React frontend with login/logout flow
 
 **Test**: Login with Google account -> access granted. No login -> redirected to login page.
 
@@ -134,7 +134,7 @@
 
 **Steps**:
 1. Write `backend/Dockerfile` for FastAPI + agent
-2. Write `frontend/nextjs_app/Dockerfile` for Next.js
+2. Write `frontend/web/Dockerfile` for React app
 3. Write `docker-compose.yml` for local testing
 4. Configure Cloud Run services:
    - Backend service (port 8000)

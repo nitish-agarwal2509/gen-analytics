@@ -67,7 +67,7 @@ Features are built incrementally across development phases 1-5:
 | Rich Visualizations | Heatmaps, scatter, funnels, cohort grids | P1 |
 | Query Explanation | NL explanation of SQL logic | P1 |
 | Feedback Loop | Thumbs up/down on results | P1 |
-| Next.js Frontend | Migrate from Streamlit to production UI | P1 |
+| React Frontend | Migrate from Streamlit to Vite + React + shadcn/ui + Tailwind | P1 |
 | Saved Queries | Persist and search query library | P2 |
 
 ### V2 -- Multi-agent + Production

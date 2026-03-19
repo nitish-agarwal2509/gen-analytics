@@ -38,7 +38,7 @@ Streamlit Chat UI  -->  Google ADK Agent (Gemini 2.5 Flash)  -->  BigQuery
 | Agent Framework | Google ADK |
 | LLM | Gemini 2.5 Flash (via Vertex AI) |
 | Data Warehouse | Google BigQuery |
-| Frontend | Streamlit |
+| Frontend | Streamlit (MVP), Vite + React + shadcn/ui + Tailwind (V1+) |
 | Backend | Python + FastAPI |
 
 ## Setup
@@ -116,7 +116,7 @@ docs/                Phase docs (phase-1 through phase-10)
 - [x] **Phase 4**: Visualization (Plotly charts, agent thinking steps)
 - [x] **Phase 5**: Business context (table enrichments, domain rules)
 - [x] **Phase 6**: Complex queries (eval harness, 91.4% accuracy)
-- [ ] **Phase 7**: Next.js frontend with SSE streaming, premium design
+- [ ] **Phase 7**: React frontend (Vite + shadcn/ui + Tailwind) with SSE streaming
 - [ ] **Phase 8**: Multi-turn conversations
 - [ ] **Phase 9**: Multi-agent (LangGraph), auth, Cloud Run deployment
 - [ ] **Phase 10**: Model routing (optional — Gemini Flash + Claude Sonnet/Opus)
