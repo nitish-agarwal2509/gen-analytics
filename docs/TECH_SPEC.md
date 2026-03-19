@@ -5,7 +5,7 @@
 ```
 +------------------------------------------------------------------+
 |                        CLIENT LAYER                               |
-|  Streamlit (MVP)  |  Vite + React + shadcn/ui + Tailwind (V1+)   |
+|  Streamlit (MVP)  |  Vite + React + MUI + Emotion (V1+)          |
 +------------------------------------------------------------------+
                          HTTP / SSE
 +------------------------------------------------------------------+
@@ -69,7 +69,7 @@
 | LLM (moderate) | Claude Sonnet 4 via Vertex AI | ~$3/M input tokens | Multi-table queries |
 | LLM (complex) | Claude Opus 4 via Vertex AI | ~$15/M input tokens | Complex analysis |
 | Vector DB | pgvector / AlloyDB | Paid (GCP) | Production-grade |
-| Frontend | Vite + React + shadcn/ui + Tailwind | Free (MIT) | SSE streaming, premium UI |
+| Frontend | Vite + React + MUI + Emotion | Free (MIT) | SSE streaming, same stack as SM Saarthi |
 | Deployment | Cloud Run | Pay-as-go | Serverless |
 
 ### Why Google ADK over Claude Agent SDK for MVP
@@ -270,7 +270,7 @@ gen-analytics/
     Dockerfile
   frontend/
     streamlit_app/               # MVP
-    web/                         # V1+ (Phase 7) -- Vite + React + shadcn/ui + Tailwind
+    web/                         # V1+ (Phase 7) -- Vite + React + MUI + Emotion
   data/
     glossary/business_terms.yaml
     examples/query_examples.yaml
@@ -295,7 +295,7 @@ gen-analytics/
 | RAG as supplement in V1+ | Belt + suspenders | Full schema stays; RAG adds glossary, examples, rich metadata. NOT for table discovery. |
 | gemini-embedding-001 for V1+ | Free | Same API key as LLM |
 | ChromaDB (V1+) -> pgvector (prod) | Progressive infra | No vector DB in MVP. ChromaDB for V1, pgvector for production. |
-| Streamlit -> Vite + React | Progressive frontend | SPA like Metabase/Superset; no SSR needed for analytics dashboard |
+| Streamlit -> Vite + React + MUI | Progressive frontend | SPA like Metabase/Superset; MUI for fast development; same stack as SM Saarthi |
 | Multi-turn in MVP | User requirement | Conversation history from day one |
 | SSE over WebSocket | Simpler | Unidirectional streaming |
 

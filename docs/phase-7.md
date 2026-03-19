@@ -1,21 +1,22 @@
 # Phase 7: React Frontend (Weeks 9-10)
 
-**Milestone**: Production-quality chat UI with SSE streaming, premium design, rich charts, saved queries
+**Milestone**: Production-quality chat UI with SSE streaming, rich charts, saved queries
 
-**Learning Focus**: SSE streaming, React SPA patterns, frontend-backend API contract, production UI/UX
+**Learning Focus**: SSE streaming, React SPA patterns, frontend-backend API contract, MUI theming
 
-**Key Design Decision**: Vite + React + shadcn/ui + Tailwind. Not Next.js — GenAnalytics is a single-page analytics app (like Metabase, Superset, Redash), not a content site. SSR/file-based routing provide no value. Vite gives faster dev, simpler build, and the same stack used by every major BI tool. shadcn/ui + Tailwind give premium design with full customization (components are local files, not node_module black boxes). Future Metabase-like features (dashboards, drag-drop, saved queries) work perfectly in a Vite SPA with react-router.
+**Key Design Decision**: Vite + React + MUI + Emotion. Not Next.js — GenAnalytics is a single-page analytics app (like Metabase, Superset, Redash), not a content site. SSR/file-based routing provide no value. Vite gives faster dev, simpler build, and the same stack used by every major BI tool. MUI provides a complete component system (UI + styling + icons) for fast development. Same stack as SM Saarthi for consistency. Future Metabase-like features (dashboards, drag-drop, saved queries) work perfectly in a Vite SPA with react-router.
 
 **Tech Stack**:
 - **Vite** — build tool + dev server
 - **React 18 + TypeScript** — UI framework (strict mode)
-- **shadcn/ui** — copy-paste UI primitives (button, card, table, dialog, sheet, dropdown)
-- **Tailwind CSS** — utility-first styling, dark mode via `dark:` prefix
+- **MUI (Material-UI) 5** — component library (TextField, DataGrid, Dialog, etc.)
+- **Emotion** — CSS-in-JS styling (MUI's built-in styling engine)
+- **MUI Icons** — icon library
 - **react-router** — client-side routing (`/`, `/dashboards`, `/queries` in future)
+- **react-markdown + remark-gfm** — markdown rendering for agent responses
 - **@codemirror/lang-sql** — SQL syntax highlighting
-- **Recharts** — charts (lighter than Plotly, Tailwind-friendly)
-- **lucide-react** — icons
-- **tailwind-merge + clsx** — conditional class composition
+- **Recharts** — charts for query results
+- **Mermaid** — diagram rendering (optional, for schema visualization)
 
 ---
 
@@ -47,38 +48,38 @@
 
 **Steps**:
 1. Create `frontend/web/` with `npm create vite@latest -- --template react-ts`
-2. Install and configure:
-   - Tailwind CSS + postcss + autoprefixer
-   - shadcn/ui (init + add components: button, card, input, table, dialog, sheet, dropdown-menu, scroll-area)
-   - react-router-dom
-   - @codemirror/lang-sql + @codemirror/view
-   - recharts
-   - lucide-react
+2. Install dependencies:
+   - `@mui/material @mui/icons-material @emotion/react @emotion/styled`
+   - `react-router-dom`
+   - `react-markdown remark-gfm`
+   - `@codemirror/lang-sql @codemirror/view`
+   - `recharts`
 3. Set up project structure:
    ```
    frontend/web/
    ├── src/
    │   ├── components/
-   │   │   ├── ui/              # shadcn primitives
    │   │   ├── chat/            # ChatInput, MessageBubble, ThinkingSteps
    │   │   ├── results/         # SqlViewer, ResultTable, ChartRenderer, MetricCard
    │   │   └── layout/          # Header, Sidebar, WelcomeScreen
    │   ├── hooks/
    │   │   └── useQueryStream.ts
-   │   ├── lib/
-   │   │   ├── utils.ts         # cn() helper
-   │   │   └── api.ts           # API client
    │   ├── styles/
-   │   │   └── globals.css      # Tailwind + CSS variables for theming
+   │   │   ├── theme.ts         # MUI createTheme() + color tokens
+   │   │   └── components.ts    # Reusable sx style functions
+   │   ├── types/
+   │   │   └── index.ts         # TypeScript interfaces
+   │   ├── config.ts            # API base URL, app settings
    │   ├── App.tsx
+   │   ├── App.css
    │   └── main.tsx
-   ├── tailwind.config.ts
    ├── vite.config.ts
    └── package.json
    ```
 4. Configure Vite proxy to FastAPI backend (port 8000)
+5. Set up MUI ThemeProvider with light/dark themes
 
-**Test**: Vite dev server runs, shows placeholder UI
+**Test**: Vite dev server runs, shows placeholder UI with MUI components
 
 ---
 
@@ -104,13 +105,13 @@
 
 ## Chunk 7.4: Chat Components
 
-**Goal**: Build the core chat UI components using shadcn/ui primitives.
+**Goal**: Build the core chat UI components using MUI.
 
 **Steps**:
-1. `ChatInput.tsx` — shadcn Input/Textarea + Button, Enter to send, Shift+Enter for newline
-2. `MessageBubble.tsx` — polymorphic: user (right-aligned) / assistant (left-aligned with markdown)
+1. `ChatInput.tsx` — MUI TextField (multiline, max 4 rows) + InputAdornment send button, Enter to send, Shift+Enter for newline
+2. `MessageBubble.tsx` — polymorphic: user (right-aligned) / assistant (left-aligned with react-markdown)
 3. `ThinkingSteps.tsx` — animated progress indicator for agent tool calls
-4. `WelcomeScreen.tsx` — centered greeting with suggestion chips (clickable demo queries)
+4. `WelcomeScreen.tsx` — centered greeting with suggestion chips (MUI Chip, clickable demo queries)
 
 **Test**: Chat flow works with mock data
 
@@ -121,10 +122,10 @@
 **Goal**: Rich display of query results.
 
 **Steps**:
-1. `SqlViewer.tsx` — CodeMirror with SQL syntax highlighting, collapsible via shadcn Collapsible
-2. `ResultTable.tsx` — shadcn Table with sortable columns, pagination
+1. `SqlViewer.tsx` — CodeMirror with SQL syntax highlighting, collapsible via MUI Collapse/Accordion
+2. `ResultTable.tsx` — MUI Table or DataGrid with sortable columns, pagination
 3. `ChartRenderer.tsx` — Recharts bar/line/area based on viz config from `suggest_visualization`
-4. `MetricCard.tsx` — shadcn Card with large number + label for scalar results
+4. `MetricCard.tsx` — MUI Card with large Typography number + label for scalar results
 
 **Test**: Each component renders correctly with sample data
 
@@ -137,26 +138,26 @@
 **Steps**:
 1. Add `POST /api/v1/queries/saved` and `GET /api/v1/queries/saved` endpoints
 2. Store in SQLite: name, description, original question, SQL, created_at
-3. Frontend: "Save this query" button on each result, saved queries in sidebar (shadcn Sheet)
+3. Frontend: "Save this query" button on each result, saved queries list in MUI Drawer sidebar
 
 **Test**: Save a query -> appears in sidebar -> clicking re-runs it
 
 ---
 
-## Chunk 7.7: Premium Design & Polish
+## Chunk 7.7: Design & Polish
 
-**Goal**: Production-quality, premium UI.
+**Goal**: Production-quality UI.
 
 **Steps**:
-1. Tailwind theme: custom color palette, typography (Inter for UI, JetBrains Mono for code)
-2. Dark mode: CSS variables + `dark:` classes, system preference detection + toggle
-3. Loading states and error boundaries
+1. MUI theme: `createTheme()` with custom color palette, typography (Inter for UI, JetBrains Mono for code)
+2. Dark mode: system preference detection + toggle button, persisted to localStorage
+3. Loading states (MUI CircularProgress, Skeleton) and error boundaries
 4. Keyboard shortcuts (Enter to submit, Ctrl+K to focus search)
-5. Smooth animations (Tailwind `transition` + `animate` utilities)
+5. Smooth animations (MUI transitions)
 6. Polished empty states, onboarding hints
 7. Mobile-responsive layout
 
-**Test**: UI looks premium on desktop and mobile, all interactions are smooth
+**Test**: UI looks good on desktop and mobile, all interactions are smooth
 
 ---
 
@@ -168,4 +169,4 @@
 - [ ] SQL viewer with CodeMirror syntax highlighting
 - [ ] Charts render via Recharts based on viz config
 - [ ] Saved queries feature works
-- [ ] Premium, responsive design with dark mode (shadcn/ui + Tailwind)
+- [ ] Responsive design with dark mode (MUI + Emotion)
