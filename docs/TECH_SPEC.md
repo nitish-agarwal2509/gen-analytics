@@ -201,16 +201,29 @@ Claude Sonnet/Opus have 200K context -- full schema doesn't fit. For Claude-rout
 
 ## 6. API Design
 
+### ADK Built-in Endpoints (V1+ — same pattern as SM Saarthi)
+```
+POST   /run_sse                                    SSE stream: ADK events (text, functionCall, functionResponse)
+POST   /apps/{agent}/users/{user}/sessions         Create new session
+GET    /apps/{agent}/users/{user}/sessions/{id}    Load session history
+GET    /list-apps                                  Available agents
+```
+
+### Custom Endpoints (alongside ADK)
+```
+POST   /api/v1/queries/saved     Save a query
+GET    /api/v1/queries/saved     List saved queries
+POST   /api/v1/feedback          Thumbs up/down
+GET    /health                   Health check
+```
+
+### MVP Endpoints (Streamlit — will be replaced by ADK endpoints)
 ```
 POST   /api/v1/query              Submit NL question -> returns query_id + stream_url
 GET    /api/v1/query/{id}/stream  SSE stream: status -> sql -> results -> viz -> done
-GET    /api/v1/query/{id}         Get completed result (polling fallback)
-GET    /api/v1/history            Session query history
-POST   /api/v1/feedback           Thumbs up/down
-GET    /api/v1/schema/search      Search table metadata
 ```
 
-**SSE events**: `status`, `sql`, `results`, `visualization`, `explanation`, `done`, `error`
+**ADK SSE event format**: `text` (partial/complete), `functionCall` (tool invocation), `functionResponse` (tool result)
 
 ---
 
@@ -298,6 +311,7 @@ gen-analytics/
 | Streamlit -> Vite + React + MUI | Progressive frontend | SPA like Metabase/Superset; MUI for fast development; same stack as SM Saarthi |
 | Multi-turn in MVP | User requirement | Conversation history from day one |
 | SSE over WebSocket | Simpler | Unidirectional streaming |
+| ADK built-in SSE for V1+ | Same as SM Saarthi | `/run_sse` + session management for free; custom routes only for saved queries/feedback |
 
 ### Streamlit Deployment Note
 Streamlit runs as a separate process (port 8501) from FastAPI (port 8000). Two terminal windows during local dev. Streamlit calls FastAPI via HTTP.

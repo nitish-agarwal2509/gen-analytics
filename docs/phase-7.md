@@ -2,9 +2,11 @@
 
 **Milestone**: Production-quality chat UI with SSE streaming, rich charts, saved queries
 
-**Learning Focus**: SSE streaming, React SPA patterns, frontend-backend API contract, MUI theming
+**Learning Focus**: ADK SSE integration, React SPA patterns, frontend-backend API contract, MUI theming
 
-**Key Design Decision**: Vite + React + MUI + Emotion. Not Next.js — GenAnalytics is a single-page analytics app (like Metabase, Superset, Redash), not a content site. SSR/file-based routing provide no value. Vite gives faster dev, simpler build, and the same stack used by every major BI tool. MUI provides a complete component system (UI + styling + icons) for fast development. Same stack as SM Saarthi for consistency. Future Metabase-like features (dashboards, drag-drop, saved queries) work perfectly in a Vite SPA with react-router.
+**Key Design Decisions**:
+1. **Vite + React + MUI + Emotion** (not Next.js) — GenAnalytics is a single-page analytics app (like Metabase, Superset, Redash), not a content site. SSR/file-based routing provide no value. Same stack as SM Saarthi.
+2. **ADK built-in SSE** (not custom endpoints) — ADK provides `/run_sse`, session management, and event streaming out of the box. SM Saarthi uses this pattern. No need to build custom SSE infrastructure. Custom FastAPI routes from Streamlit MVP become unnecessary.
 
 **UX Reference**: SM Saarthi (`/Users/nitish.agarwal5/claude-project/sm/sm-saarthi/frontend/`). Take inspiration from:
 - **Layout**: Full-screen chat with sticky header + scrollable messages + sticky input
@@ -28,29 +30,43 @@
 - **react-markdown + remark-gfm** — markdown rendering for agent responses
 - **@codemirror/lang-sql** — SQL syntax highlighting
 - **Recharts** — charts for query results
-- **Mermaid** — diagram rendering (optional, for schema visualization)
 
 ---
 
-## Chunk 7.1: FastAPI SSE Endpoints
+## Chunk 7.1: Switch Backend to ADK Built-in SSE
 
-**Goal**: Backend streams agent responses via Server-Sent Events.
+**Goal**: Replace custom FastAPI routes with ADK's built-in `/run_sse` endpoint, matching SM Saarthi's pattern.
 
 **Steps**:
-1. Write `backend/app/api/routes/query.py`:
-   - `POST /api/v1/query` -> accepts question, returns `query_id`
-   - `GET /api/v1/query/{id}/stream` -> SSE stream
-2. SSE events:
-   - `status`: thinking steps ("Searching tables...", "Generating SQL...")
-   - `sql`: the generated SQL
-   - `results`: query results as JSON
-   - `visualization`: chart config
-   - `explanation`: NL explanation
-   - `done`: final metadata (execution time, cost, model used)
-   - `error`: if something fails
-3. Use FastAPI `StreamingResponse` with `text/event-stream` content type
+1. Update `backend/app/main.py`:
+   - Switch from custom FastAPI app to `get_fast_api_app()` from `google.adk.cli.fast_api`
+   - ADK auto-generates: `POST /run_sse`, session CRUD, `/list-apps`
+   - Keep custom routes only where needed (health check, saved queries)
+2. Restructure agent directory to match ADK's agent discovery:
+   - `backend/agents/gen_analytics/` with `__init__.py` exporting `root_agent`
+   - ADK scans `agents_dir` for agent modules
+3. Configure ADK session storage (SQLite for dev, MySQL for production)
+4. Add CORS middleware for frontend dev server
+5. Verify existing tools (validate_sql, execute_sql, get_sample_data, suggest_visualization) work through `/run_sse`
 
-**Test**: `curl` the SSE endpoint -> see events streaming in order
+**ADK provides these endpoints automatically**:
+- `POST /run_sse` — streams agent responses as SSE events
+- `GET/POST /apps/{agent}/users/{user}/sessions` — session CRUD
+- `GET /list-apps` — agent discovery
+
+**SSE Event Format** (ADK standard):
+```json
+// Text response (streamed)
+{"content": {"parts": [{"text": "response text"}]}, "partial": true}
+
+// Tool call (thinking step)
+{"content": {"parts": [{"functionCall": {"name": "validate_sql", "args": {...}}}]}}
+
+// Tool result
+{"content": {"parts": [{"functionResponse": {"name": "validate_sql", "response": {...}}}]}}
+```
+
+**Test**: `curl -X POST /run_sse` with a test question -> see ADK events streaming
 
 ---
 
@@ -97,21 +113,30 @@
 
 ## Chunk 7.3: SSE Client Hook
 
-**Goal**: React hook that consumes the SSE stream.
+**Goal**: React hook that consumes ADK's `/run_sse` SSE stream (same pattern as SM Saarthi).
 
 **Steps**:
 1. Write `frontend/web/src/hooks/useQueryStream.ts`:
    ```typescript
-   function useQueryStream(queryId: string) {
+   function useQueryStream() {
+     // POST to /run_sse with {app_name, user_id, session_id, new_message, streaming: true}
      // fetch() with ReadableStream + TextDecoder
-     // Parse SSE events into state: {status, sql, results, visualization, error}
+     // Parse ADK events: text (partial/complete), functionCall, functionResponse
+     // Map functionCall events to thinking steps:
+     //   validate_sql -> "Validating SQL..."
+     //   execute_sql -> "Executing query..."
+     //   suggest_visualization -> "Generating chart..."
+     // Extract SQL, results, viz config from functionResponse events
      // AbortController for cancellation
-     // Return reactive state that updates as events arrive
+     // Return reactive state
    }
    ```
-2. Handle reconnection, error states, cleanup
+2. Write session management helpers:
+   - `createSession(appName, userId)` — POST to `/apps/{app}/users/{user}/sessions`
+   - `loadSession(appName, userId, sessionId)` — GET session history
+3. Handle reconnection, error states, cleanup
 
-**Test**: Hook receives and parses all SSE event types correctly
+**Test**: Hook receives and parses all ADK event types correctly
 
 ---
 
@@ -121,8 +146,15 @@
 
 **Steps**:
 1. `ChatInput.tsx` — MUI TextField (multiline, max 4 rows) + InputAdornment send button, Enter to send, Shift+Enter for newline
-2. `MessageBubble.tsx` — polymorphic: user (right-aligned) / assistant (left-aligned with react-markdown)
-3. `ThinkingSteps.tsx` — animated progress indicator for agent tool calls
+2. `MessageBubble.tsx` — polymorphic component:
+   - User: right-aligned bubble, plain text
+   - Assistant: left-aligned, react-markdown rendering
+   - Tool: left-aligned, collapsible JSON display (expand/collapse for tool calls and results)
+3. `ThinkingSteps.tsx` — maps ADK `functionCall` events to human-readable steps:
+   - `validate_sql` → "Validating SQL..."
+   - `execute_sql` → "Executing query..."
+   - `get_sample_data` → "Sampling data..."
+   - `suggest_visualization` → "Generating chart..."
 4. `WelcomeScreen.tsx` — centered greeting with suggestion chips (MUI Chip, clickable demo queries)
 
 **Test**: Chat flow works with mock data
@@ -131,12 +163,12 @@
 
 ## Chunk 7.5: Results Components
 
-**Goal**: Rich display of query results.
+**Goal**: Rich display of query results (GenAnalytics-specific, not in SM Saarthi).
 
 **Steps**:
 1. `SqlViewer.tsx` — CodeMirror with SQL syntax highlighting, collapsible via MUI Collapse/Accordion
 2. `ResultTable.tsx` — MUI Table or DataGrid with sortable columns, pagination
-3. `ChartRenderer.tsx` — Recharts bar/line/area based on viz config from `suggest_visualization`
+3. `ChartRenderer.tsx` — Recharts bar/line/area based on viz config from `suggest_visualization` tool response
 4. `MetricCard.tsx` — MUI Card with large Typography number + label for scalar results
 
 **Test**: Each component renders correctly with sample data
@@ -148,7 +180,9 @@
 **Goal**: Users can save and reuse queries.
 
 **Steps**:
-1. Add `POST /api/v1/queries/saved` and `GET /api/v1/queries/saved` endpoints
+1. Add custom FastAPI endpoints (alongside ADK routes):
+   - `POST /api/v1/queries/saved`
+   - `GET /api/v1/queries/saved`
 2. Store in SQLite: name, description, original question, SQL, created_at
 3. Frontend: "Save this query" button on each result, saved queries list in MUI Drawer sidebar
 
@@ -175,8 +209,9 @@
 
 ## Definition of Done for Phase 7
 
-- [ ] FastAPI streams responses via SSE
-- [ ] Vite + React app consumes SSE stream with reactive state
+- [ ] Backend uses ADK built-in `/run_sse` for SSE streaming (not custom endpoints)
+- [ ] ADK session management working (create, load, persist)
+- [ ] Vite + React app consumes `/run_sse` stream with reactive state
 - [ ] Chat UI with message history, thinking steps, SQL, charts
 - [ ] SQL viewer with CodeMirror syntax highlighting
 - [ ] Charts render via Recharts based on viz config
