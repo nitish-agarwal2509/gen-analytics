@@ -27,7 +27,7 @@
 **What shipped**:
 1. Created `data/glossary/business_terms.yaml` -- 20 business terms with definitions, SQL hints, related tables
 2. **NOT injected into prompt** -- tested and found it caused agent to overthink and pick wrong tables
-3. Kept as data file for Phase 6 eval harness
+3. Later deleted -- Phase 6 eval harness uses its own test case YAMLs instead
 
 ---
 
@@ -38,7 +38,7 @@
 **What shipped**:
 1. Created `data/examples/query_examples.yaml` -- 16 curated question→SQL pairs at LOW/MEDIUM/HIGH complexity
 2. **NOT injected into prompt** -- same issue as glossary; agent performed worse with examples in context
-3. Kept as data file for Phase 6 eval harness
+3. Later deleted -- Phase 6 eval harness uses its own test case YAMLs instead
 
 ---
 
@@ -72,7 +72,7 @@
 - [x] 25 tables have enriched descriptions + column notes in terse schema
 - [x] 3 targeted domain rules in prompt (transaction_at, IST timestamps, sm_user_id)
 - [x] Unified context loader with enrichments (~7.8K tokens total)
-- [x] Business glossary and few-shot examples as YAML data files (for Phase 6 eval, not injected into prompt)
+- [x] ~~Business glossary and few-shot examples as YAML data files~~ — created, tested, removed (unused; eval harness has its own test cases)
 - [x] measure_prompt.py script for token breakdown
 
 **Lesson learned**: Glossary and few-shot examples in the system prompt caused the agent to overthink and pick wrong tables. Removed from prompt; the LLM reasons better from enriched schema + minimal rules.
