@@ -110,9 +110,9 @@ async def main():
     if not args.execute:
         from google.adk.tools import FunctionTool
         stub = _make_execute_sql_stub()
-        agent._tools = [
-            t if t._func.__name__ != "execute_sql" else FunctionTool(stub)
-            for t in agent._tools
+        agent.tools = [
+            t if t.func.__name__ != "execute_sql" else FunctionTool(stub)
+            for t in agent.tools
         ]
         print("🔒 DRY-RUN MODE: validate_sql runs (free), execute_sql stubbed")
     else:

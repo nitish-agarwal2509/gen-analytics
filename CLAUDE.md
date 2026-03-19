@@ -53,6 +53,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - **Human-in-the-loop**: Queries scanning >500 GB require user approval before execution
 - All scripts run from `backend/` directory with venv activated
 - Test script defaults to dry-run mode ($0 BQ cost): `python scripts/test_agent.py`
+- Eval harness: `python scripts/evaluate.py` (35 test cases, dry-run, baseline 91.4%)
 
 ## Phase Status
 
@@ -61,7 +62,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 3: Validation & Self-Correction (validate_sql, safety module, cost guards, human-in-the-loop)
 - [x] Phase 4: Visualization & Polish (suggest_viz, Plotly charts, thinking steps, session sidebar)
 - [x] Phase 5: Business & Domain Context (table enrichments, 3 domain rules, glossary/examples as data files for eval)
-- [ ] Phase 6: Complex Query Handling (SQL recipes, retention/WoW/funnel patterns, eval harness)
+- [x] Phase 6: Complex Query Handling (eval harness 91.4% accuracy; recipes/strategies skipped — not needed)
 - [ ] Phase 7: Multi-Turn Conversations (conversation history, pronoun resolution, follow-ups)
 - [ ] Phase 8: Model Routing & Paid Models (complexity classifier, Claude via Vertex AI, escalation)
 - [ ] Phase 9: Next.js Frontend (SSE streaming, React UI, saved queries)

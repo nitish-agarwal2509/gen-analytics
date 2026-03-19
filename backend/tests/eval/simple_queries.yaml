@@ -1,0 +1,77 @@
+# Simple queries -- single table, straightforward aggregation
+# Target: 90%+ accuracy
+
+- question: "How many unique users have a rewards wallet?"
+  expected_tables: ["rewards_prod.wallet_v3"]
+  expected_patterns: ["COUNT", "DISTINCT"]
+  complexity: simple
+
+- question: "What is the total cashback redeemed vs credited across all wallets?"
+  expected_tables: ["rewards_prod.wallet_v3"]
+  expected_patterns: ["SUM", "redeemable_cashback", "creditted_cashback"]
+  complexity: simple
+
+- question: "How many active mandates are there?"
+  expected_tables: ["upi_prod.mandate_v3"]
+  expected_patterns: ["COUNT"]
+  complexity: simple
+
+- question: "How many UPI complaints are in PENDING status?"
+  expected_tables: ["upi_prod.complaint_v3"]
+  expected_patterns: ["COUNT", "complaint_status", "PENDING"]
+  complexity: simple
+
+- question: "What are the top 5 banks by number of UPI accounts?"
+  expected_tables: ["upi_prod.account_info_v3"]
+  expected_patterns: ["COUNT", "ORDER BY", "LIMIT 5"]
+  complexity: simple
+
+- question: "Total number of payouts with SUCCESS status"
+  expected_tables: ["rewards_prod.payouts_v3"]
+  expected_patterns: ["COUNT", "payout_status", "SUCCESS"]
+  complexity: simple
+
+- question: "How many reward events were triggered yesterday?"
+  expected_tables: ["rewards_prod.reward_event_v3"]
+  expected_patterns: ["COUNT"]
+  complexity: simple
+
+- question: "What is the average redemption amount by redemption type?"
+  expected_tables: ["rewards_prod.redemptions_v3"]
+  expected_patterns: ["AVG", "GROUP BY"]
+  complexity: simple
+
+- question: "How many distinct VPAs exist?"
+  expected_tables: ["upi_prod.vpa_info_v3"]
+  expected_patterns: ["COUNT", "DISTINCT"]
+  complexity: simple
+
+- question: "How many users have completed KYC?"
+  expected_tables: ["sm_kavach_svc_prod_sm_login_service.basic_details_v2"]
+  expected_patterns: ["COUNT"]
+  complexity: simple
+
+- question: "Total number of FAILED payouts"
+  expected_tables: ["rewards_prod.payouts_v3"]
+  expected_patterns: ["COUNT", "payout_status", "FAILED"]
+  complexity: simple
+
+- question: "How many UPI collect requests are there?"
+  expected_tables: ["upi_prod.collect_request_v3"]
+  expected_patterns: ["COUNT"]
+  complexity: simple
+
+- question: "Show the total number of login entities by state"
+  expected_tables: ["sm_kavach_svc_prod_sm_login_service.AccountLoginEntity"]
+  expected_patterns: ["COUNT", "GROUP BY"]
+  complexity: simple
+
+- question: "How many scratch card rewards were created?"
+  expected_tables: ["rewards_prod.reward_v3"]
+  expected_patterns: ["COUNT", "SCRATCH_CARD"]
+  complexity: simple
+
+- question: "What is the total payout amount in INR?"
+  expected_tables: ["rewards_prod.payouts_v3"]
+  expected_patterns: ["SUM", "amount"]
+  complexity: simple

@@ -1,0 +1,52 @@
+# Medium queries -- filters, joins, grouping, time ranges
+# Target: 75%+ accuracy
+
+- question: "How many successful debit transactions yesterday?"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["COUNT", "transaction_status", "SUCCESS", "payment_mode", "DEBIT", "transaction_at"]
+  complexity: medium
+
+- question: "What are the top 3 payout partners by total payout amount?"
+  expected_tables: ["rewards_prod.payouts_v3"]
+  expected_patterns: ["SUM", "ORDER BY", "LIMIT"]
+  complexity: medium
+
+- question: "How many UPI complaints were filed in the last 30 days by status?"
+  expected_tables: ["upi_prod.complaint_v3"]
+  expected_patterns: ["COUNT", "GROUP BY", "complaint_status"]
+  complexity: medium
+
+- question: "Total transaction amount by transaction type for successful transactions this month"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["SUM", "amount", "transaction_type", "SUCCESS", "GROUP BY", "transaction_at"]
+  complexity: medium
+
+- question: "How many distinct users made a UPI payment in the last 7 days?"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["COUNT", "DISTINCT", "sm_user_id", "transaction_at"]
+  complexity: medium
+
+- question: "What is the success rate of UPI transactions this month?"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["COUNT", "SUCCESS", "transaction_at"]
+  complexity: medium
+
+- question: "Top 10 merchant categories by transaction volume"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["COUNT", "mcc", "ORDER BY", "LIMIT"]
+  complexity: medium
+
+- question: "Average payout amount for successful payouts in the last 30 days"
+  expected_tables: ["rewards_prod.payouts_v3"]
+  expected_patterns: ["AVG", "amount", "payout_status", "SUCCESS"]
+  complexity: medium
+
+- question: "How many rewards were reversed vs settled last month?"
+  expected_tables: ["rewards_prod.reward_v3"]
+  expected_patterns: ["COUNT", "status", "REVERSED", "SETTLED", "GROUP BY"]
+  complexity: medium
+
+- question: "Breakdown of UPI transaction types for SCAN_PAY vs P2P_PAY this week"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["transaction_type", "SCAN_PAY", "P2P_PAY", "transaction_at"]
+  complexity: medium

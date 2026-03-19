@@ -1,0 +1,52 @@
+# Complex queries -- multi-step, WoW, retention, joins across domains
+# Target: 55%+ accuracy after tuning
+
+- question: "Week on week comparison of total successful UPI transactions"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["COUNT", "SUCCESS", "transaction_at", "DATE_TRUNC|WEEK|DATE_SUB"]
+  complexity: complex
+
+- question: "Daily trend of UPI transaction count for the last 14 days"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["COUNT", "transaction_at", "GROUP BY", "ORDER BY"]
+  complexity: complex
+
+- question: "Top 5 transaction types by total amount, with percentage of overall volume"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["SUM", "transaction_type", "LIMIT"]
+  complexity: complex
+
+- question: "How many users who received a cashback reward also made a UPI transaction in the last 30 days?"
+  expected_tables: ["rewards_prod.reward_v3", "upi_prod.transaction_v3"]
+  expected_patterns: ["JOIN|IN|EXISTS", "sm_user_id"]
+  complexity: complex
+
+- question: "What is the average time between reward creation and payout for successful payouts?"
+  expected_tables: ["rewards_prod.payouts_v3"]
+  expected_patterns: ["AVG", "TIMESTAMP"]
+  complexity: complex
+
+- question: "Month over month growth in total payout amount for the last 3 months"
+  expected_tables: ["rewards_prod.payouts_v3"]
+  expected_patterns: ["SUM", "amount", "DATE_TRUNC|MONTH"]
+  complexity: complex
+
+- question: "Which UPI transaction type has the highest failure rate?"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["transaction_type", "transaction_status", "FAILED", "COUNT"]
+  complexity: complex
+
+- question: "Daily active users vs daily transaction count trend for the past week"
+  expected_tables: ["upi_prod.transaction_v3"]
+  expected_patterns: ["COUNT", "DISTINCT", "sm_user_id", "transaction_at", "GROUP BY"]
+  complexity: complex
+
+- question: "Compare the number of INITIATED vs SUCCESS vs FAILED payouts for each of the last 4 weeks"
+  expected_tables: ["rewards_prod.payouts_v3"]
+  expected_patterns: ["COUNT", "payout_status", "GROUP BY"]
+  complexity: complex
+
+- question: "What percentage of UPI users have linked more than one bank account?"
+  expected_tables: ["upi_prod.account_info_v3"]
+  expected_patterns: ["COUNT", "DISTINCT", "HAVING|subquery"]
+  complexity: complex
