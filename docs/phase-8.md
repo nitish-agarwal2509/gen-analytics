@@ -1,147 +1,136 @@
-# Phase 8: Model Routing & Paid Models (Weeks 10-11)
+# Phase 8: Multi-Turn Conversations (Week 11)
 
-**Milestone**: Smart routing between models, 85%+ success, Claude for complex queries
+**Milestone**: Follow-up questions understand previous Q&A context
 
-**Learning Focus**: Model routing patterns, cost optimization, Vertex AI integration
-
----
-
-## Chunk 8.1: Vertex AI Setup for Claude
-
-**Goal**: Access Claude Sonnet/Opus via Vertex AI Model Garden.
-
-**Steps**:
-1. Enable Vertex AI API in your GCP project
-2. Request access to Claude models via Model Garden (if not already available)
-3. Write `backend/app/agent/llm_clients.py`:
-   - `call_gemini_flash(prompt, tools)` (existing, via Google AI Studio)
-   - `call_claude_sonnet(prompt, tools)` (new, via Vertex AI)
-   - `call_claude_opus(prompt, tools)` (new, via Vertex AI)
-4. Verify each model responds correctly
-
-**Test**: Each model generates SQL for a test question
+**Learning Focus**: Multi-turn context management, conversation memory, pronoun resolution
 
 ---
 
-## Chunk 8.2: Complexity Classifier
+## Chunk 8.1: Conversation History Data Model
 
-**Goal**: Classify query complexity to route to the right model.
+**Goal**: Define how conversation history is stored and structured.
 
 **Steps**:
-1. Write `backend/app/agent/complexity.py`:
+1. Write `backend/app/models/conversation.py`:
    ```python
-   def classify_complexity(question: str, conversation_context: str = "") -> str:
-       # Rule-based first:
-       # - Simple keywords (count, total, how many) + no joins -> LOW
-       # - Comparison, by X, trend -> MEDIUM
-       # - Cohort, funnel, correlation, predict, anomaly -> HIGH
-       #
-       # Fallback to Gemini Flash for ambiguous cases:
-       # "Rate this question's SQL complexity: LOW, MEDIUM, or HIGH"
-       return "LOW" | "MEDIUM" | "HIGH"
+   class ConversationTurn:
+       role: str           # "user" or "assistant"
+       content: str        # The message text
+       sql: str | None     # Generated SQL (if assistant)
+       results_summary: str | None  # Brief summary of results (if assistant)
+       timestamp: datetime
+
+   class Conversation:
+       session_id: str
+       turns: list[ConversationTurn]
    ```
-2. Start with rules, add LLM fallback for edge cases
+2. Store in session state for MVP (in-memory, per session)
+
+**Test**: Create a Conversation, add turns, verify serialization
+
+---
+
+## Chunk 8.2: Context Window for Agent
+
+**Goal**: Build conversation context into the agent prompt.
+
+**Steps**:
+1. Write `backend/app/agent/context.py`:
+   - Function `build_conversation_context(conversation: Conversation, max_turns: int = 10) -> str`
+   - Formats previous turns as:
+     ```
+     Previous conversation:
+     User: "What are the top 10 customers by revenue?"
+     Assistant: [SQL: SELECT ... ] [Result: 10 rows showing customer names and revenue]
+
+     User: "Show their retention over time"
+     ```
+   - Truncate to last N turns to manage context window
+   - Include results summary (not full data) to keep context manageable
+2. Pass this context to the agent alongside the new question
+
+**Test**: Build context from 5 turns -> verify it's well-formatted and under token limit
+
+---
+
+## Chunk 8.3: Results Summarization
+
+**Goal**: Summarize query results for inclusion in conversation context.
+
+**Steps**:
+1. Write a summarizer function:
+   ```python
+   def summarize_results(columns, rows, sql) -> str:
+       # "Returned 10 rows with columns: customer_name, total_revenue.
+       #  Top result: Acme Corp ($1.2M). Results range from $50K to $1.2M."
+   ```
+2. Keep summaries concise (under 200 tokens) -- enough for the LLM to understand what was returned without including all data
+
+**Test**: Summarize a 10-row result -> readable summary under 200 tokens
+
+---
+
+## Chunk 8.4: Multi-Turn Agent Integration
+
+**Goal**: Agent receives and uses conversation context.
+
+**Steps**:
+1. Update agent to accept conversation history:
+   - Prepend conversation context to the system prompt or user message
+   - Agent can reference previous queries: "The user previously asked about X and got Y"
+2. Update system prompt:
+   ```
+   You have access to the conversation history. When the user says "their", "that",
+   "those", etc., refer to the previous context to understand what they mean.
+   If the user says "break that down by X", modify the previous query to add GROUP BY X.
+   ```
 
 **Test**:
-- "Total revenue" -> LOW
-- "Revenue by product by quarter" -> MEDIUM
-- "Cohort retention funnel" -> HIGH
+- Ask "Top 10 customers by revenue" -> get results
+- Follow up "Show me just the enterprise ones" -> agent understands "them" = previous customers, adds filter
+- Follow up "Now by quarter" -> agent adds time dimension to the previous query
 
 ---
 
-## Chunk 8.3: Model Router
+## Chunk 8.5: Multi-Turn UI Integration
 
-**Goal**: Route queries to the appropriate model based on complexity.
+**Goal**: Next.js chat maintains and displays conversation history.
 
 **Steps**:
-1. Write `backend/app/agent/model_router.py`:
-   ```python
-   def route_to_model(complexity: str) -> str:
-       routing = {
-           "LOW": "gemini-flash",
-           "MEDIUM": "claude-sonnet",
-           "HIGH": "claude-opus"
-       }
-       return routing[complexity]
-   ```
-2. Integrate into agent: classify -> route -> generate SQL with selected model
-3. Log which model was used for each query
+1. Update Next.js frontend:
+   - Maintain conversation state across messages
+   - Each user message appends to conversation
+   - Each agent response (with SQL and results summary) appends to conversation
+   - Pass full conversation to agent on each new question
+   - Display full chat history with expandable SQL for each response
+2. Add "New Conversation" button to reset context
 
-**Test**: Different complexity questions route to different models (verify via logs)
+**Test**:
+1. Ask a question -> see result
+2. Ask a follow-up -> agent uses context from previous answer
+3. Click "New Conversation" -> context is cleared
 
 ---
 
-## Chunk 8.4: Model Escalation
+## Chunk 8.6: Context-Aware Self-Correction
 
-**Goal**: If a query fails on a cheaper model, automatically escalate.
-
-**Steps**:
-1. Add escalation logic:
-   - If query fails on Gemini Flash after 2 retries -> escalate to Claude Sonnet
-   - If query fails on Claude Sonnet after 2 retries -> escalate to Claude Opus
-   - Claude Opus is the ceiling -- 3 retries then give up
-2. Track escalation events for cost analysis
-
-**Test**: Simple query that fails on Flash -> automatically succeeds on Sonnet
-
----
-
-## Chunk 8.5: `explain_query` Tool
-
-**Goal**: Agent can explain what the SQL does in plain language.
+**Goal**: Self-correction also benefits from conversation context.
 
 **Steps**:
-1. Write `backend/app/agent/tools/explain_query.py`:
-   ```python
-   def explain_query(sql: str, context: str) -> dict:
-       # Call LLM: "Explain this SQL in simple terms. What does it do?"
-       # Return {explanation: str, key_assumptions: list[str]}
-   ```
-2. Show explanation alongside results in Streamlit
-3. Include assumptions made (e.g., "I interpreted 'revenue' as net revenue")
+1. When self-correction triggers, include conversation history in the retry prompt
+   - "The user has been asking about customer data. The previous query returned top customers. Now they're asking about retention. My SQL failed because..."
+2. This helps the agent make better corrections when the follow-up question is ambiguous
 
-**Test**: Complex SQL gets a clear, accurate explanation
-
----
-
-## Chunk 8.6: Feedback Mechanism
-
-**Goal**: Users can rate responses for future improvement.
-
-**Steps**:
-1. Add thumbs up/down buttons to each agent response in Streamlit
-2. Store feedback: `{query_id, question, sql, rating, comment, model_used, timestamp}`
-3. Store in SQLite for MVP (file-based, no extra infra)
-4. Write a script to analyze feedback: accuracy by model, common failure patterns
-
-**Test**: Click thumbs up/down -> feedback stored in SQLite -> analysis script works
-
----
-
-## Chunk 8.7: Cost Tracking Dashboard
-
-**Goal**: Track LLM and BigQuery costs per query.
-
-**Steps**:
-1. Log per query: model used, input/output tokens, BigQuery bytes scanned
-2. Calculate estimated cost per query
-3. Add a "Cost" section to Streamlit sidebar:
-   - Total cost this session
-   - Average cost per query
-   - Cost by model tier
-4. Alert if any single query exceeds $0.50
-
-**Test**: Ask 10 questions -> sidebar shows accurate cost breakdown
+**Test**: Ask a follow-up that causes an error -> self-correction uses conversation context to fix it correctly
 
 ---
 
 ## Definition of Done for Phase 8
 
-- [ ] Claude Sonnet and Opus accessible via Vertex AI
-- [ ] Complexity classifier routes LOW/MEDIUM/HIGH correctly
-- [ ] Model router sends queries to appropriate model
-- [ ] Escalation works: Flash failure -> Sonnet -> Opus
-- [ ] `explain_query` provides clear explanations
-- [ ] Feedback stored and analyzable
-- [ ] Cost tracking in sidebar
-- [ ] 85%+ success rate on test suite
+- [ ] Conversation history stored with question + SQL + results summary per turn
+- [ ] Agent receives conversation context with each new question
+- [ ] Follow-up questions with pronouns ("their", "those") resolve correctly
+- [ ] "Break that down by X" modifies the previous query appropriately
+- [ ] Chat displays full conversation with expandable SQL
+- [ ] "New Conversation" button resets context
+- [ ] At least 3 out of 5 multi-turn test sequences complete correctly

@@ -60,7 +60,7 @@ OVERALL : 32/35 ( 91.4%)
 
 ---
 
-## Chunk 6.6: Error Logging & Analysis — DEFERRED to Phase 10
+## Chunk 6.6: Error Logging & Analysis — DEFERRED to Phase 9
 
 **Reason**: Production concern, not needed for current development. The eval harness JSONL output serves as a lightweight substitute for now.
 

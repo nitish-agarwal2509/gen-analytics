@@ -1,136 +1,132 @@
-# Phase 7: Multi-Turn Conversations (Week 9)
+# Phase 7: Next.js Frontend (Weeks 9-10)
 
-**Milestone**: Follow-up questions understand previous Q&A context
+**Milestone**: Production-quality chat UI with SSE streaming, premium design, rich charts, saved queries
 
-**Learning Focus**: Multi-turn context management, conversation memory, pronoun resolution
+**Learning Focus**: SSE streaming, React patterns, frontend-backend API contract, production UI/UX
 
 ---
 
-## Chunk 7.1: Conversation History Data Model
+## Chunk 7.1: FastAPI SSE Endpoints
 
-**Goal**: Define how conversation history is stored and structured.
+**Goal**: Backend streams agent responses via Server-Sent Events.
 
 **Steps**:
-1. Write `backend/app/models/conversation.py`:
-   ```python
-   class ConversationTurn:
-       role: str           # "user" or "assistant"
-       content: str        # The message text
-       sql: str | None     # Generated SQL (if assistant)
-       results_summary: str | None  # Brief summary of results (if assistant)
-       timestamp: datetime
+1. Write `backend/app/api/routes/query.py`:
+   - `POST /api/v1/query` -> accepts question, returns `query_id`
+   - `GET /api/v1/query/{id}/stream` -> SSE stream
+2. SSE events:
+   - `status`: thinking steps ("Searching tables...", "Generating SQL...")
+   - `sql`: the generated SQL
+   - `results`: query results as JSON
+   - `visualization`: chart config
+   - `explanation`: NL explanation
+   - `done`: final metadata (execution time, cost, model used)
+   - `error`: if something fails
+3. Use FastAPI `StreamingResponse` with `text/event-stream` content type
 
-   class Conversation:
-       session_id: str
-       turns: list[ConversationTurn]
+**Test**: `curl` the SSE endpoint -> see events streaming in order
+
+---
+
+## Chunk 7.2: Next.js Project Setup
+
+**Goal**: Scaffold the Next.js frontend.
+
+**Steps**:
+1. Create `frontend/nextjs_app/` with `npx create-next-app@latest`
+2. Install dependencies: TanStack Query, Recharts or ECharts, CodeMirror (SQL viewer)
+3. Set up basic layout: sidebar + main chat area
+4. Configure proxy to FastAPI backend
+
+**Test**: Next.js dev server runs, shows placeholder UI
+
+---
+
+## Chunk 7.3: SSE Client Hook
+
+**Goal**: React hook that consumes the SSE stream.
+
+**Steps**:
+1. Write `frontend/nextjs_app/src/hooks/useQueryStream.ts`:
+   ```typescript
+   function useQueryStream(queryId: string) {
+     // EventSource connection to /api/v1/query/{id}/stream
+     // Parse events into state: {status, sql, results, visualization, error}
+     // Return reactive state that updates as events arrive
+   }
    ```
-2. Store in Streamlit session state for MVP (in-memory, per session)
+2. Handle reconnection, error states, cleanup
 
-**Test**: Create a Conversation, add turns, verify serialization
-
----
-
-## Chunk 7.2: Context Window for Agent
-
-**Goal**: Build conversation context into the agent prompt.
-
-**Steps**:
-1. Write `backend/app/agent/context.py`:
-   - Function `build_conversation_context(conversation: Conversation, max_turns: int = 10) -> str`
-   - Formats previous turns as:
-     ```
-     Previous conversation:
-     User: "What are the top 10 customers by revenue?"
-     Assistant: [SQL: SELECT ... ] [Result: 10 rows showing customer names and revenue]
-
-     User: "Show their retention over time"
-     ```
-   - Truncate to last N turns to manage context window
-   - Include results summary (not full data) to keep context manageable
-2. Pass this context to the agent alongside the new question
-
-**Test**: Build context from 5 turns -> verify it's well-formatted and under token limit
+**Test**: Hook receives and parses all SSE event types correctly
 
 ---
 
-## Chunk 7.3: Results Summarization
+## Chunk 7.4: Chat Components
 
-**Goal**: Summarize query results for inclusion in conversation context.
+**Goal**: Build the core chat UI components.
 
 **Steps**:
-1. Write a summarizer function:
-   ```python
-   def summarize_results(columns, rows, sql) -> str:
-       # "Returned 10 rows with columns: customer_name, total_revenue.
-       #  Top result: Acme Corp ($1.2M). Results range from $50K to $1.2M."
-   ```
-2. Keep summaries concise (under 200 tokens) -- enough for the LLM to understand what was returned without including all data
+1. `ChatInput.tsx` - Message input with submit button
+2. `ChatMessage.tsx` - Message bubble supporting:
+   - User message (plain text)
+   - Assistant message (thinking steps + SQL + results + chart + explanation)
+3. `ThinkingSteps.tsx` - Animated progress indicator for agent steps
+4. `StreamingIndicator.tsx` - "Agent is thinking..." animation
 
-**Test**: Summarize a 10-row result -> readable summary under 200 tokens
+**Test**: Chat flow works with mock data
 
 ---
 
-## Chunk 7.4: Multi-Turn Agent Integration
+## Chunk 7.5: Results Components
 
-**Goal**: Agent receives and uses conversation context.
+**Goal**: Rich display of query results.
 
 **Steps**:
-1. Update agent to accept conversation history:
-   - Prepend conversation context to the system prompt or user message
-   - Agent can reference previous queries: "The user previously asked about X and got Y"
-2. Update system prompt:
-   ```
-   You have access to the conversation history. When the user says "their", "that",
-   "those", etc., refer to the previous context to understand what they mean.
-   If the user says "break that down by X", modify the previous query to add GROUP BY X.
-   ```
+1. `SqlViewer.tsx` - CodeMirror with SQL syntax highlighting, collapsible
+2. `ResultTable.tsx` - Sortable, paginated data table
+3. `ChartRenderer.tsx` - Renders bar, line, metric card based on viz config
+4. `MetricCard.tsx` - Single large number with label
 
-**Test**:
-- Ask "Top 10 customers by revenue" -> get results
-- Follow up "Show me just the enterprise ones" -> agent understands "them" = previous customers, adds filter
-- Follow up "Now by quarter" -> agent adds time dimension to the previous query
+**Test**: Each component renders correctly with sample data
 
 ---
 
-## Chunk 7.5: Streamlit Multi-Turn UI
+## Chunk 7.6: Saved Queries
 
-**Goal**: Streamlit chat maintains and displays conversation history.
+**Goal**: Users can save and reuse queries.
 
 **Steps**:
-1. Update `frontend/streamlit_app/app.py`:
-   - Maintain `st.session_state.conversation` as a `Conversation` object
-   - Each user message appends to conversation
-   - Each agent response (with SQL and results summary) appends to conversation
-   - Pass full conversation to agent on each new question
-   - Display full chat history with expandable SQL for each response
-2. Add "New Conversation" button to reset context
+1. Add `POST /api/v1/queries/saved` and `GET /api/v1/queries/saved` endpoints
+2. Store in SQLite: name, description, original question, SQL, created_at
+3. Frontend: "Save this query" button on each result, saved queries list in sidebar
 
-**Test**:
-1. Ask a question -> see result
-2. Ask a follow-up -> agent uses context from previous answer
-3. Click "New Conversation" -> context is cleared
+**Test**: Save a query -> appears in sidebar -> clicking re-runs it
 
 ---
 
-## Chunk 7.6: Context-Aware Self-Correction
+## Chunk 7.7: Premium Design & Polish
 
-**Goal**: Self-correction also benefits from conversation context.
+**Goal**: Production-quality, premium UI.
 
 **Steps**:
-1. When self-correction triggers, include conversation history in the retry prompt
-   - "The user has been asking about customer data. The previous query returned top customers. Now they're asking about retention. My SQL failed because..."
-2. This helps the agent make better corrections when the follow-up question is ambiguous
+1. Mobile-responsive layout
+2. Dark mode support
+3. Loading states and error boundaries
+4. Keyboard shortcuts (Enter to submit, Ctrl+K to focus search)
+5. Smooth animations for thinking steps
+6. Premium design system: typography, spacing, color palette
+7. Polished empty states, onboarding hints
 
-**Test**: Ask a follow-up that causes an error -> self-correction uses conversation context to fix it correctly
+**Test**: UI looks premium on desktop and mobile, all interactions are smooth
 
 ---
 
 ## Definition of Done for Phase 7
 
-- [ ] Conversation history stored with question + SQL + results summary per turn
-- [ ] Agent receives conversation context with each new question
-- [ ] Follow-up questions with pronouns ("their", "those") resolve correctly
-- [ ] "Break that down by X" modifies the previous query appropriately
-- [ ] Streamlit displays full conversation with expandable SQL
-- [ ] "New Conversation" button resets context
-- [ ] At least 3 out of 5 multi-turn test sequences complete correctly
+- [ ] FastAPI streams responses via SSE
+- [ ] Next.js consumes SSE stream with reactive state
+- [ ] Chat UI with message history, thinking steps, SQL, charts
+- [ ] SQL viewer with syntax highlighting
+- [ ] Charts render based on viz config
+- [ ] Saved queries feature works
+- [ ] Premium, responsive design with dark mode

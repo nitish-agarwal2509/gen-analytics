@@ -1,193 +1,149 @@
-# Phase 10: Multi-Agent & Production (Weeks 14-17)
+# Phase 10: Model Routing & Paid Models (Optional — Weeks 16-17)
 
-**Milestone**: LangGraph multi-agent system, auth, audit logging, Cloud Run deployment
+**Milestone**: Smart routing between models, 85%+ success, Claude for complex queries
 
-**Learning Focus**: Multi-agent coordination, state management, production deployment, monitoring
+**Learning Focus**: Model routing patterns, cost optimization, Vertex AI integration
+
+**Note**: This phase is optional. Gemini 2.5 Flash already achieves 91.4% accuracy. Implement only if real-world usage reveals accuracy gaps on complex queries that warrant model escalation.
 
 ---
 
-## Chunk 10.1: LangGraph Setup
+## Chunk 10.1: Vertex AI Setup for Claude
 
-**Goal**: Set up LangGraph and understand the graph abstraction.
+**Goal**: Access Claude Sonnet/Opus via Vertex AI Model Garden.
 
 **Steps**:
-1. Install `langgraph`
-2. Write `backend/app/agent/langgraph/state.py`:
+1. Enable Vertex AI API in your GCP project
+2. Request access to Claude models via Model Garden (if not already available)
+3. Write `backend/app/agent/llm_clients.py`:
+   - `call_gemini_flash(prompt, tools)` (existing, via Vertex AI)
+   - `call_claude_sonnet(prompt, tools)` (new, via Vertex AI)
+   - `call_claude_opus(prompt, tools)` (new, via Vertex AI)
+4. Verify each model responds correctly
+
+**Test**: Each model generates SQL for a test question
+
+---
+
+## Chunk 10.2: Complexity Classifier
+
+**Goal**: Classify query complexity to route to the right model.
+
+**Steps**:
+1. Write `backend/app/agent/complexity.py`:
    ```python
-   class QueryState(TypedDict):
-       user_question: str
-       conversation_history: list
-       complexity: str
-       relevant_tables: list
-       table_schemas: dict
-       generated_sql: str
-       validation_result: dict
-       query_results: dict
-       visualization: dict
-       retry_count: int
-       error_history: list
+   def classify_complexity(question: str, conversation_context: str = "") -> str:
+       # Rule-based first:
+       # - Simple keywords (count, total, how many) + no joins -> LOW
+       # - Comparison, by X, trend -> MEDIUM
+       # - Cohort, funnel, correlation, predict, anomaly -> HIGH
+       #
+       # Fallback to Gemini Flash for ambiguous cases:
+       # "Rate this question's SQL complexity: LOW, MEDIUM, or HIGH"
+       return "LOW" | "MEDIUM" | "HIGH"
    ```
-3. Create a simple 2-node graph (just to learn the API): input -> process -> output
+2. Start with rules, add LLM fallback for edge cases
 
-**Test**: Simple graph executes and passes state between nodes
-
----
-
-## Chunk 10.2: Specialized Agents
-
-**Goal**: Split the single agent into specialized agents.
-
-**Steps**:
-1. Write `backend/app/agent/langgraph/agents/planner.py`:
-   - Receives question + context
-   - Classifies complexity, creates execution plan
-   - Decides which tables to investigate
-
-2. Write `backend/app/agent/langgraph/agents/schema_agent.py`:
-   - Receives planner output
-   - Calls `search_tables`, `get_schema`
-   - Resolves join paths between tables
-
-3. Write `backend/app/agent/langgraph/agents/sql_agent.py`:
-   - Receives schema context
-   - Generates SQL (model varies by complexity)
-
-4. Write `backend/app/agent/langgraph/agents/validator.py`:
-   - Receives SQL
-   - Calls `validate_sql`, handles self-correction
-   - Routes back to sql_agent on failure (conditional edge)
-
-5. Write `backend/app/agent/langgraph/agents/viz_agent.py`:
-   - Receives query results
-   - Determines visualization, formats response
-
-**Test**: Each agent works independently with mock inputs
+**Test**:
+- "Total revenue" -> LOW
+- "Revenue by product by quarter" -> MEDIUM
+- "Cohort retention funnel" -> HIGH
 
 ---
 
-## Chunk 10.3: LangGraph State Graph
+## Chunk 10.3: Model Router
 
-**Goal**: Wire agents together as a LangGraph graph.
+**Goal**: Route queries to the appropriate model based on complexity.
 
 **Steps**:
-1. Write `backend/app/agent/langgraph/graph.py`:
+1. Write `backend/app/agent/model_router.py`:
    ```python
-   graph = StateGraph(QueryState)
-   graph.add_node("planner", planner_agent)
-   graph.add_node("schema", schema_agent)
-   graph.add_node("sql", sql_agent)
-   graph.add_node("validator", validator_agent)
-   graph.add_node("viz", viz_agent)
-
-   graph.add_edge("planner", "schema")
-   graph.add_edge("schema", "sql")
-   graph.add_edge("sql", "validator")
-   graph.add_conditional_edges("validator", route_after_validation,
-       {"valid": "viz", "invalid": "sql", "give_up": END})
-   graph.add_edge("viz", END)
+   def route_to_model(complexity: str) -> str:
+       routing = {
+           "LOW": "gemini-flash",
+           "MEDIUM": "claude-sonnet",
+           "HIGH": "claude-opus"
+       }
+       return routing[complexity]
    ```
-2. Replace single agent with multi-agent graph
-3. Compare accuracy: single-agent vs multi-agent
+2. Integrate into agent: classify -> route -> generate SQL with selected model
+3. Log which model was used for each query
 
-**Test**: Full query flows through all agents correctly. Multi-agent matches or exceeds single-agent accuracy.
-
----
-
-## Chunk 10.4: User Authentication
-
-**Goal**: Add Google OAuth 2.0 login.
-
-**Steps**:
-1. Set up OAuth 2.0 client in GCP Console
-2. Add auth middleware to FastAPI
-3. JWT token management for sessions
-4. Associate queries with authenticated users
-5. Update Next.js with login/logout flow
-
-**Test**: Login with Google account -> access granted. No login -> redirected to login page.
+**Test**: Different complexity questions route to different models (verify via logs)
 
 ---
 
-## Chunk 10.5: Audit Logging
+## Chunk 10.4: Model Escalation
 
-**Goal**: Log every query for security and analytics.
+**Goal**: If a query fails on a cheaper model, automatically escalate.
 
 **Steps**:
-1. Create audit log table (SQLite for MVP, BigQuery or Cloud SQL for production):
+1. Add escalation logic:
+   - If query fails on Gemini Flash after 2 retries -> escalate to Claude Sonnet
+   - If query fails on Claude Sonnet after 2 retries -> escalate to Claude Opus
+   - Claude Opus is the ceiling -- 3 retries then give up
+2. Track escalation events for cost analysis
+
+**Test**: Simple query that fails on Flash -> automatically succeeds on Sonnet
+
+---
+
+## Chunk 10.5: `explain_query` Tool
+
+**Goal**: Agent can explain what the SQL does in plain language.
+
+**Steps**:
+1. Write `backend/app/agent/tools/explain_query.py`:
+   ```python
+   def explain_query(sql: str, context: str) -> dict:
+       # Call LLM: "Explain this SQL in simple terms. What does it do?"
+       # Return {explanation: str, key_assumptions: list[str]}
    ```
-   audit_log: {
-     id, user_email, timestamp, question, generated_sql,
-     tables_accessed, model_used, bytes_scanned, execution_time,
-     success, error_message, cost_usd
-   }
-   ```
-2. Write audit log entry on every query execution
-3. Admin view to browse audit log
+2. Show explanation alongside results in UI
+3. Include assumptions made (e.g., "I interpreted 'revenue' as net revenue")
 
-**Test**: Every query creates an audit log entry with complete metadata
+**Test**: Complex SQL gets a clear, accurate explanation
 
 ---
 
-## Chunk 10.6: Cloud Run Deployment
+## Chunk 10.6: Feedback Mechanism
 
-**Goal**: Deploy to GCP Cloud Run.
+**Goal**: Users can rate responses for future improvement.
 
 **Steps**:
-1. Write `backend/Dockerfile` for FastAPI + agent
-2. Write `frontend/nextjs_app/Dockerfile` for Next.js
-3. Write `docker-compose.yml` for local testing
-4. Configure Cloud Run services:
-   - Backend service (port 8000)
-   - Frontend service (port 3000)
-5. Set up environment variables via Secret Manager
-6. Configure custom domain (optional)
-7. Set up auto-scaling rules
+1. Add thumbs up/down buttons to each agent response
+2. Store feedback: `{query_id, question, sql, rating, comment, model_used, timestamp}`
+3. Store in SQLite for MVP (file-based, no extra infra)
+4. Write a script to analyze feedback: accuracy by model, common failure patterns
 
-**Test**: Application accessible via Cloud Run URL, all features work
+**Test**: Click thumbs up/down -> feedback stored in SQLite -> analysis script works
 
 ---
 
-## Chunk 10.7: Monitoring & Alerting
+## Chunk 10.7: Cost Tracking Dashboard
 
-**Goal**: Production observability.
-
-**Steps**:
-1. Structured logging (JSON format) for Cloud Logging
-2. Key metrics to track:
-   - Query success rate
-   - Average latency by model
-   - LLM cost per day
-   - BigQuery cost per day
-   - Error rate by type
-3. Alerting: Email if error rate > 20% or daily cost > threshold
-4. Health check endpoint: `GET /health`
-
-**Test**: Logs appear in Cloud Logging, health check returns 200
-
----
-
-## Chunk 10.8: Performance Optimization
-
-**Goal**: Optimize for production load.
+**Goal**: Track LLM and BigQuery costs per query.
 
 **Steps**:
-1. Add semantic query cache (if same intent, return cached result)
-2. Cache schema metadata in-memory (refresh hourly)
-3. Connection pooling for BigQuery client
-4. Migrate ChromaDB to pgvector/AlloyDB if needed for concurrent access
-5. Load test: simulate 10 concurrent users
+1. Log per query: model used, input/output tokens, BigQuery bytes scanned
+2. Calculate estimated cost per query
+3. Add a "Cost" section to sidebar:
+   - Total cost this session
+   - Average cost per query
+   - Cost by model tier
+4. Alert if any single query exceeds $0.50
 
-**Test**: 10 concurrent queries don't cause errors or excessive latency
+**Test**: Ask 10 questions -> sidebar shows accurate cost breakdown
 
 ---
 
 ## Definition of Done for Phase 10
 
-- [ ] LangGraph multi-agent graph works end-to-end
-- [ ] Multi-agent accuracy matches or exceeds single-agent
-- [ ] Google OAuth authentication working
-- [ ] Audit logging captures every query
-- [ ] Deployed on Cloud Run (backend + frontend)
-- [ ] Monitoring and alerting set up
-- [ ] Semantic query cache reduces redundant LLM calls
-- [ ] System handles 10 concurrent users
+- [ ] Claude Sonnet and Opus accessible via Vertex AI
+- [ ] Complexity classifier routes LOW/MEDIUM/HIGH correctly
+- [ ] Model router sends queries to appropriate model
+- [ ] Escalation works: Flash failure -> Sonnet -> Opus
+- [ ] `explain_query` provides clear explanations
+- [ ] Feedback stored and analyzable
+- [ ] Cost tracking in sidebar
+- [ ] 85%+ success rate on test suite

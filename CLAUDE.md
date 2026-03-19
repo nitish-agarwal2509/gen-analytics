@@ -17,7 +17,7 @@ backend/           Python backend (FastAPI + Google ADK agent)
   tests/
 frontend/          Streamlit (MVP) → Next.js (V1+)
 data/              Glossary, examples, metadata enrichments (V1+)
-docs/              PRD, Tech Spec, phase docs (phase-1 through phase-9)
+docs/              PRD, Tech Spec, phase docs (phase-1 through phase-10)
 ```
 
 ## Development
@@ -63,7 +63,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 4: Visualization & Polish (suggest_viz, Plotly charts, thinking steps, session sidebar)
 - [x] Phase 5: Business & Domain Context (table enrichments, 3 domain rules, glossary/examples as data files for eval)
 - [x] Phase 6: Complex Query Handling (eval harness 91.4% accuracy; recipes/strategies skipped — not needed)
-- [ ] Phase 7: Multi-Turn Conversations (conversation history, pronoun resolution, follow-ups)
-- [ ] Phase 8: Model Routing & Paid Models (complexity classifier, Claude via Vertex AI, escalation)
-- [ ] Phase 9: Next.js Frontend (SSE streaming, React UI, saved queries)
-- [ ] Phase 10: Multi-Agent & Production (LangGraph, auth, audit, Cloud Run)
+- [ ] Phase 7: Next.js Frontend (SSE streaming, React UI, premium design, saved queries)
+- [ ] Phase 8: Multi-Turn Conversations (conversation history, pronoun resolution, follow-ups)
+- [ ] Phase 9: Multi-Agent & Production (LangGraph, auth, audit, Cloud Run)
+- [ ] Phase 10: Model Routing & Paid Models (optional — complexity classifier, Claude via Vertex AI, escalation)

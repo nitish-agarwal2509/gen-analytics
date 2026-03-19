@@ -113,13 +113,13 @@ docs/                Phase docs (phase-1 through phase-10)
 ## Roadmap
 
 - [x] **Phase 1-3**: Core agent with validation, self-correction, and cost guards
-- [ ] **Phase 4**: Visualization (Plotly charts, agent thinking steps)
-- [ ] **Phase 5**: Business context (glossary, table enrichments, few-shot examples)
-- [ ] **Phase 6**: Complex queries (retention, WoW, funnels, eval harness)
-- [ ] **Phase 7**: Multi-turn conversations
-- [ ] **Phase 8**: Model routing (Gemini Flash + Claude Sonnet/Opus)
-- [ ] **Phase 9**: Next.js frontend with SSE streaming
-- [ ] **Phase 10**: Multi-agent (LangGraph), auth, Cloud Run deployment
+- [x] **Phase 4**: Visualization (Plotly charts, agent thinking steps)
+- [x] **Phase 5**: Business context (table enrichments, domain rules)
+- [x] **Phase 6**: Complex queries (eval harness, 91.4% accuracy)
+- [ ] **Phase 7**: Next.js frontend with SSE streaming, premium design
+- [ ] **Phase 8**: Multi-turn conversations
+- [ ] **Phase 9**: Multi-agent (LangGraph), auth, Cloud Run deployment
+- [ ] **Phase 10**: Model routing (optional — Gemini Flash + Claude Sonnet/Opus)
 
 ## License
 
