@@ -6,6 +6,18 @@
 
 **Key Design Decision**: Vite + React + MUI + Emotion. Not Next.js — GenAnalytics is a single-page analytics app (like Metabase, Superset, Redash), not a content site. SSR/file-based routing provide no value. Vite gives faster dev, simpler build, and the same stack used by every major BI tool. MUI provides a complete component system (UI + styling + icons) for fast development. Same stack as SM Saarthi for consistency. Future Metabase-like features (dashboards, drag-drop, saved queries) work perfectly in a Vite SPA with react-router.
 
+**UX Reference**: SM Saarthi (`/Users/nitish.agarwal5/claude-project/sm/sm-saarthi/frontend/`). Take inspiration from:
+- **Layout**: Full-screen chat with sticky header + scrollable messages + sticky input
+- **Theme system**: Centralized `styles/theme.ts` with `ThemeColors` interface, light/dark tokens
+- **Component styles**: Extracted to `styles/components.ts` as reusable `getSomethingStyles()` functions
+- **Message bubbles**: Polymorphic component (user/assistant/tool variants), right/left aligned
+- **Welcome screen**: Centered greeting with suggestion chips for quick-start queries
+- **Dark mode**: System preference detection + toggle + localStorage persistence
+- **SSE streaming**: fetch + ReadableStream + TextDecoder pattern with AbortController
+- **Chat input**: Multiline TextField with Enter to send, Shift+Enter for newline
+- **Header**: Compact with session info, action buttons (new session, share, clear, dark mode toggle)
+- **Animations**: Fade-in on messages, custom scrollbar styling
+
 **Tech Stack**:
 - **Vite** — build tool + dev server
 - **React 18 + TypeScript** — UI framework (strict mode)
