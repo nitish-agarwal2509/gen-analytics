@@ -5,16 +5,21 @@ Natural language analytics tool for BigQuery. Ask questions in plain English, ge
 ## Project Structure
 
 ```
-backend/           Python backend (FastAPI + Google ADK agent)
+backend/           Python backend (ADK SSE server + Google ADK agent)
   app/
     agent/         Agent definition + tools (execute_sql, validate_sql, etc.)
     bigquery/      BigQuery client, safety, metadata extraction
     schema/        Terse schema formatter for system prompt injection
+    api/routes/    Custom endpoints (saved_queries)
     config.py      Settings via pydantic-settings
-    main.py        FastAPI entry point
+    main.py        ADK SSE server entry point
+  agents/          ADK agent discovery directory
+    gen_analytics/ ADK-compatible agent wrapper
   scripts/         Utility scripts (extract_schema, test_bq_connection, etc.)
   tests/
-frontend/          Streamlit (MVP) → Next.js (V1+)
+frontend/
+  streamlit_app/   Streamlit chat UI (MVP, still works)
+  react-app/       Vite + React + shadcn/ui (production frontend)
 data/              Table enrichments metadata
 docs/              PRD, Tech Spec, phase docs (phase-1 through phase-10)
 ```
@@ -22,12 +27,16 @@ docs/              PRD, Tech Spec, phase docs (phase-1 through phase-10)
 ## Development
 
 ```bash
-# Backend
+# Backend (ADK SSE server)
 cd backend
 source .venv/bin/activate
-uvicorn app.main:app --reload          # FastAPI on port 8000
+uvicorn app.main:app --reload          # ADK SSE on port 8000
 
-# Frontend (separate terminal)
+# Frontend — React (production)
+cd frontend/react-app
+npm run dev                            # Vite on port 5173
+
+# Frontend — Streamlit (legacy MVP)
 cd frontend/streamlit_app
 streamlit run app.py                   # Streamlit on port 8501
 ```
@@ -62,7 +71,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 4: Visualization & Polish (suggest_viz, Plotly charts, thinking steps, session sidebar)
 - [x] Phase 5: Business & Domain Context (table enrichments, 3 domain rules, glossary/examples as data files for eval)
 - [x] Phase 6: Complex Query Handling (eval harness 91.4% accuracy; recipes/strategies skipped — not needed)
-- [ ] Phase 7: Next.js Frontend (SSE streaming, React UI, premium design, saved queries)
+- [x] Phase 7: React Frontend (ADK SSE streaming, Vite + React + shadcn/ui, dark mode, saved queries, Playwright e2e tests)
 - [ ] Phase 8: Multi-Turn Conversations (conversation history, pronoun resolution, follow-ups)
 - [ ] Phase 9: Multi-Agent & Production (LangGraph, auth, audit, Cloud Run)
 - [ ] Phase 10: Model Routing & Paid Models (optional — complexity classifier, Claude via Vertex AI, escalation)

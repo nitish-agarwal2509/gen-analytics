@@ -1,132 +1,73 @@
-# Phase 7: Next.js Frontend (Weeks 9-10)
+# Phase 7: React Frontend (Weeks 9-10)
 
-**Milestone**: Production-quality chat UI with SSE streaming, premium design, rich charts, saved queries
+**Milestone**: Production-quality chat UI with ADK SSE streaming, premium design, rich charts, saved queries
 
-**Learning Focus**: SSE streaming, React patterns, frontend-backend API contract, production UI/UX
-
----
-
-## Chunk 7.1: FastAPI SSE Endpoints
-
-**Goal**: Backend streams agent responses via Server-Sent Events.
-
-**Steps**:
-1. Write `backend/app/api/routes/query.py`:
-   - `POST /api/v1/query` -> accepts question, returns `query_id`
-   - `GET /api/v1/query/{id}/stream` -> SSE stream
-2. SSE events:
-   - `status`: thinking steps ("Searching tables...", "Generating SQL...")
-   - `sql`: the generated SQL
-   - `results`: query results as JSON
-   - `visualization`: chart config
-   - `explanation`: NL explanation
-   - `done`: final metadata (execution time, cost, model used)
-   - `error`: if something fails
-3. Use FastAPI `StreamingResponse` with `text/event-stream` content type
-
-**Test**: `curl` the SSE endpoint -> see events streaming in order
+**Learning Focus**: ADK SSE, React patterns, Vite + shadcn/ui, Playwright e2e testing
 
 ---
 
-## Chunk 7.2: Next.js Project Setup
+## What Shipped
 
-**Goal**: Scaffold the Next.js frontend.
+### Backend: ADK SSE Server
 
-**Steps**:
-1. Create `frontend/nextjs_app/` with `npx create-next-app@latest`
-2. Install dependencies: TanStack Query, Recharts or ECharts, CodeMirror (SQL viewer)
-3. Set up basic layout: sidebar + main chat area
-4. Configure proxy to FastAPI backend
+- **Replaced custom SSE with ADK built-in** — `get_fast_api_app()` from `google.adk.cli.fast_api` handles `/run_sse`, session management, and streaming natively
+- **ADK agent wrapper** — `backend/agents/gen_analytics/agent.py` exports `root_agent` for ADK discovery
+- **Saved queries API** — `backend/app/api/routes/saved_queries.py` (SQLite CRUD: create, list, delete)
+- *Note: Initially built custom SSE endpoints with keepalives and queue-based streaming. Replaced with ADK SSE after discovering connection buffering issues with Vite proxy. ADK SSE solved all streaming reliability issues.*
 
-**Test**: Next.js dev server runs, shows placeholder UI
+### Frontend: Vite + React + TypeScript
 
----
+**Stack:** Vite + React 18 + TypeScript + shadcn/ui + Tailwind CSS v4
 
-## Chunk 7.3: SSE Client Hook
+**Key dependency:** `@microsoft/fetch-event-source` for POST SSE streaming (native `fetch` ReadableStream buffers responses; `EventSource` only supports GET)
 
-**Goal**: React hook that consumes the SSE stream.
+**Components built:**
+- `useQueryStream` hook — consumes ADK SSE events via `fetchEventSource`, parses `functionCall`, `functionResponse`, and `text` parts from ADK event format
+- `useTheme` — dark mode toggle with localStorage persistence
+- `useSavedQueries` — TanStack Query hooks for saved queries CRUD
+- `ChatPage` — main page with example question pills, message history, streaming state
+- `ChatInput` — textarea with Enter to submit, Ctrl/Cmd+K focus shortcut
+- `ChatMessage` — user bubbles + assistant responses (thinking steps → SQL → chart → table → explanation)
+- `ThinkingSteps` — animated step indicators (spinner/checkmark)
+- `SqlViewer` — collapsible SQL display with validation badge, copy button (collapsed by default)
+- `ResultTable` — TanStack Table with sorting, pagination, number formatting
+- `ChartRenderer` → `BarChart`, `LineChart`, `MetricCard` — Recharts-based
+- `SaveQueryButton` + `SavedQueryList` — save/reuse queries from sidebar
+- `ErrorBoundary` — catches React render errors, shows "Something went wrong" instead of blank page
+- `AppLayout`, `Sidebar`, `Header` — layout shell with dark mode toggle
 
-**Steps**:
-1. Write `frontend/nextjs_app/src/hooks/useQueryStream.ts`:
-   ```typescript
-   function useQueryStream(queryId: string) {
-     // EventSource connection to /api/v1/query/{id}/stream
-     // Parse events into state: {status, sql, results, visualization, error}
-     // Return reactive state that updates as events arrive
-   }
-   ```
-2. Handle reconnection, error states, cleanup
+**Markdown support:** `react-markdown` + `remark-gfm` for agent explanations (renders tables, bold, lists)
 
-**Test**: Hook receives and parses all SSE event types correctly
+### E2E Tests: Playwright
 
----
-
-## Chunk 7.4: Chat Components
-
-**Goal**: Build the core chat UI components.
-
-**Steps**:
-1. `ChatInput.tsx` - Message input with submit button
-2. `ChatMessage.tsx` - Message bubble supporting:
-   - User message (plain text)
-   - Assistant message (thinking steps + SQL + results + chart + explanation)
-3. `ThinkingSteps.tsx` - Animated progress indicator for agent steps
-4. `StreamingIndicator.tsx` - "Agent is thinking..." animation
-
-**Test**: Chat flow works with mock data
+- 8 mock tests (ADK SSE format): landing, dark mode, metric card, bar chart, error state, markdown table, SQL collapsed, scrolling
+- 1 real backend integration test: submits query, verifies streaming steps + completion
 
 ---
 
-## Chunk 7.5: Results Components
+## Key Design Decisions
 
-**Goal**: Rich display of query results.
-
-**Steps**:
-1. `SqlViewer.tsx` - CodeMirror with SQL syntax highlighting, collapsible
-2. `ResultTable.tsx` - Sortable, paginated data table
-3. `ChartRenderer.tsx` - Renders bar, line, metric card based on viz config
-4. `MetricCard.tsx` - Single large number with label
-
-**Test**: Each component renders correctly with sample data
-
----
-
-## Chunk 7.6: Saved Queries
-
-**Goal**: Users can save and reuse queries.
-
-**Steps**:
-1. Add `POST /api/v1/queries/saved` and `GET /api/v1/queries/saved` endpoints
-2. Store in SQLite: name, description, original question, SQL, created_at
-3. Frontend: "Save this query" button on each result, saved queries list in sidebar
-
-**Test**: Save a query -> appears in sidebar -> clicking re-runs it
-
----
-
-## Chunk 7.7: Premium Design & Polish
-
-**Goal**: Production-quality, premium UI.
-
-**Steps**:
-1. Mobile-responsive layout
-2. Dark mode support
-3. Loading states and error boundaries
-4. Keyboard shortcuts (Enter to submit, Ctrl+K to focus search)
-5. Smooth animations for thinking steps
-6. Premium design system: typography, spacing, color palette
-7. Polished empty states, onboarding hints
-
-**Test**: UI looks premium on desktop and mobile, all interactions are smooth
+| Decision | Choice | Why |
+|----------|--------|-----|
+| Vite + React over Next.js | SPA, no SSR needed | Single-page chat app, simpler than Next.js |
+| shadcn/ui + Tailwind | Over MUI/Ant Design | Copy-paste components, no lock-in, premium look |
+| ADK SSE over custom SSE | `get_fast_api_app()` | Native streaming, no keepalive/timeout/connection issues |
+| `@microsoft/fetch-event-source` | Over native `fetch`/`EventSource` | Supports POST SSE with true streaming (no buffering) |
+| Recharts over Plotly | React-native, 25x smaller | Only need bar, line, metric — Plotly is overkill |
+| Direct backend URL for SSE | Not via Vite proxy | Vite's http-proxy buffers SSE responses |
+| `useReducer` over `useState` | For streaming state | Rapid SSE events need centralized state transitions |
 
 ---
 
 ## Definition of Done for Phase 7
 
-- [ ] FastAPI streams responses via SSE
-- [ ] Next.js consumes SSE stream with reactive state
-- [ ] Chat UI with message history, thinking steps, SQL, charts
-- [ ] SQL viewer with syntax highlighting
-- [ ] Charts render based on viz config
-- [ ] Saved queries feature works
-- [ ] Premium, responsive design with dark mode
+- [x] ADK SSE streams agent responses to React frontend
+- [x] Chat UI with message history, thinking steps, SQL, charts
+- [x] SQL viewer with validation badge, collapsible, copy button
+- [x] Charts render based on viz config (bar, line, metric card)
+- [x] Saved queries feature (save, list, delete, re-run from sidebar)
+- [x] Premium design with dark mode, responsive layout
+- [x] Markdown rendering in agent explanations (tables, bold, lists)
+- [x] Error boundary prevents blank page on React errors
+- [x] Keyboard shortcuts (Ctrl/Cmd+K, Enter to submit)
+- [x] Playwright e2e tests (8 mock + 1 real, all passing)

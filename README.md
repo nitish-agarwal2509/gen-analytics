@@ -17,9 +17,9 @@ Agent: validates SQL (dry-run) -> estimates scan: 450 MB ($0.003) -> executes ->
 ## Architecture
 
 ```
-Streamlit Chat UI  -->  Google ADK Agent (Gemini 2.5 Flash)  -->  BigQuery
+React Chat UI  --SSE-->  ADK SSE Server (Google ADK)  -->  Gemini 2.5 Flash  -->  BigQuery
                               |
-                        Tools: validate_sql, execute_sql, get_sample_data
+                        Tools: validate_sql, execute_sql, get_sample_data, suggest_visualization
                               |
                         Full schema (101 tables) in system prompt
 ```
@@ -38,8 +38,9 @@ Streamlit Chat UI  -->  Google ADK Agent (Gemini 2.5 Flash)  -->  BigQuery
 | Agent Framework | Google ADK |
 | LLM | Gemini 2.5 Flash (via Vertex AI) |
 | Data Warehouse | Google BigQuery |
-| Frontend | Streamlit |
-| Backend | Python + FastAPI |
+| Frontend | Vite + React + shadcn/ui + Tailwind CSS |
+| Backend | Google ADK SSE Server (FastAPI) |
+| E2E Tests | Playwright |
 
 ## Setup
 
@@ -74,17 +75,20 @@ python scripts/extract_schema.py <dataset1> <dataset2> ...
 ### Running
 
 ```bash
-# Terminal 1: Backend
+# Terminal 1: Backend (ADK SSE server)
 cd backend
 source .venv/bin/activate
 uvicorn app.main:app --reload          # port 8000
 
-# Terminal 2: Frontend
-cd frontend/streamlit_app
-streamlit run app.py                   # port 8501
+# Terminal 2: Frontend (React)
+cd frontend/react-app
+npm install                            # first time only
+npm run dev                            # port 5173
 ```
 
-Open http://localhost:8501 and start asking questions.
+Open http://localhost:5173 and start asking questions.
+
+**Streamlit (legacy MVP)** is still available at `frontend/streamlit_app/` if needed.
 
 ## Project Structure
 
@@ -94,11 +98,15 @@ backend/
     agent/           Agent definition, prompts, tools
     bigquery/        Client, safety checks, metadata
     schema/          Terse schema formatter
-    config.py        Settings via pydantic-settings
-    main.py          FastAPI entry point
+    api/routes/      Custom endpoints (saved_queries)
+    main.py          ADK SSE server entry point
+  agents/
+    gen_analytics/   ADK-compatible agent wrapper
   scripts/           extract_schema, test_agent, etc.
 frontend/
-  streamlit_app/     Streamlit chat UI
+  react-app/         Vite + React + TypeScript + shadcn/ui (production)
+    e2e/             Playwright end-to-end tests
+  streamlit_app/     Streamlit chat UI (legacy MVP)
 data/                Table enrichments metadata
 docs/                Phase docs (phase-1 through phase-10)
 ```
@@ -117,7 +125,7 @@ docs/                Phase docs (phase-1 through phase-10)
 - [x] **Phase 4**: Visualization (Plotly charts, agent thinking steps)
 - [x] **Phase 5**: Business context (table enrichments, domain rules)
 - [x] **Phase 6**: Complex queries (eval harness, 91.4% accuracy)
-- [ ] **Phase 7**: Next.js frontend with SSE streaming, premium design
+- [x] **Phase 7**: React frontend (ADK SSE, Vite + React + shadcn/ui, dark mode, saved queries, Playwright tests)
 - [ ] **Phase 8**: Multi-turn conversations
 - [ ] **Phase 9**: Multi-agent (LangGraph), auth, Cloud Run deployment
 - [ ] **Phase 10**: Model routing (optional — Gemini Flash + Claude Sonnet/Opus)
