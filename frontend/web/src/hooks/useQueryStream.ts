@@ -1,6 +1,6 @@
 /**
  * SSE streaming hook — consumes ADK /run_sse endpoint.
- * Pattern matches SM Saarthi: fetch + ReadableStream + TextDecoder.
+ * Uses fetch + ReadableStream + TextDecoder pattern with AbortController.
  */
 
 import { useRef, useCallback, useState } from 'react'

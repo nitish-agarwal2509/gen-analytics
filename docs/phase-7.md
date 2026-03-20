@@ -5,20 +5,18 @@
 **Learning Focus**: ADK SSE integration, React SPA patterns, frontend-backend API contract, MUI theming
 
 **Key Design Decisions**:
-1. **Vite + React + MUI + Emotion** (not Next.js) — GenAnalytics is a single-page analytics app (like Metabase, Superset, Redash), not a content site. SSR/file-based routing provide no value. Same stack as SM Saarthi.
-2. **ADK built-in SSE** (not custom endpoints) — ADK provides `/run_sse`, session management, and event streaming out of the box. SM Saarthi uses this pattern. No need to build custom SSE infrastructure. Custom FastAPI routes from Streamlit MVP become unnecessary.
+1. **Vite + React + MUI + Emotion** (not Next.js) — GenAnalytics is a single-page analytics app (like Metabase, Superset, Redash), not a content site. SSR/file-based routing provide no value.
+2. **ADK built-in SSE** (not custom endpoints) — ADK provides `/run_sse`, session management, and event streaming out of the box. No need to build custom SSE infrastructure.
 
-**UX Reference**: SM Saarthi (`/Users/nitish.agarwal5/claude-project/sm/sm-saarthi/frontend/`). Take inspiration from:
-- **Layout**: Full-screen chat with sticky header + scrollable messages + sticky input
-- **Theme system**: Centralized `styles/theme.ts` with `ThemeColors` interface, light/dark tokens
-- **Component styles**: Extracted to `styles/components.ts` as reusable `getSomethingStyles()` functions
-- **Message bubbles**: Polymorphic component (user/assistant/tool variants), right/left aligned
-- **Welcome screen**: Centered greeting with suggestion chips for quick-start queries
-- **Dark mode**: System preference detection + toggle + localStorage persistence
-- **SSE streaming**: fetch + ReadableStream + TextDecoder pattern with AbortController
-- **Chat input**: Multiline TextField with Enter to send, Shift+Enter for newline
-- **Header**: Compact with session info, action buttons (new session, share, clear, dark mode toggle)
-- **Animations**: Fade-in on messages, custom scrollbar styling
+**UX Patterns**:
+- Full-screen chat with sticky header + scrollable messages + sticky input
+- Centralized `styles/theme.ts` with `ThemeColors` interface, light/dark tokens
+- Polymorphic message bubbles (user right-aligned, assistant left-aligned with avatar)
+- Welcome screen with suggestion chips for quick-start queries
+- Dark mode: system preference detection + toggle + localStorage persistence
+- SSE streaming: fetch + ReadableStream + TextDecoder pattern with AbortController
+- Multiline TextField with Enter to send, Shift+Enter for newline
+- Fade-in animations on messages, custom scrollbar, toast notifications
 
 **Tech Stack**:
 - **Vite** — build tool + dev server
@@ -35,7 +33,7 @@
 
 ## Chunk 7.1: Switch Backend to ADK Built-in SSE
 
-**Goal**: Replace custom FastAPI routes with ADK's built-in `/run_sse` endpoint, matching SM Saarthi's pattern.
+**Goal**: Replace custom FastAPI routes with ADK's built-in `/run_sse` endpoint.
 
 **Steps**:
 1. Update `backend/app/main.py`:
@@ -113,7 +111,7 @@
 
 ## Chunk 7.3: SSE Client Hook
 
-**Goal**: React hook that consumes ADK's `/run_sse` SSE stream (same pattern as SM Saarthi).
+**Goal**: React hook that consumes ADK's `/run_sse` SSE stream.
 
 **Steps**:
 1. Write `frontend/web/src/hooks/useQueryStream.ts`:
@@ -163,7 +161,7 @@
 
 ## Chunk 7.5: Results Components
 
-**Goal**: Rich display of query results (GenAnalytics-specific, not in SM Saarthi).
+**Goal**: Rich display of query results.
 
 **Steps**:
 1. `SqlViewer.tsx` — CodeMirror with SQL syntax highlighting, collapsible via MUI Collapse/Accordion
