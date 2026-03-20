@@ -5,20 +5,18 @@
 **Learning Focus**: ADK SSE integration, React SPA patterns, frontend-backend API contract, MUI theming
 
 **Key Design Decisions**:
-1. **Vite + React + MUI + Emotion** (not Next.js) — GenAnalytics is a single-page analytics app (like Metabase, Superset, Redash), not a content site. SSR/file-based routing provide no value. Same stack as SM Saarthi.
-2. **ADK built-in SSE** (not custom endpoints) — ADK provides `/run_sse`, session management, and event streaming out of the box. SM Saarthi uses this pattern. No need to build custom SSE infrastructure. Custom FastAPI routes from Streamlit MVP become unnecessary.
+1. **Vite + React + MUI + Emotion** (not Next.js) — GenAnalytics is a single-page analytics app (like Metabase, Superset, Redash), not a content site. SSR/file-based routing provide no value.
+2. **ADK built-in SSE** (not custom endpoints) — ADK provides `/run_sse`, session management, and event streaming out of the box. No need to build custom SSE infrastructure.
 
-**UX Reference**: SM Saarthi (`/Users/nitish.agarwal5/claude-project/sm/sm-saarthi/frontend/`). Take inspiration from:
-- **Layout**: Full-screen chat with sticky header + scrollable messages + sticky input
-- **Theme system**: Centralized `styles/theme.ts` with `ThemeColors` interface, light/dark tokens
-- **Component styles**: Extracted to `styles/components.ts` as reusable `getSomethingStyles()` functions
-- **Message bubbles**: Polymorphic component (user/assistant/tool variants), right/left aligned
-- **Welcome screen**: Centered greeting with suggestion chips for quick-start queries
-- **Dark mode**: System preference detection + toggle + localStorage persistence
-- **SSE streaming**: fetch + ReadableStream + TextDecoder pattern with AbortController
-- **Chat input**: Multiline TextField with Enter to send, Shift+Enter for newline
-- **Header**: Compact with session info, action buttons (new session, share, clear, dark mode toggle)
-- **Animations**: Fade-in on messages, custom scrollbar styling
+**UX Patterns**:
+- Full-screen chat with sticky header + scrollable messages + sticky input
+- Centralized `styles/theme.ts` with `ThemeColors` interface, light/dark tokens
+- Polymorphic message bubbles (user right-aligned, assistant left-aligned with avatar)
+- Welcome screen with suggestion chips for quick-start queries
+- Dark mode: system preference detection + toggle + localStorage persistence
+- SSE streaming: fetch + ReadableStream + TextDecoder pattern with AbortController
+- Multiline TextField with Enter to send, Shift+Enter for newline
+- Fade-in animations on messages, custom scrollbar, toast notifications
 
 **Tech Stack**:
 - **Vite** — build tool + dev server
@@ -26,7 +24,6 @@
 - **MUI (Material-UI) 5** — component library (TextField, DataGrid, Dialog, etc.)
 - **Emotion** — CSS-in-JS styling (MUI's built-in styling engine)
 - **MUI Icons** — icon library
-- **react-router** — client-side routing (`/`, `/dashboards`, `/queries` in future)
 - **react-markdown + remark-gfm** — markdown rendering for agent responses
 - **@codemirror/lang-sql** — SQL syntax highlighting
 - **Recharts** — charts for query results
@@ -35,7 +32,7 @@
 
 ## Chunk 7.1: Switch Backend to ADK Built-in SSE
 
-**Goal**: Replace custom FastAPI routes with ADK's built-in `/run_sse` endpoint, matching SM Saarthi's pattern.
+**Goal**: Replace custom FastAPI routes with ADK's built-in `/run_sse` endpoint.
 
 **Steps**:
 1. Update `backend/app/main.py`:
@@ -78,7 +75,6 @@
 1. Create `frontend/web/` with `npm create vite@latest -- --template react-ts`
 2. Install dependencies:
    - `@mui/material @mui/icons-material @emotion/react @emotion/styled`
-   - `react-router-dom`
    - `react-markdown remark-gfm`
    - `@codemirror/lang-sql @codemirror/view`
    - `recharts`
@@ -93,13 +89,15 @@
    │   ├── hooks/
    │   │   └── useQueryStream.ts
    │   ├── styles/
-   │   │   ├── theme.ts         # MUI createTheme() + color tokens
-   │   │   └── components.ts    # Reusable sx style functions
+   │   │   └── theme.ts         # MUI createTheme() + color tokens
    │   ├── types/
    │   │   └── index.ts         # TypeScript interfaces
+   │   ├── hooks/
+   │   │   ├── useQueryStream.ts # SSE streaming hook
+   │   │   ├── useSavedQueries.ts
+   │   │   └── useToast.ts
    │   ├── config.ts            # API base URL, app settings
    │   ├── App.tsx
-   │   ├── App.css
    │   └── main.tsx
    ├── vite.config.ts
    └── package.json
@@ -113,7 +111,7 @@
 
 ## Chunk 7.3: SSE Client Hook
 
-**Goal**: React hook that consumes ADK's `/run_sse` SSE stream (same pattern as SM Saarthi).
+**Goal**: React hook that consumes ADK's `/run_sse` SSE stream.
 
 **Steps**:
 1. Write `frontend/web/src/hooks/useQueryStream.ts`:
@@ -163,7 +161,7 @@
 
 ## Chunk 7.5: Results Components
 
-**Goal**: Rich display of query results (GenAnalytics-specific, not in SM Saarthi).
+**Goal**: Rich display of query results.
 
 **Steps**:
 1. `SqlViewer.tsx` — CodeMirror with SQL syntax highlighting, collapsible via MUI Collapse/Accordion
@@ -209,11 +207,16 @@
 
 ## Definition of Done for Phase 7
 
-- [ ] Backend uses ADK built-in `/run_sse` for SSE streaming (not custom endpoints)
-- [ ] ADK session management working (create, load, persist)
-- [ ] Vite + React app consumes `/run_sse` stream with reactive state
-- [ ] Chat UI with message history, thinking steps, SQL, charts
-- [ ] SQL viewer with CodeMirror syntax highlighting
-- [ ] Charts render via Recharts based on viz config
-- [ ] Saved queries feature works
-- [ ] Responsive design with dark mode (MUI + Emotion)
+- [x] Backend uses ADK built-in `/run_sse` for SSE streaming via `get_fast_api_app()`
+- [x] ADK session management working (SQLite-backed, create/load/persist)
+- [x] Agent auto-discovery via `backend/agents/gen_analytics/` exporting `root_agent`
+- [x] Vite + React app consumes `/run_sse` stream with reactive state (`useQueryStream` hook)
+- [x] Chat UI with message history, thinking steps, timestamps, fade-in animations
+- [x] SQL viewer with CodeMirror syntax highlighting (collapsible, copy button)
+- [x] Charts render via Recharts (bar_chart, line_chart, area) based on viz config
+- [x] MetricCard for scalar results, ValidationBadge for dry-run status
+- [x] Saved queries: backend CRUD (SQLite) + frontend drawer with save/delete/re-run
+- [x] Dark mode (system pref + toggle + localStorage) via MUI ThemeProvider
+- [x] Toast notifications (Snackbar) for save/error/session events
+- [x] Eager session creation on page load for fast first query
+- [x] Domain rule added: transaction_at/created_at are epoch millis (TIMESTAMP_MILLIS)

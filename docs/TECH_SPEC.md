@@ -55,10 +55,11 @@
 | Agent Framework | **Google ADK** | Free | Apache 2.0 | Works with Vertex AI, has built-in dev UI (`adk web`) |
 | LLM | **Gemini 2.5 Flash** (Vertex AI) | Pay-as-go | GCP | No rate limits. Auth via service account. |
 | Schema Strategy | Full terse schema in system prompt | Free | N/A | ~250K tokens for 500 tables. Fits in Gemini's 1M context. No vector DB needed for MVP. |
-| Frontend | **Streamlit** | Free | Apache 2.0 | Runs as separate process from FastAPI (port 8501 vs 8000) |
-| Charts | Plotly (via Streamlit) | Free | MIT | |
-| Data Store | SQLite | Free | Public domain | For session history, feedback |
-| Deployment | Local | Free | | Two processes: FastAPI + Streamlit |
+| Frontend | **Vite + React + MUI + Emotion** | Free | MIT | SSE streaming via ADK `/run_sse`, dark mode, saved queries |
+| Charts | Recharts (React) / Plotly (Streamlit fallback) | Free | MIT | Bar, line, area, metric card |
+| SQL Highlighting | CodeMirror | Free | MIT | Collapsible SQL viewer |
+| Data Store | SQLite | Free | Public domain | ADK sessions, saved queries |
+| Deployment | Local | Free | | Backend (port 8000) + Vite dev (port 3000) |
 
 ### Production Stack (V1+)
 
@@ -69,7 +70,7 @@
 | LLM (moderate) | Claude Sonnet 4 via Vertex AI | ~$3/M input tokens | Multi-table queries |
 | LLM (complex) | Claude Opus 4 via Vertex AI | ~$15/M input tokens | Complex analysis |
 | Session/Data Store | SQLite (dev) / PostgreSQL (prod) | Free / Paid | ADK sessions, saved queries, feedback |
-| Frontend | Vite + React + MUI + Emotion | Free (MIT) | SSE streaming, same stack as SM Saarthi |
+| Frontend | Vite + React + MUI + Emotion | Free (MIT) | SSE streaming, dark mode, saved queries |
 | Deployment | Cloud Run | Pay-as-go | Serverless |
 
 ### Why Google ADK over Claude Agent SDK for MVP
@@ -198,7 +199,7 @@ Total: ~7.8K tokens (schema + enrichments). Trivially fits in Gemini's 1M contex
 
 ## 6. API Design
 
-### ADK Built-in Endpoints (V1+ — same pattern as SM Saarthi)
+### ADK Built-in Endpoints
 ```
 POST   /run_sse                                    SSE stream: ADK events (text, functionCall, functionResponse)
 POST   /apps/{agent}/users/{user}/sessions         Create new session
@@ -263,8 +264,6 @@ gen-analytics/
         client.py                # BigQuery client wrapper
         safety.py                # Cost guards, DML detection
         metadata.py              # INFORMATION_SCHEMA queries
-      models/                    # Pydantic data models
-      services/                  # Business logic services
     scripts/
       extract_schema.py          # Extract metadata + generate terse schema (RUN FIRST)
       evaluate.py                # Evaluation harness (35 test cases, 91.4% baseline)
@@ -295,10 +294,10 @@ gen-analytics/
 | Gemini via Vertex AI | No rate limits | Pay-as-go, auth via service account |
 | Full schema in context | Highest accuracy | Gemini's 1M context fits 101 tables (~6.8K tokens). Eliminates RAG retrieval errors. |
 | Table enrichments over RAG | Simpler, better results | Glossary/examples in prompt caused agent to overthink. Enriched schema + 3 domain rules = 91.4% accuracy. |
-| Streamlit (MVP) -> Vite + React + MUI (V1+) | Progressive frontend | SPA like Metabase/Superset; MUI for fast development; same stack as SM Saarthi |
-| ADK built-in SSE for V1+ | Same as SM Saarthi | `/run_sse` + session management for free; custom routes only for saved queries/feedback |
+| Streamlit (MVP) -> Vite + React + MUI (V1+) | Progressive frontend | SPA like Metabase/Superset; MUI for fast development |
+| ADK built-in SSE | Simplest streaming option | `/run_sse` + session management for free; custom routes only for saved queries |
 | SSE over WebSocket | Simpler | Unidirectional streaming sufficient for query results |
 
 ### Deployment Notes
 - **MVP (Streamlit)**: Two processes — FastAPI (port 8000) + Streamlit (port 8501). Streamlit calls FastAPI via HTTP.
-- **V1+ (React)**: ADK serves backend (port 8000) + static frontend at `/web`. Single process possible (like SM Saarthi).
+- **V1+ (React)**: ADK serves backend (port 8000) + static frontend at `/web`. Single process possible.

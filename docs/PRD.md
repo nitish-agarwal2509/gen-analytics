@@ -67,8 +67,8 @@ Features are built incrementally across development phases 1-5:
 | Rich Visualizations | Heatmaps, scatter, funnels, cohort grids | P1 |
 | Query Explanation | NL explanation of SQL logic | P1 |
 | Feedback Loop | Thumbs up/down on results | P1 |
-| React Frontend | Migrate from Streamlit to Vite + React + MUI + Emotion | P1 |
-| Saved Queries | Persist and search query library | P2 |
+| React Frontend | Vite + React + MUI + Emotion with ADK SSE streaming (shipped in Phase 7) | P1 ✅ |
+| Saved Queries | SQLite-backed save/list/delete + drawer UI (shipped in Phase 7) | P2 ✅ |
 
 ### V2 -- Multi-agent + Production
 

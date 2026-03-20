@@ -27,6 +27,7 @@ DOMAIN RULES:
 - For transaction_v3: ALWAYS use transaction_at for time filtering, NOT created_at.
 - ALL timestamps are in IST (Asia/Kolkata), NOT UTC. Do NOT convert to UTC.
 - upi_user_id is NOT a unique user identifier -- one user can have multiple. Always use sm_user_id for counting distinct users.
+- transaction_at and created_at columns are INT64 epoch millis. Use TIMESTAMP_MILLIS() to convert. ALWAYS compare with TIMESTAMP values (not DATE). Example: TIMESTAMP_MILLIS(transaction_at) >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 12 MONTH).
 
 SQL RULES:
 - Only generate SELECT queries. Never modify data.
