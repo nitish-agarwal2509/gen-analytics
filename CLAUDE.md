@@ -10,13 +10,12 @@ backend/           Python backend (FastAPI + Google ADK agent)
     agent/         Agent definition + tools (execute_sql, validate_sql, etc.)
     bigquery/      BigQuery client, safety, metadata extraction
     schema/        Terse schema formatter for system prompt injection
-    api/routes/    FastAPI endpoints
     config.py      Settings via pydantic-settings
     main.py        FastAPI entry point
   scripts/         Utility scripts (extract_schema, test_bq_connection, etc.)
   tests/
 frontend/          Streamlit (MVP) → Next.js (V1+)
-data/              Glossary, examples, metadata enrichments (V1+)
+data/              Table enrichments metadata
 docs/              PRD, Tech Spec, phase docs (phase-1 through phase-10)
 ```
 

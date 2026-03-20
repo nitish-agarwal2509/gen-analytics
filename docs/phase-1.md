@@ -41,10 +41,13 @@
    - `pydantic-settings` (config)
 3. Create `.env.example` with placeholder variables:
    ```
-   GOOGLE_API_KEY=your-gemini-api-key
    GCP_PROJECT_ID=your-project-id
    BQ_DATASET=your-dataset
+   GOOGLE_APPLICATION_CREDENTIALS=path-to-service-account.json
+   GOOGLE_CLOUD_PROJECT=your-project-id
+   GOOGLE_GENAI_USE_VERTEXAI=true
    ```
+   *Note: Originally planned GOOGLE_API_KEY for free-tier Gemini; switched to Vertex AI auth instead.*
 4. Set up virtual environment and install dependencies
 
 **Test**: `python -c "import google.adk; import google.cloud.bigquery; import fastapi; import streamlit; print('All imports OK')"`

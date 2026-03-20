@@ -28,7 +28,7 @@ Streamlit Chat UI  -->  Google ADK Agent (Gemini 2.5 Flash)  -->  BigQuery
 - **Full schema in context** -- all 101 table schemas (~6.8K tokens) injected into the system prompt. No RAG needed; Gemini's 1M context handles it easily.
 - **Validate-before-execute** -- every query is dry-run validated before execution (free, catches errors, estimates cost).
 - **Self-correction** -- agent retries up to 3 times on validation failure, using error context to fix SQL.
-- **Human-in-the-loop** -- queries scanning >5 GB require user approval before execution.
+- **Human-in-the-loop** -- queries scanning >500 GB require user approval before execution.
 - **Cost guard** -- `maximumBytesBilled` (500 GB) enforced on every query.
 
 ## Tech Stack
@@ -94,11 +94,12 @@ backend/
     agent/           Agent definition, prompts, tools
     bigquery/        Client, safety checks, metadata
     schema/          Terse schema formatter
-    api/routes/      FastAPI endpoints
+    config.py        Settings via pydantic-settings
+    main.py          FastAPI entry point
   scripts/           extract_schema, test_agent, etc.
 frontend/
   streamlit_app/     Streamlit chat UI
-data/                Glossary, examples, enrichments (future)
+data/                Table enrichments metadata
 docs/                Phase docs (phase-1 through phase-10)
 ```
 
@@ -107,7 +108,7 @@ docs/                Phase docs (phase-1 through phase-10)
 - **Read-only**: Only SELECT queries allowed. DML/DDL rejected at the SQL parser level.
 - **Dry-run validation**: Every query validated via BigQuery dry-run before execution.
 - **Cost limits**: `maximumBytesBilled` enforced on every query (500 GB cap).
-- **Approval threshold**: Queries scanning >5 GB require explicit user approval.
+- **Approval threshold**: Queries scanning >500 GB require explicit user approval.
 - **Row limits**: Results capped at 1000 rows by default.
 
 ## Roadmap

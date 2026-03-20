@@ -35,8 +35,8 @@
 1. Write `backend/app/bigquery/safety.py`:
    - `is_read_only(sql)` -> reject DML/DDL keywords
    - `check_cost_limit(estimated_bytes, max_bytes=500GB)` -> reject expensive queries
-   - `has_partition_filter(sql, partition_column)` -> warn if missing
-   - `enforce_row_limit(sql, max_rows=1000)` -> add LIMIT if missing
+   - `estimate_cost_usd(estimated_bytes)` -> estimate query cost in USD
+   *Note: `has_partition_filter` and `enforce_row_limit` were planned but not implemented — the agent handles row limits via LIMIT clauses in generated SQL, and partition filters are not enforced.*
 
 **Test**:
 - `is_read_only("SELECT * FROM t")` -> True

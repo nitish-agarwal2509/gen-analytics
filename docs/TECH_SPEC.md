@@ -238,49 +238,52 @@ gen-analytics/
     app/
       main.py                    # FastAPI entry point
       config.py                  # Settings (pydantic-settings)
-      api/routes/                # query, history, feedback, schema endpoints
       agent/
         agent.py                 # Google ADK agent definition (MOST IMPORTANT FILE)
         prompts.py               # System prompts
-        complexity.py            # Query complexity classifier (V1)
-        model_router.py          # Model selection (V1)
+        context_loader.py        # Assembles schema with enrichments
         tools/                   # get_sample_data, validate_sql, execute_sql, suggest_viz
-        langgraph/               # V2 multi-agent (graph.py, state.py, agents/)
+        # Future (V1+):
+        # complexity.py          # Query complexity classifier
+        # model_router.py        # Model selection
+        # langgraph/             # V2 multi-agent (graph.py, state.py, agents/)
       schema/
-        extractor.py             # Extract metadata from BigQuery INFORMATION_SCHEMA
         formatter.py             # Format as terse schema string for system prompt
-      rag/                       # V1+ only (NOT needed for MVP)
-        embeddings.py            # Embedding generation (gemini-embedding-001)
-        retriever.py             # Two-phase retrieval
-        reranker.py              # LLM-based reranking
-        collections.py           # ChromaDB management
+        enrichments.py           # Load table enrichments from YAML
+      # Future (V1+):
+      # rag/                     # NOT needed for MVP
+      #   embeddings.py, retriever.py, reranker.py, collections.py
       bigquery/
         client.py                # BigQuery client wrapper
         safety.py                # Cost guards, DML detection
         metadata.py              # INFORMATION_SCHEMA queries
-      models/                    # Pydantic data models
-      services/                  # Business logic services
+      # Future (V1+):
+      # api/routes/              # SSE streaming endpoints (Phase 7)
+      # models/                  # Pydantic data models
+      # services/                # Business logic services
     scripts/
       extract_schema.py          # Extract metadata + generate terse schema (RUN FIRST)
-      seed_glossary.py           # Seed business glossary (V1+)
-      seed_examples.py           # Seed curated query examples (V1+)
       evaluate.py                # Evaluation harness
+      test_agent.py              # End-to-end agent test (dry-run)
+      # Future (V1+):
+      # seed_glossary.py         # Seed business glossary
+      # seed_examples.py         # Seed curated query examples
     tests/
     pyproject.toml
-    Dockerfile
+    # Future: Dockerfile
   frontend/
     streamlit_app/               # MVP
-    nextjs_app/                  # V1+ (Phase 8)
+    # Future (V1+): nextjs_app/  # Phase 7
   data/
-    glossary/business_terms.yaml
-    examples/query_examples.yaml
     metadata/table_enrichments.yaml
+    # Future (V1+):
+    # glossary/business_terms.yaml
+    # examples/query_examples.yaml
   docs/
     PRD.md
     TECH_SPEC.md
-    phase-1.md through phase-9.md
-  docker-compose.yml
-  Makefile
+    phase-1.md through phase-10.md
+  # Future: docker-compose.yml, Makefile
 ```
 
 ---

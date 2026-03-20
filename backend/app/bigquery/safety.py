@@ -1,4 +1,4 @@
-"""BigQuery safety checks -- DML detection, cost limits, row limits."""
+"""BigQuery safety checks -- DML detection and cost limits."""
 
 import re
 
@@ -13,7 +13,6 @@ _COST_PER_TB = 6.25
 
 # Default limits
 DEFAULT_MAX_BYTES = 500 * 1024 ** 3  # 500 GB
-DEFAULT_MAX_ROWS = 1000
 
 # Queries scanning more than this require user approval before execution
 APPROVAL_THRESHOLD_BYTES = 500 * 1024 ** 3  # 500 GB (same as max -- auto-approve everything under max)
@@ -51,12 +50,3 @@ def check_cost_limit(estimated_bytes: int, max_bytes: int = DEFAULT_MAX_BYTES) -
 def estimate_cost_usd(estimated_bytes: int) -> float:
     """Estimate query cost in USD based on bytes scanned."""
     return estimated_bytes * _COST_PER_TB / 1e12
-
-
-def enforce_row_limit(sql: str, max_rows: int = DEFAULT_MAX_ROWS) -> str:
-    """Add LIMIT clause if missing from SQL."""
-    # Simple check: if SQL doesn't end with a LIMIT clause, add one
-    stripped = sql.strip().rstrip(";")
-    if not re.search(r"\bLIMIT\s+\d+\s*$", stripped, re.IGNORECASE):
-        return f"{stripped}\nLIMIT {max_rows}"
-    return sql
