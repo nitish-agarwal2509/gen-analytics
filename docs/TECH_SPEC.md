@@ -264,8 +264,6 @@ gen-analytics/
         client.py                # BigQuery client wrapper
         safety.py                # Cost guards, DML detection
         metadata.py              # INFORMATION_SCHEMA queries
-      models/                    # Pydantic data models
-      services/                  # Business logic services
     scripts/
       extract_schema.py          # Extract metadata + generate terse schema (RUN FIRST)
       evaluate.py                # Evaluation harness (35 test cases, 91.4% baseline)

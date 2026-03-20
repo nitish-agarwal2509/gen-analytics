@@ -24,7 +24,6 @@
 - **MUI (Material-UI) 5** — component library (TextField, DataGrid, Dialog, etc.)
 - **Emotion** — CSS-in-JS styling (MUI's built-in styling engine)
 - **MUI Icons** — icon library
-- **react-router** — client-side routing (`/`, `/dashboards`, `/queries` in future)
 - **react-markdown + remark-gfm** — markdown rendering for agent responses
 - **@codemirror/lang-sql** — SQL syntax highlighting
 - **Recharts** — charts for query results
@@ -76,7 +75,6 @@
 1. Create `frontend/web/` with `npm create vite@latest -- --template react-ts`
 2. Install dependencies:
    - `@mui/material @mui/icons-material @emotion/react @emotion/styled`
-   - `react-router-dom`
    - `react-markdown remark-gfm`
    - `@codemirror/lang-sql @codemirror/view`
    - `recharts`
@@ -91,13 +89,15 @@
    │   ├── hooks/
    │   │   └── useQueryStream.ts
    │   ├── styles/
-   │   │   ├── theme.ts         # MUI createTheme() + color tokens
-   │   │   └── components.ts    # Reusable sx style functions
+   │   │   └── theme.ts         # MUI createTheme() + color tokens
    │   ├── types/
    │   │   └── index.ts         # TypeScript interfaces
+   │   ├── hooks/
+   │   │   ├── useQueryStream.ts # SSE streaming hook
+   │   │   ├── useSavedQueries.ts
+   │   │   └── useToast.ts
    │   ├── config.ts            # API base URL, app settings
    │   ├── App.tsx
-   │   ├── App.css
    │   └── main.tsx
    ├── vite.config.ts
    └── package.json
