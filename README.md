@@ -77,32 +77,43 @@ python scripts/extract_schema.py <dataset1> <dataset2> ...
 ### Running
 
 ```bash
-# Terminal 1: Backend
+# Terminal 1: Backend (ADK SSE + sessions + saved queries)
 cd backend
 source .venv/bin/activate
 uvicorn app.main:app --reload          # port 8000
 
-# Terminal 2: Frontend
-cd frontend/streamlit_app
-streamlit run app.py                   # port 8501
+# Terminal 2: Frontend (React)
+cd frontend/web
+npm install                            # first time only
+npm run dev                            # port 3000
 ```
 
-Open http://localhost:8501 and start asking questions.
+Open http://localhost:3000 and start asking questions.
+
+Streamlit MVP is still available as fallback: `cd frontend/streamlit_app && streamlit run app.py` (port 8501).
 
 ## Project Structure
 
 ```
 backend/
+  agents/
+    gen_analytics/   ADK agent discovery entry point (root_agent)
   app/
     agent/           Agent definition, prompts, tools, context loader
     bigquery/        Client, safety checks, metadata
     schema/          Terse schema formatter + enrichments
-    api/routes/      Custom endpoints (saved queries, feedback)
+    api/routes/      Custom endpoints (saved queries)
   scripts/           extract_schema, evaluate, measure_prompt
   tests/eval/        Query test cases (simple, medium, complex)
 frontend/
-  streamlit_app/     Streamlit chat UI (MVP)
-  web/               Vite + React + MUI (V1+, Phase 7)
+  web/               React + MUI + Emotion (primary UI)
+    src/
+      components/    chat/ (ChatInput, MessageBubble, ThinkingSteps, WelcomeScreen)
+                     results/ (SqlViewer, ResultTable, ChartRenderer, MetricCard)
+                     layout/ (Header, ChatView, SavedQueriesDrawer)
+      hooks/         useQueryStream (SSE), useSavedQueries, useToast
+      styles/        theme.ts (light/dark MUI themes)
+  streamlit_app/     Streamlit chat UI (legacy fallback)
 data/
   metadata/          Table enrichments YAML
 docs/                Phase docs (phase-1 through phase-10)
@@ -122,7 +133,7 @@ docs/                Phase docs (phase-1 through phase-10)
 - [x] **Phase 4**: Visualization (Plotly charts, agent thinking steps)
 - [x] **Phase 5**: Business context (table enrichments, domain rules)
 - [x] **Phase 6**: Complex queries (eval harness, 91.4% accuracy)
-- [ ] **Phase 7**: React frontend (Vite + MUI + Emotion) with SSE streaming
+- [x] **Phase 7**: React frontend (ADK SSE, Vite + MUI + Recharts, saved queries, dark mode)
 - [ ] **Phase 8**: Multi-turn conversations
 - [ ] **Phase 9**: Multi-agent (LangGraph), auth, Cloud Run deployment
 - [ ] **Phase 10**: Model routing (optional — Gemini Flash + Claude Sonnet/Opus)

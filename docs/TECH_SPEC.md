@@ -55,10 +55,11 @@
 | Agent Framework | **Google ADK** | Free | Apache 2.0 | Works with Vertex AI, has built-in dev UI (`adk web`) |
 | LLM | **Gemini 2.5 Flash** (Vertex AI) | Pay-as-go | GCP | No rate limits. Auth via service account. |
 | Schema Strategy | Full terse schema in system prompt | Free | N/A | ~250K tokens for 500 tables. Fits in Gemini's 1M context. No vector DB needed for MVP. |
-| Frontend | **Streamlit** | Free | Apache 2.0 | Runs as separate process from FastAPI (port 8501 vs 8000) |
-| Charts | Plotly (via Streamlit) | Free | MIT | |
-| Data Store | SQLite | Free | Public domain | For session history, feedback |
-| Deployment | Local | Free | | Two processes: FastAPI + Streamlit |
+| Frontend | **Vite + React + MUI + Emotion** | Free | MIT | SSE streaming via ADK `/run_sse`, dark mode, saved queries |
+| Charts | Recharts (React) / Plotly (Streamlit fallback) | Free | MIT | Bar, line, area, metric card |
+| SQL Highlighting | CodeMirror | Free | MIT | Collapsible SQL viewer |
+| Data Store | SQLite | Free | Public domain | ADK sessions, saved queries |
+| Deployment | Local | Free | | Backend (port 8000) + Vite dev (port 3000) |
 
 ### Production Stack (V1+)
 

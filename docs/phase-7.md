@@ -209,11 +209,16 @@
 
 ## Definition of Done for Phase 7
 
-- [ ] Backend uses ADK built-in `/run_sse` for SSE streaming (not custom endpoints)
-- [ ] ADK session management working (create, load, persist)
-- [ ] Vite + React app consumes `/run_sse` stream with reactive state
-- [ ] Chat UI with message history, thinking steps, SQL, charts
-- [ ] SQL viewer with CodeMirror syntax highlighting
-- [ ] Charts render via Recharts based on viz config
-- [ ] Saved queries feature works
-- [ ] Responsive design with dark mode (MUI + Emotion)
+- [x] Backend uses ADK built-in `/run_sse` for SSE streaming via `get_fast_api_app()`
+- [x] ADK session management working (SQLite-backed, create/load/persist)
+- [x] Agent auto-discovery via `backend/agents/gen_analytics/` exporting `root_agent`
+- [x] Vite + React app consumes `/run_sse` stream with reactive state (`useQueryStream` hook)
+- [x] Chat UI with message history, thinking steps, timestamps, fade-in animations
+- [x] SQL viewer with CodeMirror syntax highlighting (collapsible, copy button)
+- [x] Charts render via Recharts (bar_chart, line_chart, area) based on viz config
+- [x] MetricCard for scalar results, ValidationBadge for dry-run status
+- [x] Saved queries: backend CRUD (SQLite) + frontend drawer with save/delete/re-run
+- [x] Dark mode (system pref + toggle + localStorage) via MUI ThemeProvider
+- [x] Toast notifications (Snackbar) for save/error/session events
+- [x] Eager session creation on page load for fast first query
+- [x] Domain rule added: transaction_at/created_at are epoch millis (TIMESTAMP_MILLIS)
