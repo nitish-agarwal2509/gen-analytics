@@ -126,7 +126,7 @@ docs/                Phase docs (phase-1 through phase-10)
 - [x] **Phase 5**: Business context (table enrichments, domain rules)
 - [x] **Phase 6**: Complex queries (eval harness, 91.4% accuracy)
 - [x] **Phase 7**: React frontend (ADK SSE, Vite + React + shadcn/ui, dark mode, saved queries, Playwright tests)
-- [ ] **Phase 8**: Multi-turn conversations
+- [x] **Phase 8**: Multi-turn conversations (ADK sessions, pronoun resolution, clear session reset)
 - [ ] **Phase 9**: Multi-agent (LangGraph), auth, Cloud Run deployment
 - [ ] **Phase 10**: Model routing (optional — Gemini Flash + Claude Sonnet/Opus)
 

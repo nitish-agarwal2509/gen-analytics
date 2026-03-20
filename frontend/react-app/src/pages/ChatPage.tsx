@@ -20,6 +20,7 @@ const EXAMPLE_QUESTIONS = [
 
 export interface ChatPageHandle {
   submitQuestion: (question: string) => void;
+  clearSession: () => void;
 }
 
 interface ChatPageProps {
@@ -40,7 +41,7 @@ export const ChatPage = forwardRef<ChatPageHandle, ChatPageProps>(
     const messages = externalMessages ?? internalMessages;
     const setMessages = onMessagesChange ?? setInternalMessages;
 
-    const { state, submitQuery, reset } = useQueryStream();
+    const { state, submitQuery, reset, clearSession } = useQueryStream();
 
     // When query completes, push into messages
     useEffect(() => {
@@ -74,8 +75,8 @@ export const ChatPage = forwardRef<ChatPageHandle, ChatPageProps>(
       [messages, setMessages, submitQuery],
     );
 
-    useImperativeHandle(ref, () => ({ submitQuestion: handleSubmit }), [
-      handleSubmit,
+    useImperativeHandle(ref, () => ({ submitQuestion: handleSubmit, clearSession }), [
+      handleSubmit, clearSession,
     ]);
 
     const isProcessing =

@@ -27,6 +27,7 @@ function AppInner() {
 
   const handleClearSession = () => {
     setMessages([]);
+    chatPageRef.current?.clearSession();
   };
 
   const handleSelectSavedQuery = (question: string) => {

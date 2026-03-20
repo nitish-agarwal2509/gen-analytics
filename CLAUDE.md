@@ -72,6 +72,6 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 5: Business & Domain Context (table enrichments, 3 domain rules, glossary/examples as data files for eval)
 - [x] Phase 6: Complex Query Handling (eval harness 91.4% accuracy; recipes/strategies skipped — not needed)
 - [x] Phase 7: React Frontend (ADK SSE streaming, Vite + React + shadcn/ui, dark mode, saved queries, Playwright e2e tests)
-- [ ] Phase 8: Multi-Turn Conversations (conversation history, pronoun resolution, follow-ups)
+- [x] Phase 8: Multi-Turn Conversations (ADK sessions, pronoun resolution, follow-ups, clear session reset)
 - [ ] Phase 9: Multi-Agent & Production (LangGraph, auth, audit, Cloud Run)
 - [ ] Phase 10: Model Routing & Paid Models (optional — complexity classifier, Claude via Vertex AI, escalation)
