@@ -24,7 +24,7 @@
        session_id: str
        turns: list[ConversationTurn]
    ```
-2. Store in session state for MVP (in-memory, per session)
+2. Store via ADK session management (SQLite-backed, persisted across restarts)
 
 **Test**: Create a Conversation, add turns, verify serialization
 

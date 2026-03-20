@@ -56,8 +56,8 @@
    CRITICAL RULE: You MUST call validate_sql before execute_sql. Never execute unvalidated SQL.
    If validation fails, analyze the error and try to fix the SQL.
    ```
-2. Update tool registration: agent has `search_tables`, `get_schema`, `validate_sql`, `execute_sql`
-3. Expected agent flow: search -> schema -> generate SQL -> validate -> execute
+2. Update tool registration: agent has `validate_sql`, `execute_sql`, `get_sample_data`, `suggest_visualization`
+3. Expected agent flow: generate SQL (full schema in context) -> validate -> execute
 
 **Test**: Observe agent logs -- every execution is preceded by a validation call
 
@@ -73,7 +73,7 @@
    If validate_sql returns errors:
    1. Read the error message carefully
    2. Think about what went wrong (wrong column name? wrong table? syntax error?)
-   3. If needed, call get_schema again to verify column names
+   3. If needed, call get_sample_data to verify column values
    4. Generate corrected SQL
    5. Validate again
    Maximum 3 attempts. After 3 failures, explain the issue to the user.

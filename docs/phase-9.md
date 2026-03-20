@@ -45,8 +45,8 @@
 
 2. Write `backend/app/agent/langgraph/agents/schema_agent.py`:
    - Receives planner output
-   - Calls `search_tables`, `get_schema`
-   - Resolves join paths between tables
+   - Full terse schema already in context (~6.8K tokens) — no retrieval needed
+   - Identifies relevant tables and resolves join paths from schema context
 
 3. Write `backend/app/agent/langgraph/agents/sql_agent.py`:
    - Receives schema context

@@ -60,9 +60,9 @@ Features are built incrementally across development phases 1-5:
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
-| RAG Supplement | ChromaDB for business glossary, few-shot examples, rich metadata (NOT for table discovery) | P0 |
-| Business Glossary | Term -> SQL pattern mapping ("churn" -> specific CTE) via RAG | P0 |
-| Few-Shot Examples | Curated query examples via RAG | P0 |
+| Table Enrichments | Business descriptions + column notes merged into terse schema (shipped in Phase 5) | P0 ✅ |
+| Domain Rules | Targeted prompt rules for common agent mistakes (shipped in Phase 5) | P0 ✅ |
+| Eval Harness | Automated 35-case test suite, 91.4% baseline accuracy (shipped in Phase 6) | P0 ✅ |
 | Model Routing | Simple -> Gemini Flash, moderate -> Claude Sonnet, complex -> Claude Opus (paid) | P1 |
 | Rich Visualizations | Heatmaps, scatter, funnels, cohort grids | P1 |
 | Query Explanation | NL explanation of SQL logic | P1 |

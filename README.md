@@ -17,11 +17,14 @@ Agent: validates SQL (dry-run) -> estimates scan: 450 MB ($0.003) -> executes ->
 ## Architecture
 
 ```
-Streamlit Chat UI  -->  Google ADK Agent (Gemini 2.5 Flash)  -->  BigQuery
-                              |
-                        Tools: validate_sql, execute_sql, get_sample_data
-                              |
-                        Full schema (101 tables) in system prompt
+Streamlit (MVP) / React + MUI (V1+)  -->  Google ADK Agent (Gemini 2.5 Flash)  -->  BigQuery
+                                                |
+                                          Tools: validate_sql, execute_sql,
+                                                 get_sample_data, suggest_visualization
+                                                |
+                                          Full schema (101 tables) + enrichments in system prompt
+                                                |
+                                          V1+: ADK built-in /run_sse (SSE streaming + sessions)
 ```
 
 **Key design choices:**
@@ -91,14 +94,17 @@ Open http://localhost:8501 and start asking questions.
 ```
 backend/
   app/
-    agent/           Agent definition, prompts, tools
+    agent/           Agent definition, prompts, tools, context loader
     bigquery/        Client, safety checks, metadata
-    schema/          Terse schema formatter
-    api/routes/      FastAPI endpoints
-  scripts/           extract_schema, test_agent, etc.
+    schema/          Terse schema formatter + enrichments
+    api/routes/      Custom endpoints (saved queries, feedback)
+  scripts/           extract_schema, evaluate, measure_prompt
+  tests/eval/        Query test cases (simple, medium, complex)
 frontend/
-  streamlit_app/     Streamlit chat UI
-data/                Glossary, examples, enrichments (future)
+  streamlit_app/     Streamlit chat UI (MVP)
+  web/               Vite + React + MUI (V1+, Phase 7)
+data/
+  metadata/          Table enrichments YAML
 docs/                Phase docs (phase-1 through phase-10)
 ```
 

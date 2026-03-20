@@ -28,9 +28,13 @@ cd backend
 source .venv/bin/activate
 uvicorn app.main:app --reload          # FastAPI on port 8000
 
-# Frontend (separate terminal)
+# Frontend — MVP (Streamlit)
 cd frontend/streamlit_app
 streamlit run app.py                   # Streamlit on port 8501
+
+# Frontend — V1+ (React, Phase 7)
+cd frontend/web
+npm run dev                            # Vite dev server on port 3000
 ```
 
 ## Environment

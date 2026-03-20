@@ -10,34 +10,34 @@
                          HTTP / SSE
 +------------------------------------------------------------------+
 |                        API LAYER                                  |
-|  FastAPI: POST /query, GET /query/{id}/stream, GET /history,     |
-|           POST /feedback, GET /schema/search                      |
+|  ADK built-in: POST /run_sse (SSE streaming),                    |
+|    session CRUD, /list-apps                                       |
+|  Custom: saved queries, feedback, health check                    |
 +------------------------------------------------------------------+
                               |
 +------------------------------------------------------------------+
 |                     AGENT LAYER                                   |
-|  Google ADK (MVP, free) -> LangGraph (V2)                        |
-|  Tools: get_sample_data, validate_sql, execute_sql,              |
-|         suggest_viz, explain_query                                |
-|  MVP: Full terse schema in system prompt (no RAG needed)         |
+|  Google ADK (MVP + V1) -> LangGraph (V2)                         |
+|  Tools: get_sample_data, validate_sql, execute_sql, suggest_viz  |
+|  Full terse schema + enrichments in system prompt (no RAG)       |
 |  Self-correction loop: generate -> validate -> [error?] -> retry  |
 +------------------------------------------------------------------+
               |                           |
 +------------------------+    +------------------------+
 |    SCHEMA LAYER        |    |    DATA LAYER           |
-| MVP: Full terse schema |    | BigQuery (read-only)    |
-|   in system prompt     |    | SQLite (MVP) /          |
-| V1+: + ChromaDB for    |    | PostgreSQL (prod)       |
-|   glossary, examples,  |    | (history, sessions,     |
-|   rich metadata        |    |  feedback, audit)       |
+| Full terse schema      |    | BigQuery (read-only)    |
+|   in system prompt     |    | SQLite (sessions,       |
+| + table enrichments    |    |  saved queries,         |
+|   (descriptions,       |    |  feedback, audit)       |
+|    column notes)       |    |                         |
 +------------------------+    +------------------------+
               |
 +------------------------+
 |    LLM LAYER           |
-| MVP:                   |
+| MVP + V1:              |
 |  - Gemini 2.5 Flash    |
 |    (Vertex AI)          |
-| V1+:                   |
+| V2 (optional):         |
 |  - + Claude Sonnet/Opus |
 |    (Vertex AI)          |
 +------------------------+
@@ -68,7 +68,7 @@
 | LLM (simple) | Gemini Flash | Free tier or pay-as-go | Simple queries, embeddings, routing |
 | LLM (moderate) | Claude Sonnet 4 via Vertex AI | ~$3/M input tokens | Multi-table queries |
 | LLM (complex) | Claude Opus 4 via Vertex AI | ~$15/M input tokens | Complex analysis |
-| Vector DB | pgvector / AlloyDB | Paid (GCP) | Production-grade |
+| Session/Data Store | SQLite (dev) / PostgreSQL (prod) | Free / Paid | ADK sessions, saved queries, feedback |
 | Frontend | Vite + React + MUI + Emotion | Free (MIT) | SSE streaming, same stack as SM Saarthi |
 | Deployment | Cloud Run | Pay-as-go | Serverless |
 
@@ -160,24 +160,21 @@ User Question -> [PLANNER] -> [SCHEMA AGENT] -> [SQL AGENT] -> [VALIDATOR] -> [V
 
 **Note:** Using Vertex AI — no TPM/RPD rate limits that affect development.
 
-### V1+: Add RAG as Supplement (Not Replacement)
+### V1+: Table Enrichments (Shipped in Phase 5)
 
-Full terse schema stays in context. RAG adds supplementary information:
+Full terse schema stays in context. Enrichments add business context inline:
+- Table descriptions ("Payout disbursements to users")
+- Column notes ("amount in paisa, divide by 100 for INR")
+- Status enum values, foreign key hints
 
-1. **business_glossary**: Map terms like "churn", "MRR", "CAC" to SQL patterns
-2. **query_examples**: Few-shot examples of similar questions with vetted SQL
-3. **rich_metadata**: Detailed descriptions, sample values, join hints for top candidate tables
+Total: ~7.8K tokens (schema + enrichments). Trivially fits in Gemini's 1M context.
 
-This "belt and suspenders" approach gives highest accuracy: full schema for table discovery + RAG for business context.
+**RAG was evaluated and rejected** — glossary and few-shot examples in the prompt caused the agent to overthink and pick wrong tables. Enriched schema + 3 domain rules alone achieve 91.4% accuracy.
 
-### V2: RAG for Claude Models (Mandatory)
-
-Claude Sonnet/Opus have 200K context -- full schema doesn't fit. For Claude-routed queries, use RAG to select top 10-20 tables.
-
-### Metadata Pipeline (needed for all phases)
+### Metadata Pipeline
 1. Extract raw metadata from BigQuery `INFORMATION_SCHEMA`
 2. Format as terse schema string for system prompt injection
-3. (V1+) Enrich with business descriptions, embed in ChromaDB
+3. Merge table enrichments from `data/metadata/table_enrichments.yaml`
 
 ---
 
@@ -249,24 +246,19 @@ GET    /api/v1/query/{id}/stream  SSE stream: status -> sql -> results -> viz ->
 gen-analytics/
   backend/
     app/
-      main.py                    # FastAPI entry point
+      main.py                    # FastAPI entry point (V1+: ADK get_fast_api_app())
       config.py                  # Settings (pydantic-settings)
-      api/routes/                # query, history, feedback, schema endpoints
+      api/routes/                # Custom endpoints (saved queries, feedback, health)
       agent/
-        agent.py                 # Google ADK agent definition (MOST IMPORTANT FILE)
-        prompts.py               # System prompts
-        complexity.py            # Query complexity classifier (V1)
-        model_router.py          # Model selection (V1)
+        agent.py                 # Google ADK agent definition
+        prompts.py               # System prompts with domain rules
+        context_loader.py        # Loads schema + enrichments for prompt
         tools/                   # get_sample_data, validate_sql, execute_sql, suggest_viz
         langgraph/               # V2 multi-agent (graph.py, state.py, agents/)
       schema/
         extractor.py             # Extract metadata from BigQuery INFORMATION_SCHEMA
         formatter.py             # Format as terse schema string for system prompt
-      rag/                       # V1+ only (NOT needed for MVP)
-        embeddings.py            # Embedding generation (gemini-embedding-001)
-        retriever.py             # Two-phase retrieval
-        reranker.py              # LLM-based reranking
-        collections.py           # ChromaDB management
+        enrichments.py           # Table enrichment YAML loader
       bigquery/
         client.py                # BigQuery client wrapper
         safety.py                # Cost guards, DML detection
@@ -275,25 +267,22 @@ gen-analytics/
       services/                  # Business logic services
     scripts/
       extract_schema.py          # Extract metadata + generate terse schema (RUN FIRST)
-      seed_glossary.py           # Seed business glossary (V1+)
-      seed_examples.py           # Seed curated query examples (V1+)
-      evaluate.py                # Evaluation harness
+      evaluate.py                # Evaluation harness (35 test cases, 91.4% baseline)
+      measure_prompt.py          # Token breakdown by section
     tests/
+      eval/                      # simple/medium/complex query YAML test cases
     pyproject.toml
     Dockerfile
   frontend/
-    streamlit_app/               # MVP
+    streamlit_app/               # MVP (Streamlit)
     web/                         # V1+ (Phase 7) -- Vite + React + MUI + Emotion
   data/
-    glossary/business_terms.yaml
-    examples/query_examples.yaml
-    metadata/table_enrichments.yaml
+    metadata/table_enrichments.yaml  # Table descriptions + column notes
   docs/
     PRD.md
     TECH_SPEC.md
-    phase-1.md through phase-9.md
+    phase-1.md through phase-10.md
   docker-compose.yml
-  Makefile
 ```
 
 ---
@@ -302,16 +291,14 @@ gen-analytics/
 
 | Decision | Chosen | Why |
 |----------|--------|-----|
-| Google ADK for MVP | Free + learns agent patterns | Works with Vertex AI, native Gemini support |
+| Google ADK | Free + learns agent patterns | Works with Vertex AI, native Gemini support, built-in SSE + sessions |
 | Gemini via Vertex AI | No rate limits | Pay-as-go, auth via service account |
-| Full schema in context for MVP | Highest accuracy | Gemini's 1M context fits 500 tables (~250K tokens). Eliminates RAG retrieval errors. |
-| RAG as supplement in V1+ | Belt + suspenders | Full schema stays; RAG adds glossary, examples, rich metadata. NOT for table discovery. |
-| gemini-embedding-001 for V1+ | Free | Same API key as LLM |
-| ChromaDB (V1+) -> pgvector (prod) | Progressive infra | No vector DB in MVP. ChromaDB for V1, pgvector for production. |
-| Streamlit -> Vite + React + MUI | Progressive frontend | SPA like Metabase/Superset; MUI for fast development; same stack as SM Saarthi |
-| Multi-turn in MVP | User requirement | Conversation history from day one |
-| SSE over WebSocket | Simpler | Unidirectional streaming |
+| Full schema in context | Highest accuracy | Gemini's 1M context fits 101 tables (~6.8K tokens). Eliminates RAG retrieval errors. |
+| Table enrichments over RAG | Simpler, better results | Glossary/examples in prompt caused agent to overthink. Enriched schema + 3 domain rules = 91.4% accuracy. |
+| Streamlit (MVP) -> Vite + React + MUI (V1+) | Progressive frontend | SPA like Metabase/Superset; MUI for fast development; same stack as SM Saarthi |
 | ADK built-in SSE for V1+ | Same as SM Saarthi | `/run_sse` + session management for free; custom routes only for saved queries/feedback |
+| SSE over WebSocket | Simpler | Unidirectional streaming sufficient for query results |
 
-### Streamlit Deployment Note
-Streamlit runs as a separate process (port 8501) from FastAPI (port 8000). Two terminal windows during local dev. Streamlit calls FastAPI via HTTP.
+### Deployment Notes
+- **MVP (Streamlit)**: Two processes — FastAPI (port 8000) + Streamlit (port 8501). Streamlit calls FastAPI via HTTP.
+- **V1+ (React)**: ADK serves backend (port 8000) + static frontend at `/web`. Single process possible (like SM Saarthi).
