@@ -57,6 +57,8 @@ upi_prod.transaction_v3:
   description: "UPI payment transactions (P2P and P2M) -- core for GMV, success rate"
   important_columns:
     amount: "in rupees (NUMERIC)"
+    transaction_at: "epoch millis INT64 -- use TIMESTAMP_MILLIS(transaction_at) and compare with TIMESTAMP types (not DATE)"
+    created_at: "epoch millis INT64 -- use TIMESTAMP_MILLIS(created_at)"
     transaction_status: "SUCCESS, FAILED, DEEMED, DECLINED, PENDING, EXPIRED"
     transaction_type: "SCAN_PAY, P2P_PAY, INTENT_PAY, SELF_PAY, COLLECT_PAY"
     payment_mode: "DEBIT or CREDIT"
