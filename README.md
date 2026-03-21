@@ -18,26 +18,32 @@ Agent: validates SQL (dry-run) -> estimates scan: 450 MB ($0.003) -> executes ->
 
 ```
 React Chat UI  --SSE-->  ADK SSE Server (Google ADK)  -->  Gemini 2.5 Flash  -->  BigQuery
-                              |
-                        Tools: validate_sql, execute_sql, get_sample_data, suggest_visualization
+                              |                                    |
+                        Root Orchestrator              MySQL (sessions, audit, saved queries)
+                         ├── schema_explorer
+                         ├── sql_specialist (validate + self-correct)
+                         └── viz_recommender
                               |
                         Full schema (101 tables) in system prompt
 ```
 
 **Key design choices:**
+- **Multi-agent orchestration** -- root orchestrator routes to specialized sub-agents (schema_explorer, sql_specialist, viz_recommender) via ADK `transfer_to_agent`.
 - **Full schema in context** -- all 101 table schemas (~6.8K tokens) injected into the system prompt. No RAG needed; Gemini's 1M context handles it easily.
 - **Validate-before-execute** -- every query is dry-run validated before execution (free, catches errors, estimates cost).
-- **Self-correction** -- agent retries up to 3 times on validation failure, using error context to fix SQL.
+- **Self-correction** -- sql_specialist retries up to 3 times on validation failure, using error context to fix SQL.
 - **Human-in-the-loop** -- queries scanning >500 GB require user approval before execution.
 - **Cost guard** -- `maximumBytesBilled` (500 GB) enforced on every query.
+- **Audit logging** -- every query logged to MySQL via ADK `after_tool_callback`.
 
 ## Tech Stack
 
 | Component | Tool |
 |-----------|------|
-| Agent Framework | Google ADK |
+| Agent Framework | Google ADK (multi-agent with sub-agents) |
 | LLM | Gemini 2.5 Flash (via Vertex AI) |
 | Data Warehouse | Google BigQuery |
+| Database | MySQL 8.0 (sessions, saved queries, audit log) |
 | Frontend | Vite + React + shadcn/ui + Tailwind CSS |
 | Backend | Google ADK SSE Server (FastAPI) |
 | E2E Tests | Playwright |
@@ -47,6 +53,7 @@ React Chat UI  --SSE-->  ADK SSE Server (Google ADK)  -->  Gemini 2.5 Flash  -->
 ### Prerequisites
 
 - Python 3.12+
+- MySQL 8.0 (via Homebrew: `brew install mysql && brew services start mysql`)
 - GCP project with BigQuery access
 - Service account key with BigQuery Data Viewer + Job User roles
 - Vertex AI API enabled
@@ -75,6 +82,9 @@ python scripts/extract_schema.py <dataset1> <dataset2> ...
 ### Running
 
 ```bash
+# MySQL (first time: create database)
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS gen_analytics"
+
 # Terminal 1: Backend (ADK SSE server)
 cd backend
 source .venv/bin/activate
@@ -95,20 +105,23 @@ Open http://localhost:5173 and start asking questions.
 ```
 backend/
   app/
-    agent/           Agent definition, prompts, tools
+    agent/           Multi-agent system (orchestrator + sub-agents), prompts, tools, callbacks
     bigquery/        Client, safety checks, metadata
     schema/          Terse schema formatter
-    api/routes/      Custom endpoints (saved_queries)
+    db/              SQLAlchemy async (MySQL/SQLite) — models, engine
+    api/routes/      Custom endpoints (saved_queries, audit_log)
+    config.py        Settings via pydantic-settings
     main.py          ADK SSE server entry point
   agents/
     gen_analytics/   ADK-compatible agent wrapper
-  scripts/           extract_schema, test_agent, etc.
+  scripts/           extract_schema, test_agent, evaluate, etc.
 frontend/
   react-app/         Vite + React + TypeScript + shadcn/ui (production)
     e2e/             Playwright end-to-end tests
   streamlit_app/     Streamlit chat UI (legacy MVP)
 data/                Table enrichments metadata
 docs/                Phase docs (phase-1 through phase-10)
+docker-compose.yml   MySQL 8.0 container (optional, Homebrew also supported)
 ```
 
 ## Safety
@@ -127,8 +140,8 @@ docs/                Phase docs (phase-1 through phase-10)
 - [x] **Phase 6**: Complex queries (eval harness, 91.4% accuracy)
 - [x] **Phase 7**: React frontend (ADK SSE, Vite + React + shadcn/ui, dark mode, saved queries, Playwright tests)
 - [x] **Phase 8**: Multi-turn conversations (ADK sessions, pronoun resolution, clear session reset)
-- [ ] **Phase 9**: Multi-agent (LangGraph), auth, Cloud Run deployment
-- [ ] **Phase 10**: Model routing (optional — Gemini Flash + Claude Sonnet/Opus)
+- [x] **Phase 9**: Multi-agent + MySQL (ADK sub-agents, MySQL persistence, audit logging)
+- [ ] **Phase 10**: Production deployment (auth, Cloud SQL, Cloud Run, monitoring)
 
 ## License
 

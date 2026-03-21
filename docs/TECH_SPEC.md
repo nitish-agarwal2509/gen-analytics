@@ -5,41 +5,32 @@
 ```
 +------------------------------------------------------------------+
 |                        CLIENT LAYER                               |
-|  Streamlit (MVP)  |  Next.js + React (V1+)                       |
+|  React + Vite + shadcn/ui (production)  |  Streamlit (legacy)    |
 +------------------------------------------------------------------+
-                         HTTP / SSE
+                         ADK SSE (/run_sse)
 +------------------------------------------------------------------+
-|                        API LAYER                                  |
-|  FastAPI: POST /query, GET /query/{id}/stream, GET /history,     |
-|           POST /feedback, GET /schema/search                      |
-+------------------------------------------------------------------+
-                              |
-+------------------------------------------------------------------+
-|                     AGENT LAYER                                   |
-|  Google ADK (MVP, free) -> LangGraph (V2)                        |
-|  Tools: get_sample_data, validate_sql, execute_sql,              |
-|         suggest_viz, explain_query                                |
-|  MVP: Full terse schema in system prompt (no RAG needed)         |
-|  Self-correction loop: generate -> validate -> [error?] -> retry  |
+|                     AGENT LAYER (Google ADK)                      |
+|  Root Orchestrator (LlmAgent)                                    |
+|  ├── schema_explorer — metadata questions, no SQL                |
+|  ├── sql_specialist — writes, validates, self-corrects SQL       |
+|  └── viz_recommender — chart type recommendation                 |
+|  Root tools: execute_sql                                         |
+|  Sub-agent tools: validate_sql, get_sample_data, suggest_viz     |
+|  Full terse schema (101 tables) in sub-agent prompts             |
 +------------------------------------------------------------------+
               |                           |
 +------------------------+    +------------------------+
 |    SCHEMA LAYER        |    |    DATA LAYER           |
-| MVP: Full terse schema |    | BigQuery (read-only)    |
-|   in system prompt     |    | SQLite (MVP) /          |
-| V1+: + ChromaDB for    |    | PostgreSQL (prod)       |
-|   glossary, examples,  |    | (history, sessions,     |
-|   rich metadata        |    |  feedback, audit)       |
+| Full terse schema in   |    | BigQuery (read-only)    |
+|   system prompt        |    | MySQL 8.0               |
+| Table enrichments      |    | (sessions, saved        |
+|   from YAML            |    |  queries, audit log)    |
 +------------------------+    +------------------------+
               |
 +------------------------+
 |    LLM LAYER           |
-| MVP:                   |
-|  - Gemini 2.5 Flash    |
-|    (Vertex AI)          |
-| V1+:                   |
-|  - + Claude Sonnet/Opus |
-|    (Vertex AI)          |
+|  Gemini 2.5 Flash      |
+|  (Vertex AI)           |
 +------------------------+
 ```
 
@@ -47,57 +38,43 @@
 
 ## 2. Tech Stack
 
-### MVP Stack -- ALL FREE ($0 cost)
+### Current Stack
 
-| Component | Tool | Cost | License | Notes |
-|-----------|------|------|---------|-------|
-| Backend | Python + FastAPI | Free | MIT | Best AI/ML ecosystem |
-| Agent Framework | **Google ADK** | Free | Apache 2.0 | Works with Vertex AI, has built-in dev UI (`adk web`) |
-| LLM | **Gemini 2.5 Flash** (Vertex AI) | Pay-as-go | GCP | No rate limits. Auth via service account. |
-| Schema Strategy | Full terse schema in system prompt | Free | N/A | ~250K tokens for 500 tables. Fits in Gemini's 1M context. No vector DB needed for MVP. |
-| Frontend | **Streamlit** | Free | Apache 2.0 | Runs as separate process from FastAPI (port 8501 vs 8000) |
-| Charts | Plotly (via Streamlit) | Free | MIT | |
-| Data Store | SQLite | Free | Public domain | For session history, feedback |
-| Deployment | Local | Free | | Two processes: FastAPI + Streamlit |
+| Component | Tool | Notes |
+|-----------|------|-------|
+| Backend | Python + FastAPI (via ADK) | ADK SSE server with custom endpoints |
+| Agent Framework | **Google ADK** (multi-agent) | Sub-agents with `transfer_to_agent` routing |
+| LLM | **Gemini 2.5 Flash** (Vertex AI) | All agents use same model |
+| Database | **MySQL 8.0** | Sessions, saved queries, audit log (via SQLAlchemy async) |
+| Schema Strategy | Full terse schema in prompt | 101 tables, ~6.8K tokens |
+| Frontend | **Vite + React + shadcn/ui** | ADK SSE streaming, dark mode |
+| E2E Tests | Playwright | Mock + real backend tests |
 
-### Production Stack (V1+)
-
-| Component | Tool | Cost | Notes |
-|-----------|------|------|-------|
-| Agent Framework | LangGraph | Free (MIT) | Multi-agent orchestration |
-| LLM (simple) | Gemini Flash | Free tier or pay-as-go | Simple queries, embeddings, routing |
-| LLM (moderate) | Claude Sonnet 4 via Vertex AI | ~$3/M input tokens | Multi-table queries |
-| LLM (complex) | Claude Opus 4 via Vertex AI | ~$15/M input tokens | Complex analysis |
-| Vector DB | pgvector / AlloyDB | Paid (GCP) | Production-grade |
-| Frontend | Next.js + React | Free (MIT) | SSE streaming |
-| Deployment | Cloud Run | Pay-as-go | Serverless |
-
-### Why Google ADK over Claude Agent SDK for MVP
-- Google ADK works natively with Gemini via Vertex AI
-- ADK has built-in dev UI (`adk web`) and FastAPI server (`adk api_server`)
-- ADK is model-agnostic -- can switch to Claude/LangGraph later
+### Why Google ADK for Multi-Agent
+- Native `transfer_to_agent` for sub-agent routing
+- Built-in SSE server (`get_fast_api_app`)
+- `DatabaseSessionService` supports MySQL out of the box
+- `after_tool_callback` for audit logging
 
 ---
 
 ## 3. Agent Design
 
-### System Prompt (conceptual -- MVP)
+### Multi-Agent Architecture
 ```
-You are a data analyst assistant with access to a BigQuery warehouse.
-The FULL SCHEMA of all available tables is provided below.
-
-1. Understand the user's question
-2. Identify relevant tables from the schema below
-3. Generate BigQuery SQL
-4. ALWAYS validate with validate_sql before execution
-5. Execute and present results with visualization
-
-RULES: Always validate SQL, always use partition filters, NEVER generate DML,
-max 3 self-correction attempts, show reasoning about table selection.
-
-SCHEMA:
-{terse_schema_string}   <-- ~250K tokens of all 500+ tables
+Root Orchestrator (LlmAgent) — routes, executes SQL, summarizes
+├── schema_explorer (LlmAgent) — metadata questions, no SQL
+├── sql_specialist (LlmAgent) — writes, validates, self-corrects SQL
+└── viz_recommender (LlmAgent) — chart type recommendation
 ```
+
+**Flow for data questions:**
+1. Root → transfer to `sql_specialist` (writes SQL, validates, self-corrects)
+2. sql_specialist → transfer back to Root with validated SQL
+3. Root → calls `execute_sql`
+4. Root → transfer to `viz_recommender`
+5. viz_recommender → transfer back to Root with chart recommendation
+6. Root → provides natural language summary
 
 **Why full schema in context (not RAG):**
 - Gemini 2.5 Flash has 1M token context. 500 tables in terse format = ~250K tokens. Fits easily.
@@ -132,13 +109,17 @@ User Question + Full Schema in Context -> Generate SQL
                            No -> Return error with explanation
 ```
 
-### Multi-Agent Architecture (V2 - LangGraph)
+### Multi-Agent (Implemented — ADK sub-agents)
 ```
-User Question -> [PLANNER] -> [SCHEMA AGENT] -> [SQL AGENT] -> [VALIDATOR] -> [VIZ AGENT]
-                    |              |                  |
-               Classifies    Finds tables,       Generates SQL
-               complexity    resolves joins       (model varies)
+User Question -> [ROOT ORCHESTRATOR] -> transfer_to_agent -> [SQL_SPECIALIST]
+                        |                                          |
+                  execute_sql                          validate_sql + self-correct
+                        |                                          |
+                  [VIZ_RECOMMENDER] <--- transfer back --- validated SQL
+                        |
+                  Natural language summary
 ```
+*Note: Originally planned LangGraph. Switched to ADK native sub-agents — same patterns, no rewrite needed.*
 
 ---
 
@@ -201,16 +182,24 @@ Claude Sonnet/Opus have 200K context -- full schema doesn't fit. For Claude-rout
 
 ## 6. API Design
 
+### ADK Built-in Endpoints
 ```
-POST   /api/v1/query              Submit NL question -> returns query_id + stream_url
-GET    /api/v1/query/{id}/stream  SSE stream: status -> sql -> results -> viz -> done
-GET    /api/v1/query/{id}         Get completed result (polling fallback)
-GET    /api/v1/history            Session query history
-POST   /api/v1/feedback           Thumbs up/down
-GET    /api/v1/schema/search      Search table metadata
+POST   /run_sse                                        SSE streaming (agent execution)
+POST   /apps/{app}/users/{user}/sessions               Create session
+GET    /apps/{app}/users/{user}/sessions/{id}           Get session
+DELETE /apps/{app}/users/{user}/sessions/{id}           Delete session
+GET    /health                                         Health check
 ```
 
-**SSE events**: `status`, `sql`, `results`, `visualization`, `explanation`, `done`, `error`
+### Custom Endpoints
+```
+GET    /api/v1/saved-queries       List saved queries
+POST   /api/v1/saved-queries       Create saved query
+DELETE /api/v1/saved-queries/{id}   Delete saved query
+GET    /api/v1/audit-log           Query audit history (limit, offset)
+```
+
+**SSE events** (from ADK `/run_sse`): ADK events with `functionCall`, `functionResponse`, `text` parts. Frontend parses these into thinking steps, SQL, results, viz, and explanation.
 
 ---
 
@@ -221,12 +210,10 @@ GET    /api/v1/schema/search      Search table metadata
 | Read-only access | Service account: BigQuery Data Viewer + Job User only |
 | DML prevention | SQL parser rejects non-SELECT before dry-run |
 | Dry-run validation | Every query validated before execution |
-| Cost limits | `maximumBytesBilled` on every query (default 10GB) |
-| Partition enforcement | Agent must include partition filters |
-| Result limits | Max 1000 rows per query |
-| Auth (V1) | Google OAuth 2.0 |
-| Row-level security (V1) | BigQuery RLS + authorized views |
-| Audit (V1) | Full query trail |
+| Cost limits | `maximumBytesBilled` on every query (500 GB cap) |
+| Result limits | Max 100 rows per query (configurable via max_rows param) |
+| Audit logging | Every execute_sql call logged to MySQL via ADK callback |
+| Auth (Phase 10) | Google OAuth / IAP |
 
 ---
 
@@ -236,54 +223,46 @@ GET    /api/v1/schema/search      Search table metadata
 gen-analytics/
   backend/
     app/
-      main.py                    # FastAPI entry point
+      main.py                    # ADK SSE server entry point
       config.py                  # Settings (pydantic-settings)
       agent/
-        agent.py                 # Google ADK agent definition (MOST IMPORTANT FILE)
-        prompts.py               # System prompts
+        agent.py                 # Multi-agent system (create_agent + create_single_agent)
+        prompts.py               # Per-agent prompts (orchestrator, sql_specialist, etc.)
+        callbacks.py             # ADK callbacks (audit logging)
         context_loader.py        # Assembles schema with enrichments
         tools/                   # get_sample_data, validate_sql, execute_sql, suggest_viz
-        # Future (V1+):
-        # complexity.py          # Query complexity classifier
-        # model_router.py        # Model selection
-        # langgraph/             # V2 multi-agent (graph.py, state.py, agents/)
       schema/
         formatter.py             # Format as terse schema string for system prompt
         enrichments.py           # Load table enrichments from YAML
-      # Future (V1+):
-      # rag/                     # NOT needed for MVP
-      #   embeddings.py, retriever.py, reranker.py, collections.py
+      db/
+        database.py              # Async SQLAlchemy engine (MySQL/SQLite)
+        models.py                # SavedQuery + AuditLog models
       bigquery/
         client.py                # BigQuery client wrapper
         safety.py                # Cost guards, DML detection
         metadata.py              # INFORMATION_SCHEMA queries
-      # Future (V1+):
-      # api/routes/              # SSE streaming endpoints (Phase 7)
-      # models/                  # Pydantic data models
-      # services/                # Business logic services
+      api/routes/
+        saved_queries.py         # CRUD for saved queries
+        audit.py                 # Read-only audit log endpoint
+    agents/
+      gen_analytics/agent.py     # ADK agent discovery wrapper
     scripts/
       extract_schema.py          # Extract metadata + generate terse schema (RUN FIRST)
       evaluate.py                # Evaluation harness
       test_agent.py              # End-to-end agent test (dry-run)
-      # Future (V1+):
-      # seed_glossary.py         # Seed business glossary
-      # seed_examples.py         # Seed curated query examples
     tests/
     pyproject.toml
-    # Future: Dockerfile
   frontend/
-    streamlit_app/               # MVP
-    # Future (V1+): nextjs_app/  # Phase 7
+    react-app/                   # Vite + React + shadcn/ui (production)
+      e2e/                       # Playwright tests
+    streamlit_app/               # Legacy MVP
   data/
     metadata/table_enrichments.yaml
-    # Future (V1+):
-    # glossary/business_terms.yaml
-    # examples/query_examples.yaml
   docs/
     PRD.md
     TECH_SPEC.md
     phase-1.md through phase-10.md
-  # Future: docker-compose.yml, Makefile
+  docker-compose.yml             # MySQL 8.0 (optional)
 ```
 
 ---
@@ -292,11 +271,12 @@ gen-analytics/
 
 | Decision | Chosen | Why |
 |----------|--------|-----|
-| Google ADK for MVP | Free + learns agent patterns | Works with Vertex AI, native Gemini support |
+| ADK for multi-agent | Native sub-agents | `transfer_to_agent`, `after_tool_callback`, `DatabaseSessionService` — all built-in |
+| ADK over LangGraph | No rewrite needed | Same orchestration patterns, already using ADK from Phase 1 |
 | Gemini via Vertex AI | No rate limits | Pay-as-go, auth via service account |
-| Full schema in context for MVP | Highest accuracy | Gemini's 1M context fits 500 tables (~250K tokens). Eliminates RAG retrieval errors. |
-| RAG as supplement in V1+ | Belt + suspenders | Full schema stays; RAG adds glossary, examples, rich metadata. NOT for table discovery. |
-| gemini-embedding-001 for V1+ | Free | Same API key as LLM |
+| Full schema in context | Highest accuracy | 101 tables (~6.8K tokens) fits easily in Gemini's 1M context |
+| MySQL over SQLite | Production-ready | Concurrent access, ADK native support, Cloud SQL for deployment |
+| Flat sub-agents over SequentialAgent | Reliable transfers | SequentialAgent doesn't transfer back to parent; flat sub-agents with explicit transfer work reliably |
 | ChromaDB (V1+) -> pgvector (prod) | Progressive infra | No vector DB in MVP. ChromaDB for V1, pgvector for production. |
 | Streamlit -> Next.js | Progressive frontend | No JS context-switch during backend focus |
 | Multi-turn in MVP | User requirement | Conversation history from day one |
