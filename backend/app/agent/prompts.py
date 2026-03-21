@@ -1,24 +1,5 @@
 """System prompts for the GenAnalytics agent (single-agent and multi-agent)."""
 
-from datetime import date
-
-
-def _app_context_block(ctx) -> str:
-    """Build context block from app-level state. Used in dynamic instructions."""
-    state = ctx.state if ctx else {}
-    current_date = state.get("app:current_date", str(date.today()))
-    timezone = state.get("app:default_timezone", "Asia/Kolkata")
-    fiscal_year_start = state.get("app:fiscal_year_start", "April")
-    row_limit = state.get("app:default_row_limit", 100)
-
-    return f"""\
-CONTEXT:
-- Today's date: {current_date}
-- Default timezone: {timezone}
-- Fiscal year starts: {fiscal_year_start}
-- Default row limit: {row_limit}
-"""
-
 # ---------------------------------------------------------------------------
 # Original single-agent prompt (backward compat for eval harness + test scripts)
 # ---------------------------------------------------------------------------
@@ -108,16 +89,11 @@ MULTI-TURN RULES:
 """
 
 
-def build_orchestrator_prompt(ctx) -> str:
-    """Root orchestrator: routes to sub-agents, executes validated SQL, communicates results.
-
-    Dynamic instruction — receives ReadonlyContext, reads app-level state.
-    """
+def build_orchestrator_prompt() -> str:
+    """Root orchestrator: routes to sub-agents, executes validated SQL, communicates results."""
     return f"""\
 You are GenAnalytics, a data analyst orchestrator for BigQuery.
 You coordinate specialized sub-agents to answer data questions.
-
-{_app_context_block(ctx)}
 
 FOR SCHEMA/METADATA QUESTIONS ("what tables have user data?", "show me columns of X"):
 → Transfer to schema_explorer. It will answer and transfer back.
@@ -157,16 +133,10 @@ Available tables and their schemas:
 """
 
 
-def build_sql_specialist_prompt(terse_schema: str):
-    """SQL specialist: writes SQL, validates via dry-run, and self-corrects errors.
-
-    Returns a dynamic instruction function that injects app-level state (current date, timezone).
-    """
-    def _instruction(ctx) -> str:
-        return f"""\
+def build_sql_specialist_prompt(terse_schema: str) -> str:
+    """SQL specialist: writes SQL, validates via dry-run, and self-corrects errors."""
+    return f"""\
 You are a BigQuery SQL specialist. Given a natural language question, write SQL, validate it, and fix any errors.
-
-{_app_context_block(ctx)}
 
 WORKFLOW:
 1. Write a BigQuery SQL query for the user's question.
@@ -195,7 +165,6 @@ Available tables and their schemas:
 
 {terse_schema}
 """
-    return _instruction
 
 
 def build_viz_recommender_prompt() -> str:
