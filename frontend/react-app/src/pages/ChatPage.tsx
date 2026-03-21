@@ -41,7 +41,17 @@ export const ChatPage = forwardRef<ChatPageHandle, ChatPageProps>(
     const messages = externalMessages ?? internalMessages;
     const setMessages = onMessagesChange ?? setInternalMessages;
 
-    const { state, submitQuery, reset, clearSession } = useQueryStream();
+    const { state, submitQuery, reset, clearSession, loadSessionHistory } = useQueryStream();
+
+    // Restore chat history from session on mount
+    useEffect(() => {
+      loadSessionHistory().then((restored) => {
+        if (restored.length > 0) {
+          setMessages(restored);
+        }
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // When query completes, push into messages
     useEffect(() => {

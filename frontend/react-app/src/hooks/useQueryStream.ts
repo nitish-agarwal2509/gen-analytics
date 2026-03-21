@@ -1,6 +1,7 @@
 import { useCallback, useReducer, useRef } from "react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import type {
+  Message,
   QueryState,
   ThinkingStep,
   ValidationResult,
@@ -267,5 +268,147 @@ export function useQueryStream() {
     localStorage.removeItem(SESSION_KEY);
   }, []);
 
-  return { state, submitQuery, reset, clearSession } as const;
+  /** Load chat history from ADK session events on page refresh. */
+  const loadSessionHistory = useCallback(async (): Promise<Message[]> => {
+    const sessionId = localStorage.getItem(SESSION_KEY);
+    if (!sessionId) return [];
+
+    try {
+      const res = await fetch(
+        `${BACKEND}/apps/${APP_NAME}/users/${USER_ID}/sessions/${sessionId}`,
+      );
+      if (!res.ok) {
+        localStorage.removeItem(SESSION_KEY);
+        sessionIdRef.current = null;
+        return [];
+      }
+
+      const session = await res.json();
+      const events: unknown[] = session.events ?? [];
+      const messages: Message[] = [];
+
+      // Track state per invocation to reconstruct assistant messages
+      let currentQuestion = "";
+      let sql: string | null = null;
+      let validation: ValidationResult | null = null;
+      let results: QueryResults | null = null;
+      let viz: VizConfig | null = null;
+      let explanation = "";
+      let toolCalls: string[] = [];
+
+      for (const evt of events) {
+        const e = evt as Record<string, unknown>;
+        const content = e.content as Record<string, unknown> | undefined;
+        if (!content?.parts) continue;
+        const parts = content.parts as Record<string, unknown>[];
+        const role = content.role as string;
+
+        for (const part of parts) {
+          if (role === "user" && part.text) {
+            // Flush previous assistant message if any
+            if (currentQuestion && (explanation || results || sql)) {
+              messages.push({
+                id: crypto.randomUUID(),
+                role: "assistant",
+                content: explanation || "Query completed.",
+                queryState: {
+                  status: "done",
+                  queryId: null,
+                  steps: [],
+                  sql,
+                  validation,
+                  results,
+                  visualization: viz,
+                  explanation,
+                  error: null,
+                  elapsedSeconds: null,
+                  toolCalls,
+                },
+                timestamp: Date.now(),
+              });
+              sql = null; validation = null; results = null; viz = null;
+              explanation = ""; toolCalls = [];
+            }
+
+            // Skip internal transfer messages
+            const text = part.text as string;
+            if (text && !text.startsWith("{")) {
+              currentQuestion = text;
+              messages.push({
+                id: crypto.randomUUID(),
+                role: "user",
+                content: text,
+                timestamp: Date.now(),
+              });
+            }
+          }
+
+          // Track tool calls and responses for state reconstruction
+          if (part.functionCall) {
+            const fc = part.functionCall as Record<string, unknown>;
+            const name = fc.name as string;
+            const args = fc.args as Record<string, unknown> | undefined;
+            if (name && name !== "transfer_to_agent") {
+              toolCalls.push(name);
+            }
+            if ((name === "validate_sql" || name === "execute_sql") && args?.sql) {
+              sql = args.sql as string;
+            }
+          }
+
+          if (part.functionResponse) {
+            const fr = part.functionResponse as Record<string, unknown>;
+            const name = fr.name as string;
+            const resp = fr.response as Record<string, unknown> | undefined;
+            if (!resp) continue;
+
+            if (name === "validate_sql") {
+              validation = resp as unknown as ValidationResult;
+            } else if (name === "execute_sql" && !("error" in resp)) {
+              results = resp as unknown as QueryResults;
+            } else if (name === "suggest_visualization") {
+              viz = resp as unknown as VizConfig;
+            }
+          }
+
+          // Capture final text from the orchestrator
+          if (role === "model" && part.text) {
+            const author = (e as Record<string, unknown>).author as string | undefined;
+            if (author === "gen_analytics") {
+              explanation = part.text as string;
+            }
+          }
+        }
+      }
+
+      // Flush last assistant message
+      if (currentQuestion && (explanation || results || sql)) {
+        messages.push({
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: explanation || "Query completed.",
+          queryState: {
+            status: "done",
+            queryId: null,
+            steps: [],
+            sql,
+            validation,
+            results,
+            visualization: viz,
+            explanation,
+            error: null,
+            elapsedSeconds: null,
+            toolCalls,
+          },
+          timestamp: Date.now(),
+        });
+      }
+
+      return messages;
+    } catch {
+      return [];
+    }
+  }, []);
+
+  return { state, submitQuery, reset, clearSession, loadSessionHistory } as const;
 }
