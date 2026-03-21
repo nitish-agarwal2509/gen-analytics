@@ -69,7 +69,7 @@ def create_agent() -> LlmAgent:
         name="gen_analytics",
         model="gemini-2.5-flash",
         description="Root orchestrator for GenAnalytics.",
-        instruction=build_orchestrator_prompt(),
+        instruction=build_orchestrator_prompt,
         tools=[
             FunctionTool(execute_sql),
         ],

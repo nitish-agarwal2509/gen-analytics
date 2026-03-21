@@ -25,7 +25,7 @@ from app.db.database import init_db
 
 @asynccontextmanager
 async def lifespan(_app):
-    """Initialize app DB tables on startup."""
+    """Initialize DB tables on startup."""
     await init_db()
     yield
 
