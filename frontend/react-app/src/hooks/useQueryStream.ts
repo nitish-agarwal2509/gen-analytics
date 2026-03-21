@@ -85,10 +85,14 @@ const TOOL_LABELS: Record<string, string> = {
 
 // ---- Hook ----
 
+const SESSION_KEY = "ga_session_id";
+
 export function useQueryStream() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const abortRef = useRef<AbortController | null>(null);
-  const sessionIdRef = useRef<string | null>(null);
+  const sessionIdRef = useRef<string | null>(
+    localStorage.getItem(SESSION_KEY),
+  );
 
   const cancelStream = useCallback(() => {
     abortRef.current?.abort();
@@ -96,7 +100,19 @@ export function useQueryStream() {
   }, []);
 
   const createSession = useCallback(async (signal: AbortSignal): Promise<string> => {
-    if (sessionIdRef.current) return sessionIdRef.current;
+    // Try to reuse existing session from localStorage
+    if (sessionIdRef.current) {
+      // Validate it still exists on the server
+      const check = await fetch(
+        `${BACKEND}/apps/${APP_NAME}/users/${USER_ID}/sessions/${sessionIdRef.current}`,
+        { signal },
+      );
+      if (check.ok) return sessionIdRef.current;
+      // Session expired/deleted — create new one
+      sessionIdRef.current = null;
+      localStorage.removeItem(SESSION_KEY);
+    }
+
     const res = await fetch(
       `${BACKEND}/apps/${APP_NAME}/users/${USER_ID}/sessions`,
       { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}", signal },
@@ -104,6 +120,7 @@ export function useQueryStream() {
     if (!res.ok) throw new Error("Failed to create session");
     const { id } = await res.json();
     sessionIdRef.current = id;
+    localStorage.setItem(SESSION_KEY, id);
     return id;
   }, []);
 
@@ -247,6 +264,7 @@ export function useQueryStream() {
 
   const clearSession = useCallback(() => {
     sessionIdRef.current = null;
+    localStorage.removeItem(SESSION_KEY);
   }, []);
 
   return { state, submitQuery, reset, clearSession } as const;

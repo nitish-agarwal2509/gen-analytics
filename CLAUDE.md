@@ -5,12 +5,13 @@ Natural language analytics tool for BigQuery. Ask questions in plain English, ge
 ## Project Structure
 
 ```
-backend/           Python backend (ADK SSE server + Google ADK agent)
+backend/           Python backend (ADK SSE server + multi-agent system)
   app/
-    agent/         Agent definition + tools (execute_sql, validate_sql, etc.)
+    agent/         Multi-agent definition (orchestrator + sub-agents) + tools + callbacks
     bigquery/      BigQuery client, safety, metadata extraction
     schema/        Terse schema formatter for system prompt injection
-    api/routes/    Custom endpoints (saved_queries)
+    db/            SQLAlchemy async (MySQL/SQLite) — models, engine, session factory
+    api/routes/    Custom endpoints (saved_queries, audit_log)
     config.py      Settings via pydantic-settings
     main.py        ADK SSE server entry point
   agents/          ADK agent discovery directory
@@ -27,6 +28,10 @@ docs/              PRD, Tech Spec, phase docs (phase-1 through phase-10)
 ## Development
 
 ```bash
+# MySQL (local via Homebrew)
+brew services start mysql
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS gen_analytics"
+
 # Backend (ADK SSE server)
 cd backend
 source .venv/bin/activate
@@ -50,11 +55,12 @@ streamlit run app.py                   # Streamlit on port 8501
 - Agent schema: dynamically loaded from `backend/data/schema_metadata.json` (101 tables, ~6.8K tokens)
 - Schema refresh: `cd backend && python scripts/extract_schema.py <datasets...>`
 - LLM: Gemini 2.5 Flash via Vertex AI (`GOOGLE_GENAI_USE_VERTEXAI=true`)
+- MySQL: local via Homebrew (`MYSQL_URL=mysql+aiomysql://root@localhost:3306/gen_analytics`)
 
 ## Key Decisions
 
 - **Full terse schema in system prompt** (not RAG) for MVP — Gemini's 1M context fits all tables
-- **Google ADK** for agent framework, Gemini via Vertex AI (no free tier rate limits)
+- **Google ADK** for agent framework + multi-agent orchestration, Gemini via Vertex AI
 - **RAG deferred to V1+** as supplement only (glossary + examples), not for table discovery
 - **Validate-before-execute**: Agent always calls `validate_sql` (dry-run) before `execute_sql`
 - **Cost guard**: `maximumBytesBilled` set to 500 GB on every query execution
@@ -73,5 +79,5 @@ streamlit run app.py                   # Streamlit on port 8501
 - [x] Phase 6: Complex Query Handling (eval harness 91.4% accuracy; recipes/strategies skipped — not needed)
 - [x] Phase 7: React Frontend (ADK SSE streaming, Vite + React + shadcn/ui, dark mode, saved queries, Playwright e2e tests)
 - [x] Phase 8: Multi-Turn Conversations (ADK sessions, pronoun resolution, follow-ups, clear session reset)
-- [ ] Phase 9: Multi-Agent & Production (LangGraph, auth, audit, Cloud Run)
-- [ ] Phase 10: Model Routing & Paid Models (optional — complexity classifier, Claude via Vertex AI, escalation)
+- [x] Phase 9: Multi-Agent + MySQL (ADK sub-agents, MySQL persistence, audit logging, session persistence)
+- [ ] Phase 10: Production Deployment (auth, Cloud SQL, Cloud Run, monitoring)
