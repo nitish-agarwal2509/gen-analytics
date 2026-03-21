@@ -56,30 +56,26 @@ Features are built incrementally across development phases 1-5:
 | Query History + Multi-Turn | In-memory session history doubles as conversation context for follow-up questions | P3 |
 | Basic Visualization | Auto-detect result shape -> table, bar chart, or line chart | P4 |
 
-### V1 -- Introduce paid models
+### V1 (Shipped as Phases 7-9)
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| React Frontend | Vite + React + shadcn/ui, replaced Streamlit | Done (Phase 7) |
+| Multi-Turn Conversations | ADK sessions, pronoun resolution, follow-ups | Done (Phase 8) |
+| Saved Queries | Persist and search query library (MySQL) | Done (Phase 7+9) |
+| Multi-Agent (ADK) | Root orchestrator, schema_explorer, sql_specialist, viz_recommender | Done (Phase 9) |
+| MySQL Persistence | Sessions, saved queries, audit log on MySQL | Done (Phase 9) |
+| Audit Log | Full query audit trail via ADK callback | Done (Phase 9) |
+
+### V2 -- Production Deployment (Phase 10)
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
-| RAG Supplement | ChromaDB for business glossary, few-shot examples, rich metadata (NOT for table discovery) | P0 |
-| Business Glossary | Term -> SQL pattern mapping ("churn" -> specific CTE) via RAG | P0 |
-| Few-Shot Examples | Curated query examples via RAG | P0 |
-| Model Routing | Simple -> Gemini Flash, moderate -> Claude Sonnet, complex -> Claude Opus (paid) | P1 |
-| Rich Visualizations | Heatmaps, scatter, funnels, cohort grids | P1 |
-| Query Explanation | NL explanation of SQL logic | P1 |
-| Feedback Loop | Thumbs up/down on results | P1 |
-| Next.js Frontend | Migrate from Streamlit to production UI | P1 |
-| Saved Queries | Persist and search query library | P2 |
-
-### V2 -- Multi-agent + Production
-
-| Feature | Description | Priority |
-|---------|-------------|----------|
-| Multi-Agent (LangGraph) | Planner, schema, SQL, validator, viz agents | P0 |
-| Dashboard Builder | Compose saved queries into dashboards | P1 |
-| User Management | Auth, per-user quotas, RLS pass-through | P1 |
-| Audit Log | Full query audit trail | P1 |
-| Cloud Run Deployment | Production GCP deployment | P1 |
-| Anomaly Detection | Automated deviation detection | P2 |
+| Auth | Google OAuth / IAP | P0 |
+| Cloud SQL | Migrate local MySQL to managed Cloud SQL | P0 |
+| Cloud Run Deployment | Dockerized backend + static frontend | P0 |
+| Monitoring | Cloud Logging, health checks, alerting | P1 |
+| Dashboard Builder | Compose saved queries into dashboards | P2 |
 | Scheduled Reports | Cron-based execution + email/Slack delivery | P2 |
 
 ---

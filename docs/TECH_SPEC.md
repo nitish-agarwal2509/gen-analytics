@@ -141,42 +141,29 @@ User Question -> [ROOT ORCHESTRATOR] -> transfer_to_agent -> [SQL_SPECIALIST]
 
 **Note:** Using Vertex AI — no TPM/RPD rate limits that affect development.
 
-### V1+: Add RAG as Supplement (Not Replacement)
+### Future: RAG as Supplement (Not Replacement)
 
-Full terse schema stays in context. RAG adds supplementary information:
+Full terse schema stays in context. RAG could add supplementary information:
 
 1. **business_glossary**: Map terms like "churn", "MRR", "CAC" to SQL patterns
 2. **query_examples**: Few-shot examples of similar questions with vetted SQL
-3. **rich_metadata**: Detailed descriptions, sample values, join hints for top candidate tables
 
-This "belt and suspenders" approach gives highest accuracy: full schema for table discovery + RAG for business context.
+*Not implemented — current 91.4% accuracy with full schema in context is sufficient.*
 
-### V2: RAG for Claude Models (Mandatory)
-
-Claude Sonnet/Opus have 200K context -- full schema doesn't fit. For Claude-routed queries, use RAG to select top 10-20 tables.
-
-### Metadata Pipeline (needed for all phases)
+### Metadata Pipeline
 1. Extract raw metadata from BigQuery `INFORMATION_SCHEMA`
 2. Format as terse schema string for system prompt injection
-3. (V1+) Enrich with business descriptions, embed in ChromaDB
+3. Load table enrichments from YAML (descriptions, notes)
 
 ---
 
-## 5. Model Routing
+## 5. Model
 
-### MVP -- Gemini via Vertex AI
+| Model | Usage | Cost/Query |
+|-------|-------|------------|
+| Gemini 2.5 Flash (Vertex AI) | All agents (orchestrator, sql_specialist, schema_explorer, viz_recommender) | ~$0.0003 |
 
-| Complexity | Model | Cost/Query |
-|------------|-------|------------|
-| ALL | Gemini 2.5 Flash (Vertex AI) | ~$0.0003 |
-
-### V1+ -- Paid Hybrid Routing
-
-| Complexity | Model | When | Cost/Query |
-|------------|-------|------|------------|
-| LOW | Gemini Flash | Single table, simple aggregation | ~$0.0003 |
-| MEDIUM | Claude Sonnet 4 (Vertex AI) | 2-3 table joins, GROUP BY | ~$0.016 |
-| HIGH | Claude Opus 4 (Vertex AI) | Cohorts, funnels, statistical | ~$0.20 |
+*Model routing (Gemini + Claude) was considered but dropped — Gemini 2.5 Flash handles all complexity levels adequately.*
 
 ---
 
@@ -277,10 +264,6 @@ gen-analytics/
 | Full schema in context | Highest accuracy | 101 tables (~6.8K tokens) fits easily in Gemini's 1M context |
 | MySQL over SQLite | Production-ready | Concurrent access, ADK native support, Cloud SQL for deployment |
 | Flat sub-agents over SequentialAgent | Reliable transfers | SequentialAgent doesn't transfer back to parent; flat sub-agents with explicit transfer work reliably |
-| ChromaDB (V1+) -> pgvector (prod) | Progressive infra | No vector DB in MVP. ChromaDB for V1, pgvector for production. |
-| Streamlit -> Next.js | Progressive frontend | No JS context-switch during backend focus |
-| Multi-turn in MVP | User requirement | Conversation history from day one |
-| SSE over WebSocket | Simpler | Unidirectional streaming |
-
-### Streamlit Deployment Note
-Streamlit runs as a separate process (port 8501) from FastAPI (port 8000). Two terminal windows during local dev. Streamlit calls FastAPI via HTTP.
+| Streamlit → Vite + React | Production frontend | shadcn/ui + Tailwind, ADK SSE streaming |
+| Multi-turn via ADK sessions | User requirement | Conversation history persisted in MySQL |
+| SSE over WebSocket | Simpler | ADK built-in SSE via `/run_sse` |
