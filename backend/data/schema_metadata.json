@@ -1,0 +1,3847 @@
+[
+  {
+    "table_name": "payouts_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.payouts_v2",
+    "row_count": 31877581,
+    "size_bytes": 5992092553,
+    "columns": [
+      {
+        "name": "payout_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "amount",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "partner_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "payment_mode",
+        "type": "STRING"
+      },
+      {
+        "name": "payout_partner",
+        "type": "STRING"
+      },
+      {
+        "name": "payout_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "payout_status",
+        "type": "STRING"
+      },
+      {
+        "name": "payout_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "payee_vpa",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "payouts_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.payouts_v3",
+    "row_count": 119126749,
+    "size_bytes": 22765603626,
+    "columns": [
+      {
+        "name": "payout_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "amount",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "partner_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "payment_mode",
+        "type": "STRING"
+      },
+      {
+        "name": "payout_partner",
+        "type": "STRING"
+      },
+      {
+        "name": "payout_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "payout_status",
+        "type": "STRING"
+      },
+      {
+        "name": "payout_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "payee_vpa",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "redemptions_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.redemptions_v2",
+    "row_count": 32400196,
+    "size_bytes": 5286586713,
+    "columns": [
+      {
+        "name": "redemption_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "payout_id",
+        "type": "STRING"
+      },
+      {
+        "name": "qty",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "display_message",
+        "type": "STRING"
+      },
+      {
+        "name": "redemption_status",
+        "type": "STRING"
+      },
+      {
+        "name": "redemption_type",
+        "type": "STRING"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "waller_ref_id",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "redemptions_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.redemptions_v3",
+    "row_count": 119808761,
+    "size_bytes": 24192244494,
+    "columns": [
+      {
+        "name": "redemption_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "payout_id",
+        "type": "STRING"
+      },
+      {
+        "name": "qty",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "display_message",
+        "type": "STRING"
+      },
+      {
+        "name": "redemption_status",
+        "type": "STRING"
+      },
+      {
+        "name": "redemption_type",
+        "type": "STRING"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "waller_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "request_meta_data",
+        "type": "JSON"
+      },
+      {
+        "name": "redemption_ref_id",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "reward_event",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.reward_event",
+    "row_count": 86252370,
+    "size_bytes": 44221045254,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "event_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "event_source",
+        "type": "STRING"
+      },
+      {
+        "name": "type",
+        "type": "STRING"
+      },
+      {
+        "name": "event_type_state",
+        "type": "STRING"
+      },
+      {
+        "name": "payload",
+        "type": "JSON"
+      },
+      {
+        "name": "reward_eligible",
+        "type": "BOOL"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "reversal_identifier",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "reward_event_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.reward_event_v2",
+    "row_count": 492053538,
+    "size_bytes": 267657873006,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "event_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "event_source",
+        "type": "STRING"
+      },
+      {
+        "name": "type",
+        "type": "STRING"
+      },
+      {
+        "name": "event_type_state",
+        "type": "STRING"
+      },
+      {
+        "name": "payload",
+        "type": "JSON"
+      },
+      {
+        "name": "reward_eligible",
+        "type": "BOOL"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "reversal_identifier",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "reward_event_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.reward_event_v3",
+    "row_count": 3977544646,
+    "size_bytes": 2218229543394,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "event_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "event_source",
+        "type": "STRING"
+      },
+      {
+        "name": "type",
+        "type": "STRING"
+      },
+      {
+        "name": "event_type_state",
+        "type": "STRING"
+      },
+      {
+        "name": "payload",
+        "type": "JSON"
+      },
+      {
+        "name": "reward_eligible",
+        "type": "BOOL"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "reversal_identifier",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "reward_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.reward_v2",
+    "row_count": 833277028,
+    "size_bytes": 317366918375,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "event_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "reversal_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "type",
+        "type": "STRING"
+      },
+      {
+        "name": "flow",
+        "type": "STRING"
+      },
+      {
+        "name": "payload",
+        "type": "JSON"
+      },
+      {
+        "name": "metadata",
+        "type": "JSON"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "settlement_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "reward_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.reward_v3",
+    "row_count": 5031495944,
+    "size_bytes": 1970349767137,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "event_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "reversal_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "type",
+        "type": "STRING"
+      },
+      {
+        "name": "flow",
+        "type": "STRING"
+      },
+      {
+        "name": "payload",
+        "type": "JSON"
+      },
+      {
+        "name": "metadata",
+        "type": "JSON"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "settlement_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "rule_engine_metadata_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.rule_engine_metadata_v2",
+    "row_count": 445110028,
+    "size_bytes": 174082288816,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "event_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "rules_data",
+        "type": "JSON"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "rule_engine_metadata_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.rule_engine_metadata_v3",
+    "row_count": 3999593195,
+    "size_bytes": 2981215222962,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "event_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "rules_data",
+        "type": "JSON"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "source_request_log_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.source_request_log_v2",
+    "row_count": 185376,
+    "size_bytes": 44860992,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "request_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "source",
+        "type": "STRING"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "request_origin_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "request_data",
+        "type": "JSON"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "source_request_log_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.source_request_log_v3",
+    "row_count": 9269786,
+    "size_bytes": 2243232138,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "request_ref_id",
+        "type": "STRING"
+      },
+      {
+        "name": "source",
+        "type": "STRING"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "request_origin_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "request_data",
+        "type": "JSON"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "user_reward_detail",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.user_reward_detail",
+    "row_count": 20178,
+    "size_bytes": 13291590,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "is_sm_cc_linked",
+        "type": "BOOL"
+      },
+      {
+        "name": "first_reward_txn_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "last_reward_txn_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "active_txn_month",
+        "type": "INT64"
+      },
+      {
+        "name": "aggregated_txn_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "monthly_reward_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "lifetime_reward_detail",
+        "type": "JSON"
+      }
+    ]
+  },
+  {
+    "table_name": "user_reward_detail_dump",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.user_reward_detail_dump",
+    "row_count": 11096611,
+    "size_bytes": 11316042863,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "txn_month",
+        "type": "INT64"
+      },
+      {
+        "name": "calendar_month",
+        "type": "STRING"
+      },
+      {
+        "name": "aggregated_txn_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "monthly_reward_detail",
+        "type": "JSON"
+      }
+    ]
+  },
+  {
+    "table_name": "user_reward_detail_dump_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.user_reward_detail_dump_v2",
+    "row_count": 11205557,
+    "size_bytes": 11491904207,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "txn_month",
+        "type": "INT64"
+      },
+      {
+        "name": "calendar_month",
+        "type": "STRING"
+      },
+      {
+        "name": "aggregated_txn_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "monthly_reward_detail",
+        "type": "JSON"
+      }
+    ]
+  },
+  {
+    "table_name": "user_reward_detail_dump_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.user_reward_detail_dump_v3",
+    "row_count": 0,
+    "size_bytes": 0,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "txn_month",
+        "type": "INT64"
+      },
+      {
+        "name": "calendar_month",
+        "type": "STRING"
+      },
+      {
+        "name": "aggregated_txn_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "monthly_reward_detail",
+        "type": "JSON"
+      }
+    ]
+  },
+  {
+    "table_name": "user_reward_detail_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.user_reward_detail_v2",
+    "row_count": 7806820,
+    "size_bytes": 9742784968,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "is_sm_cc_linked",
+        "type": "BOOL"
+      },
+      {
+        "name": "first_reward_txn_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "last_reward_txn_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "active_txn_month",
+        "type": "INT64"
+      },
+      {
+        "name": "aggregated_txn_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "monthly_reward_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "lifetime_reward_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "daily_reward_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "user_insight",
+        "type": "JSON"
+      }
+    ]
+  },
+  {
+    "table_name": "user_reward_detail_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.user_reward_detail_v3",
+    "row_count": 29036225,
+    "size_bytes": 39598381387,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "is_sm_cc_linked",
+        "type": "BOOL"
+      },
+      {
+        "name": "first_reward_txn_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "last_reward_txn_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "active_txn_month",
+        "type": "INT64"
+      },
+      {
+        "name": "aggregated_txn_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "monthly_reward_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "lifetime_reward_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "daily_reward_detail",
+        "type": "JSON"
+      },
+      {
+        "name": "user_insight",
+        "type": "JSON"
+      }
+    ]
+  },
+  {
+    "table_name": "wallet",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.wallet",
+    "row_count": 4925010,
+    "size_bytes": 694426157,
+    "columns": [
+      {
+        "name": "wallet_id",
+        "type": "STRING"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "reason",
+        "type": "STRING"
+      },
+      {
+        "name": "onthe_way_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemed_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemable_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "reversed_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "creditted_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "wallet_compartment",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.wallet_compartment",
+    "row_count": 163,
+    "size_bytes": 20701,
+    "columns": [
+      {
+        "name": "wallet_id",
+        "type": "STRING"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "source",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "onthe_way_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemed_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemable_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "reversed_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "creditted_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "wallet_compartment_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.wallet_compartment_v2",
+    "row_count": 7523516,
+    "size_bytes": 955486532,
+    "columns": [
+      {
+        "name": "wallet_id",
+        "type": "STRING"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "source",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "onthe_way_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemed_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemable_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "reversed_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "creditted_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "wallet_compartment_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.wallet_compartment_v3",
+    "row_count": 33123085,
+    "size_bytes": 4200034470,
+    "columns": [
+      {
+        "name": "wallet_id",
+        "type": "STRING"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "source",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "onthe_way_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemed_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemable_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "reversed_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "creditted_balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "wallet_transaction",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.wallet_transaction",
+    "row_count": 121660271,
+    "size_bytes": 28685515103,
+    "columns": [
+      {
+        "name": "wallet_txn_id",
+        "type": "STRING"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "wallet_id",
+        "type": "STRING"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "amount",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "percentage",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "reference_transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_description",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_note",
+        "type": "STRING"
+      },
+      {
+        "name": "original_reference_transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "type",
+        "type": "STRING"
+      },
+      {
+        "name": "source_type",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "earn_by_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "error_message",
+        "type": "STRING"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "metadata",
+        "type": "JSON"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "amount_splits",
+        "type": "JSON"
+      },
+      {
+        "name": "source",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "wallet_transaction_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.wallet_transaction_v2",
+    "row_count": 429449059,
+    "size_bytes": 106432587575,
+    "columns": [
+      {
+        "name": "wallet_txn_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "wallet_id",
+        "type": "STRING"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "amount",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "percentage",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "reference_transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_description",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_note",
+        "type": "STRING"
+      },
+      {
+        "name": "original_reference_transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "type",
+        "type": "STRING"
+      },
+      {
+        "name": "source_type",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "earn_by_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "error_message",
+        "type": "STRING"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "metadata",
+        "type": "JSON"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "amount_splits",
+        "type": "JSON"
+      },
+      {
+        "name": "source",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "wallet_transaction_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.wallet_transaction_v3",
+    "row_count": 3159091808,
+    "size_bytes": 814311125331,
+    "columns": [
+      {
+        "name": "wallet_txn_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "wallet_id",
+        "type": "STRING"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "amount",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "percentage",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "reference_transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_description",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_note",
+        "type": "STRING"
+      },
+      {
+        "name": "original_reference_transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "type",
+        "type": "STRING"
+      },
+      {
+        "name": "source_type",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "earn_by_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "error_message",
+        "type": "STRING"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "metadata",
+        "type": "JSON"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "amount_splits",
+        "type": "JSON"
+      },
+      {
+        "name": "source",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "wallet_v2",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.wallet_v2",
+    "row_count": 10000534,
+    "size_bytes": 1490079267,
+    "columns": [
+      {
+        "name": "wallet_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "reason",
+        "type": "STRING"
+      },
+      {
+        "name": "onthe_way_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemed_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemable_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "reversed_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "creditted_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "wallet_v3",
+    "dataset": "rewards_prod",
+    "full_name": "rewards_prod.wallet_v3",
+    "row_count": 33123227,
+    "size_bytes": 4935360511,
+    "columns": [
+      {
+        "name": "wallet_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "reason",
+        "type": "STRING"
+      },
+      {
+        "name": "onthe_way_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemed_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "redeemable_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "reversed_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "creditted_cashback",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "account_auto_link_event",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.account_auto_link_event",
+    "row_count": 151987,
+    "size_bytes": 90730779,
+    "columns": [
+      {
+        "name": "_PARTITIONTIME",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "bank_code",
+        "type": "STRING"
+      },
+      {
+        "name": "request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "account_type",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "status_error_code",
+        "type": "STRING"
+      },
+      {
+        "name": "meta",
+        "type": "STRING"
+      },
+      {
+        "name": "subscription_name",
+        "type": "STRING"
+      },
+      {
+        "name": "message_id",
+        "type": "STRING"
+      },
+      {
+        "name": "publish_time",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "attributes",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "account_info_v2",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.account_info_v2",
+    "row_count": 9556593,
+    "size_bytes": 1665240198,
+    "columns": [
+      {
+        "name": "bank_account_unique_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "bank_code",
+        "type": "STRING"
+      },
+      {
+        "name": "bank_name",
+        "type": "STRING"
+      },
+      {
+        "name": "holder_name",
+        "type": "STRING"
+      },
+      {
+        "name": "masked_account_number",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_pin_set",
+        "type": "BOOL"
+      },
+      {
+        "name": "upi_pin_len",
+        "type": "INT64"
+      },
+      {
+        "name": "bank_account_type",
+        "type": "STRING"
+      },
+      {
+        "name": "account_subtype",
+        "type": "STRING"
+      },
+      {
+        "name": "cbc_card_id",
+        "type": "STRING"
+      },
+      {
+        "name": "ifsc_code",
+        "type": "STRING"
+      },
+      {
+        "name": "atm_pin_len",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "account_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.account_info_v3",
+    "row_count": 53362921,
+    "size_bytes": 9304608420,
+    "columns": [
+      {
+        "name": "bank_account_unique_id",
+        "type": "STRING"
+      },
+      {
+        "name": "bank_code",
+        "type": "STRING"
+      },
+      {
+        "name": "bank_name",
+        "type": "STRING"
+      },
+      {
+        "name": "holder_name",
+        "type": "STRING"
+      },
+      {
+        "name": "masked_account_number",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_pin_set",
+        "type": "BOOL"
+      },
+      {
+        "name": "upi_pin_len",
+        "type": "INT64"
+      },
+      {
+        "name": "bank_account_type",
+        "type": "STRING"
+      },
+      {
+        "name": "account_subtype",
+        "type": "STRING"
+      },
+      {
+        "name": "cbc_card_id",
+        "type": "STRING"
+      },
+      {
+        "name": "ifsc_code",
+        "type": "STRING"
+      },
+      {
+        "name": "atm_pin_len",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "beneficiary_info_v2",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.beneficiary_info_v2",
+    "row_count": 124381,
+    "size_bytes": 22268790,
+    "columns": [
+      {
+        "name": "beneficiary_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_nickname",
+        "type": "STRING"
+      },
+      {
+        "name": "payment_address_type",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_name",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "payment_address",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "collect_request_v2",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.collect_request_v2",
+    "row_count": 783116,
+    "size_bytes": 256241566,
+    "columns": [
+      {
+        "name": "collect_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "collect_type",
+        "type": "STRING"
+      },
+      {
+        "name": "pop_up_status",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "is_verified_payee",
+        "type": "BOOL"
+      },
+      {
+        "name": "is_payee_marked_spam",
+        "type": "BOOL"
+      },
+      {
+        "name": "payee_name",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_mcc",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "payer_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "seq_number",
+        "type": "INT64"
+      },
+      {
+        "name": "remarks",
+        "type": "STRING"
+      },
+      {
+        "name": "expires_at",
+        "type": "INT64"
+      },
+      {
+        "name": "amount",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      }
+    ]
+  },
+  {
+    "table_name": "collect_request_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.collect_request_v3",
+    "row_count": 13889188,
+    "size_bytes": 4525987241,
+    "columns": [
+      {
+        "name": "collect_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "collect_type",
+        "type": "STRING"
+      },
+      {
+        "name": "pop_up_status",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "is_verified_payee",
+        "type": "BOOL"
+      },
+      {
+        "name": "is_payee_marked_spam",
+        "type": "BOOL"
+      },
+      {
+        "name": "payee_name",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_mcc",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "payer_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "seq_number",
+        "type": "INT64"
+      },
+      {
+        "name": "remarks",
+        "type": "STRING"
+      },
+      {
+        "name": "expires_at",
+        "type": "INT64"
+      },
+      {
+        "name": "amount",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "complaint_temp",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.complaint_temp",
+    "row_count": 4174,
+    "size_bytes": 531482,
+    "columns": [
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "complaint_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "complaint_status",
+        "type": "STRING"
+      },
+      {
+        "name": "adj_code",
+        "type": "STRING"
+      },
+      {
+        "name": "adj_flag",
+        "type": "STRING"
+      },
+      {
+        "name": "crn",
+        "type": "STRING"
+      },
+      {
+        "name": "gateway_reference_id",
+        "type": "STRING"
+      },
+      {
+        "name": "gateway_complaint_id",
+        "type": "STRING"
+      },
+      {
+        "name": "complaint_category",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "response_meta_data",
+        "type": "JSON"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "complaint_v2",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.complaint_v2",
+    "row_count": 54021,
+    "size_bytes": 21087456,
+    "columns": [
+      {
+        "name": "complaint_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "complaint_status",
+        "type": "STRING"
+      },
+      {
+        "name": "adj_code",
+        "type": "STRING"
+      },
+      {
+        "name": "adj_flag",
+        "type": "STRING"
+      },
+      {
+        "name": "crn",
+        "type": "STRING"
+      },
+      {
+        "name": "gateway_reference_id",
+        "type": "STRING"
+      },
+      {
+        "name": "gateway_complaint_id",
+        "type": "STRING"
+      },
+      {
+        "name": "complaint_category",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "response_meta_data",
+        "type": "JSON"
+      }
+    ]
+  },
+  {
+    "table_name": "complaint_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.complaint_v3",
+    "row_count": 345242,
+    "size_bytes": 135422747,
+    "columns": [
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "complaint_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "complaint_status",
+        "type": "STRING"
+      },
+      {
+        "name": "adj_code",
+        "type": "STRING"
+      },
+      {
+        "name": "adj_flag",
+        "type": "STRING"
+      },
+      {
+        "name": "crn",
+        "type": "STRING"
+      },
+      {
+        "name": "gateway_reference_id",
+        "type": "STRING"
+      },
+      {
+        "name": "gateway_complaint_id",
+        "type": "STRING"
+      },
+      {
+        "name": "complaint_category",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "response_meta_data",
+        "type": "JSON"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "device_info_v2",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.device_info_v2",
+    "row_count": 7981788,
+    "size_bytes": 768566273,
+    "columns": [
+      {
+        "name": "device_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "manufacturer",
+        "type": "STRING"
+      },
+      {
+        "name": "model",
+        "type": "STRING"
+      },
+      {
+        "name": "version",
+        "type": "STRING"
+      },
+      {
+        "name": "os",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "device_meta",
+        "type": "JSON"
+      }
+    ]
+  },
+  {
+    "table_name": "device_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.device_info_v3",
+    "row_count": 46702619,
+    "size_bytes": 4474283312,
+    "columns": [
+      {
+        "name": "device_id",
+        "type": "STRING"
+      },
+      {
+        "name": "manufacturer",
+        "type": "STRING"
+      },
+      {
+        "name": "model",
+        "type": "STRING"
+      },
+      {
+        "name": "version",
+        "type": "STRING"
+      },
+      {
+        "name": "os",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "device_meta",
+        "type": "JSON"
+      }
+    ]
+  },
+  {
+    "table_name": "lite_mandate_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.lite_mandate_v3",
+    "row_count": 289049,
+    "size_bytes": 84274784,
+    "columns": [
+      {
+        "name": "autoload_id",
+        "type": "STRING"
+      },
+      {
+        "name": "lrn",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "mandate_id",
+        "type": "STRING"
+      },
+      {
+        "name": "first_exec_amount",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "threshold_amount",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "recharge_amount",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "umn",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "first_execution_time",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "balance",
+        "type": "FLOAT64"
+      },
+      {
+        "name": "execution_state",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "mandate_v2",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.mandate_v2",
+    "row_count": 16074,
+    "size_bytes": 9497893,
+    "columns": [
+      {
+        "name": "mandate_id",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "amount",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "amount_rule",
+        "type": "STRING"
+      },
+      {
+        "name": "bank_account_unique_id",
+        "type": "STRING"
+      },
+      {
+        "name": "block_fund",
+        "type": "BOOL"
+      },
+      {
+        "name": "expiry",
+        "type": "INT64"
+      },
+      {
+        "name": "gateway_mandate_id",
+        "type": "STRING"
+      },
+      {
+        "name": "gateway_reference_id",
+        "type": "STRING"
+      },
+      {
+        "name": "psp_provider",
+        "type": "STRING"
+      },
+      {
+        "name": "psp_response_code",
+        "type": "STRING"
+      },
+      {
+        "name": "psp_response_message",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "initiated_by",
+        "type": "STRING"
+      },
+      {
+        "name": "is_marked_spam",
+        "type": "BOOL"
+      },
+      {
+        "name": "is_verified_payee",
+        "type": "BOOL"
+      },
+      {
+        "name": "mandate_approval_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "mandate_name",
+        "type": "STRING"
+      },
+      {
+        "name": "mandate_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "merchant_channel_id",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant_customer_id",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant_id",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "org_mandate_id",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_mcc",
+        "type": "STRING"
+      },
+      {
+        "name": "pause_end",
+        "type": "INT64"
+      },
+      {
+        "name": "pause_start",
+        "type": "INT64"
+      },
+      {
+        "name": "payee_name",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "payer_name",
+        "type": "STRING"
+      },
+      {
+        "name": "payer_revocable",
+        "type": "BOOL"
+      },
+      {
+        "name": "payer_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "purpose",
+        "type": "STRING"
+      },
+      {
+        "name": "recurrence_pattern",
+        "type": "STRING"
+      },
+      {
+        "name": "recurrence_rule",
+        "type": "STRING"
+      },
+      {
+        "name": "recurrence_value",
+        "type": "STRING"
+      },
+      {
+        "name": "ref_url",
+        "type": "STRING"
+      },
+      {
+        "name": "remarks",
+        "type": "STRING"
+      },
+      {
+        "name": "role",
+        "type": "STRING"
+      },
+      {
+        "name": "share_to_payee",
+        "type": "BOOL"
+      },
+      {
+        "name": "transaction_type",
+        "type": "STRING"
+      },
+      {
+        "name": "umn",
+        "type": "STRING"
+      },
+      {
+        "name": "validity_end",
+        "type": "INT64"
+      },
+      {
+        "name": "validity_start",
+        "type": "INT64"
+      },
+      {
+        "name": "payer_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "transaction_reference",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "mandate_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.mandate_v3",
+    "row_count": 938689,
+    "size_bytes": 571747686,
+    "columns": [
+      {
+        "name": "mandate_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "amount",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "amount_rule",
+        "type": "STRING"
+      },
+      {
+        "name": "bank_account_unique_id",
+        "type": "STRING"
+      },
+      {
+        "name": "block_fund",
+        "type": "BOOL"
+      },
+      {
+        "name": "expiry",
+        "type": "INT64"
+      },
+      {
+        "name": "gateway_mandate_id",
+        "type": "STRING"
+      },
+      {
+        "name": "gateway_reference_id",
+        "type": "STRING"
+      },
+      {
+        "name": "psp_provider",
+        "type": "STRING"
+      },
+      {
+        "name": "psp_response_code",
+        "type": "STRING"
+      },
+      {
+        "name": "psp_response_message",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "initiated_by",
+        "type": "STRING"
+      },
+      {
+        "name": "is_marked_spam",
+        "type": "BOOL"
+      },
+      {
+        "name": "is_verified_payee",
+        "type": "BOOL"
+      },
+      {
+        "name": "mandate_approval_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "mandate_name",
+        "type": "STRING"
+      },
+      {
+        "name": "mandate_timestamp",
+        "type": "INT64"
+      },
+      {
+        "name": "merchant_channel_id",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant_customer_id",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant_id",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "org_mandate_id",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_mcc",
+        "type": "STRING"
+      },
+      {
+        "name": "pause_end",
+        "type": "INT64"
+      },
+      {
+        "name": "pause_start",
+        "type": "INT64"
+      },
+      {
+        "name": "payee_name",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "payer_name",
+        "type": "STRING"
+      },
+      {
+        "name": "payer_revocable",
+        "type": "BOOL"
+      },
+      {
+        "name": "payer_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "purpose",
+        "type": "STRING"
+      },
+      {
+        "name": "recurrence_pattern",
+        "type": "STRING"
+      },
+      {
+        "name": "recurrence_rule",
+        "type": "STRING"
+      },
+      {
+        "name": "recurrence_value",
+        "type": "STRING"
+      },
+      {
+        "name": "ref_url",
+        "type": "STRING"
+      },
+      {
+        "name": "remarks",
+        "type": "STRING"
+      },
+      {
+        "name": "role",
+        "type": "STRING"
+      },
+      {
+        "name": "share_to_payee",
+        "type": "BOOL"
+      },
+      {
+        "name": "transaction_type",
+        "type": "STRING"
+      },
+      {
+        "name": "umn",
+        "type": "STRING"
+      },
+      {
+        "name": "validity_end",
+        "type": "INT64"
+      },
+      {
+        "name": "validity_start",
+        "type": "INT64"
+      },
+      {
+        "name": "payer_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "transaction_reference",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "payment_address_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.payment_address_info_v3",
+    "row_count": 269685985,
+    "size_bytes": 49689925795,
+    "columns": [
+      {
+        "name": "payment_address",
+        "type": "STRING"
+      },
+      {
+        "name": "name",
+        "type": "STRING"
+      },
+      {
+        "name": "mcc",
+        "type": "STRING"
+      },
+      {
+        "name": "is_merchant_verified",
+        "type": "BOOL"
+      },
+      {
+        "name": "merchant_details",
+        "type": "JSON"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "expires_at",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "meta",
+        "type": "JSON"
+      },
+      {
+        "name": "ifsc",
+        "type": "STRING"
+      },
+      {
+        "name": "is_merchant",
+        "type": "BOOL"
+      },
+      {
+        "name": "mid",
+        "type": "STRING"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "transaction_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.transaction_v3",
+    "row_count": 4258468057,
+    "size_bytes": 2342348759043,
+    "columns": [
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_id",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_type",
+        "type": "STRING"
+      },
+      {
+        "name": "payment_mode",
+        "type": "STRING"
+      },
+      {
+        "name": "bank_account_unique_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_request_id",
+        "type": "STRING"
+      },
+      {
+        "name": "gateway_reference_id",
+        "type": "STRING"
+      },
+      {
+        "name": "initiation_mode",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_name",
+        "type": "STRING"
+      },
+      {
+        "name": "payee_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "payer_name",
+        "type": "STRING"
+      },
+      {
+        "name": "payer_vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "is_verified",
+        "type": "BOOL"
+      },
+      {
+        "name": "mcc",
+        "type": "STRING"
+      },
+      {
+        "name": "amount",
+        "type": "NUMERIC"
+      },
+      {
+        "name": "currency",
+        "type": "STRING"
+      },
+      {
+        "name": "transaction_status",
+        "type": "STRING"
+      },
+      {
+        "name": "remarks",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "transaction_at",
+        "type": "INT64"
+      },
+      {
+        "name": "request_meta_data",
+        "type": "JSON"
+      },
+      {
+        "name": "response_meta_data",
+        "type": "JSON"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "mobile_number",
+        "type": "STRING(250)"
+      },
+      {
+        "name": "source",
+        "type": "STRING(50)"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING(80)"
+      },
+      {
+        "name": "account_type",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "upi_auth_session_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.upi_auth_session_info_v3",
+    "row_count": 103040444,
+    "size_bytes": 45548085643,
+    "columns": [
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "session_id",
+        "type": "STRING"
+      },
+      {
+        "name": "device_id",
+        "type": "STRING"
+      },
+      {
+        "name": "npci_token",
+        "type": "STRING"
+      },
+      {
+        "name": "expires_at",
+        "type": "INT64"
+      },
+      {
+        "name": "device_fingerprint",
+        "type": "STRING"
+      },
+      {
+        "name": "sim_slot",
+        "type": "INT64"
+      },
+      {
+        "name": "ssid",
+        "type": "STRING"
+      },
+      {
+        "name": "psp_provider",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "status_error_code",
+        "type": "STRING"
+      },
+      {
+        "name": "meta",
+        "type": "JSON"
+      },
+      {
+        "name": "user_created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "upi_handle_name_mapping",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.upi_handle_name_mapping",
+    "row_count": 51,
+    "size_bytes": 2056,
+    "columns": [
+      {
+        "name": "sno",
+        "type": "INT64"
+      },
+      {
+        "name": "TPAP",
+        "type": "STRING"
+      },
+      {
+        "name": "PSP_Banks",
+        "type": "STRING"
+      },
+      {
+        "name": "Handle_Name",
+        "type": "STRING"
+      },
+      {
+        "name": "string_field_4",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "upi_lite_account_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.upi_lite_account_info_v3",
+    "row_count": 505332,
+    "size_bytes": 109095775,
+    "columns": [
+      {
+        "name": "upi_user_id",
+        "type": "STRING(50)"
+      },
+      {
+        "name": "lrn",
+        "type": "STRING(80)"
+      },
+      {
+        "name": "bank_account_unique_id",
+        "type": "STRING(80)"
+      },
+      {
+        "name": "os_type",
+        "type": "STRING(30)"
+      },
+      {
+        "name": "device_id",
+        "type": "STRING(80)"
+      },
+      {
+        "name": "status",
+        "type": "STRING(50)"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "upi_mapper_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.upi_mapper_info_v3",
+    "row_count": 1079319,
+    "size_bytes": 132687283,
+    "columns": [
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_number",
+        "type": "STRING"
+      },
+      {
+        "name": "vpa_id",
+        "type": "STRING"
+      },
+      {
+        "name": "phone_no",
+        "type": "BOOL"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "expires_at",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "user_account_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.user_account_info_v3",
+    "row_count": 54334967,
+    "size_bytes": 7886916890,
+    "columns": [
+      {
+        "name": "bank_account_unique_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "primary_account",
+        "type": "BOOL"
+      },
+      {
+        "name": "merchant_default",
+        "type": "BOOL"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "version_no",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "user_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.user_info_v3",
+    "row_count": 41833476,
+    "size_bytes": 4770574273,
+    "columns": [
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "version_no",
+        "type": "INT64"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "user_vpa_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.user_vpa_info_v3",
+    "row_count": 38870082,
+    "size_bytes": 4510787501,
+    "columns": [
+      {
+        "name": "vpa_id",
+        "type": "STRING"
+      },
+      {
+        "name": "upi_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "status",
+        "type": "STRING"
+      },
+      {
+        "name": "primary",
+        "type": "BOOL"
+      },
+      {
+        "name": "version_no",
+        "type": "INT64"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "vpa_info_v3",
+    "dataset": "upi_prod",
+    "full_name": "upi_prod.vpa_info_v3",
+    "row_count": 38841248,
+    "size_bytes": 3225206210,
+    "columns": [
+      {
+        "name": "vpa_id",
+        "type": "STRING"
+      },
+      {
+        "name": "vpa",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "INT64"
+      },
+      {
+        "name": "updated_at",
+        "type": "INT64"
+      },
+      {
+        "name": "_metadata_big_query_commit_timestamp",
+        "type": "TIMESTAMP"
+      }
+    ]
+  },
+  {
+    "table_name": "AccountLoginEntity",
+    "dataset": "sm_kavach_svc_prod_sm_login_service",
+    "full_name": "sm_kavach_svc_prod_sm_login_service.AccountLoginEntity",
+    "row_count": 134536946,
+    "size_bytes": 32154330332,
+    "columns": [
+      {
+        "name": "user_login_id",
+        "type": "STRING"
+      },
+      {
+        "name": "account_id",
+        "type": "STRING"
+      },
+      {
+        "name": "password",
+        "type": "STRING"
+      },
+      {
+        "name": "state",
+        "type": "STRING"
+      },
+      {
+        "name": "user_login_id_type",
+        "type": "STRING"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "stamp_created",
+        "type": "DATETIME"
+      },
+      {
+        "name": "stamp_modified",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "last_verified_time",
+        "type": "DATETIME"
+      },
+      {
+        "name": "persona",
+        "type": "STRING"
+      },
+      {
+        "name": "datastream_metadata",
+        "type": "STRUCT<uuid STRING, source_timestamp INT64>"
+      }
+    ]
+  },
+  {
+    "table_name": "AccountLoginEntity2",
+    "dataset": "sm_kavach_svc_prod_sm_login_service",
+    "full_name": "sm_kavach_svc_prod_sm_login_service.AccountLoginEntity2",
+    "row_count": 219201824,
+    "size_bytes": 32880273600,
+    "columns": [
+      {
+        "name": "user_login_id",
+        "type": "STRING"
+      },
+      {
+        "name": "account_id",
+        "type": "STRING"
+      },
+      {
+        "name": "state",
+        "type": "STRING"
+      },
+      {
+        "name": "user_login_id_type",
+        "type": "STRING"
+      },
+      {
+        "name": "stamp_created",
+        "type": "DATETIME"
+      },
+      {
+        "name": "stamp_modified",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "last_verified_time",
+        "type": "DATETIME"
+      },
+      {
+        "name": "datastream_metadata",
+        "type": "STRUCT<uuid STRING, source_timestamp INT64>"
+      }
+    ]
+  },
+  {
+    "table_name": "AccountLoginEntityV2",
+    "dataset": "sm_kavach_svc_prod_sm_login_service",
+    "full_name": "sm_kavach_svc_prod_sm_login_service.AccountLoginEntityV2",
+    "row_count": 160046195,
+    "size_bytes": 24006929250,
+    "columns": [
+      {
+        "name": "user_login_id",
+        "type": "STRING"
+      },
+      {
+        "name": "account_id",
+        "type": "STRING"
+      },
+      {
+        "name": "state",
+        "type": "STRING"
+      },
+      {
+        "name": "user_login_id_type",
+        "type": "STRING"
+      },
+      {
+        "name": "stamp_created",
+        "type": "DATETIME"
+      },
+      {
+        "name": "stamp_modified",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "last_verified_time",
+        "type": "DATETIME"
+      },
+      {
+        "name": "datastream_metadata",
+        "type": "STRUCT<uuid STRING, source_timestamp INT64>"
+      }
+    ]
+  },
+  {
+    "table_name": "MerchantAccountMapping",
+    "dataset": "sm_kavach_svc_prod_sm_login_service",
+    "full_name": "sm_kavach_svc_prod_sm_login_service.MerchantAccountMapping",
+    "row_count": 115715522,
+    "size_bytes": 16955586963,
+    "columns": [
+      {
+        "name": "account_id",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant_account_id",
+        "type": "STRING"
+      },
+      {
+        "name": "created_time",
+        "type": "DATETIME"
+      },
+      {
+        "name": "state",
+        "type": "STRING"
+      },
+      {
+        "name": "datastream_metadata",
+        "type": "STRUCT<uuid STRING, source_timestamp INT64>"
+      }
+    ]
+  },
+  {
+    "table_name": "MerchantAccountMappingV2",
+    "dataset": "sm_kavach_svc_prod_sm_login_service",
+    "full_name": "sm_kavach_svc_prod_sm_login_service.MerchantAccountMappingV2",
+    "row_count": 138538742,
+    "size_bytes": 20307220890,
+    "columns": [
+      {
+        "name": "account_id",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant",
+        "type": "STRING"
+      },
+      {
+        "name": "merchant_account_id",
+        "type": "STRING"
+      },
+      {
+        "name": "created_time",
+        "type": "DATETIME"
+      },
+      {
+        "name": "state",
+        "type": "STRING"
+      },
+      {
+        "name": "datastream_metadata",
+        "type": "STRUCT<uuid STRING, source_timestamp INT64>"
+      }
+    ]
+  },
+  {
+    "table_name": "basic_details",
+    "dataset": "sm_kavach_svc_prod_sm_login_service",
+    "full_name": "sm_kavach_svc_prod_sm_login_service.basic_details",
+    "row_count": 0,
+    "size_bytes": 0,
+    "columns": [
+      {
+        "name": "account_id",
+        "type": "STRING"
+      },
+      {
+        "name": "lob",
+        "type": "STRING"
+      },
+      {
+        "name": "first_name",
+        "type": "STRING"
+      },
+      {
+        "name": "last_name",
+        "type": "STRING"
+      },
+      {
+        "name": "gender",
+        "type": "STRING"
+      },
+      {
+        "name": "dob",
+        "type": "DATE"
+      },
+      {
+        "name": "verified_first_name",
+        "type": "STRING"
+      },
+      {
+        "name": "verified_last_name",
+        "type": "STRING"
+      },
+      {
+        "name": "name_match",
+        "type": "INT64"
+      },
+      {
+        "name": "match_score",
+        "type": "INT64"
+      },
+      {
+        "name": "profile_name",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "datastream_metadata",
+        "type": "STRUCT<uuid STRING, source_timestamp INT64>"
+      }
+    ]
+  },
+  {
+    "table_name": "basic_details_v2",
+    "dataset": "sm_kavach_svc_prod_sm_login_service",
+    "full_name": "sm_kavach_svc_prod_sm_login_service.basic_details_v2",
+    "row_count": 35169113,
+    "size_bytes": 4100528903,
+    "columns": [
+      {
+        "name": "account_id",
+        "type": "STRING"
+      },
+      {
+        "name": "first_name",
+        "type": "STRING"
+      },
+      {
+        "name": "last_name",
+        "type": "STRING"
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "datastream_metadata",
+        "type": "STRUCT<uuid STRING, source_timestamp INT64>"
+      }
+    ]
+  },
+  {
+    "table_name": "numbers",
+    "dataset": "sm_kavach_svc_prod_sm_login_service",
+    "full_name": "sm_kavach_svc_prod_sm_login_service.numbers",
+    "row_count": 187025,
+    "size_bytes": 9725300,
+    "columns": [
+      {
+        "name": "sm_user_id",
+        "type": "STRING"
+      },
+      {
+        "name": "user_login_id",
+        "type": "STRING"
+      }
+    ]
+  },
+  {
+    "table_name": "user_profile",
+    "dataset": "sm_kavach_svc_prod_sm_login_service",
+    "full_name": "sm_kavach_svc_prod_sm_login_service.user_profile",
+    "row_count": 19603358,
+    "size_bytes": 2444755530,
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING"
+      },
+      {
+        "name": "first_name",
+        "type": "STRING"
+      },
+      {
+        "name": "last_name",
+        "type": "STRING"
+      },
+      {
+        "name": "gender",
+        "type": "STRING"
+      },
+      {
+        "name": "dob",
+        "type": "STRING"
+      },
+      {
+        "name": "inactive_dob",
+        "type": "STRING"
+      },
+      {
+        "name": "profile_name",
+        "type": "STRING"
+      },
+      {
+        "name": "country",
+        "type": "STRING"
+      },
+      {
+        "name": "altPhone",
+        "type": "STRING"
+      },
+      {
+        "name": "version",
+        "type": "INT64"
+      },
+      {
+        "name": "creation_date",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "last_modified",
+        "type": "DATETIME"
+      },
+      {
+        "name": "datastream_metadata",
+        "type": "STRUCT<uuid STRING, source_timestamp INT64>"
+      }
+    ]
+  }
+]
