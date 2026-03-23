@@ -28,7 +28,7 @@ def extract_dataset_metadata(dataset_id: str) -> list[dict]:
     tables_query = f"""
     SELECT table_name
     FROM {proj}.{dataset_id}.INFORMATION_SCHEMA.TABLES
-    WHERE table_type = 'BASE TABLE'
+    WHERE table_type IN ('BASE TABLE', 'VIEW')
     ORDER BY table_name
     """
 
