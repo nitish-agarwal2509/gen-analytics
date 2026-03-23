@@ -52,7 +52,7 @@ streamlit run app.py                   # Streamlit on port 8501
 - Config loaded from `backend/.env` via pydantic-settings
 - BigQuery auth: service account key JSON (`GOOGLE_APPLICATION_CREDENTIALS`)
 - GCP Project: `sm-apps-core` (76 datasets, 500+ tables)
-- Agent schema: dynamically loaded from `backend/data/schema_metadata.json` (101 tables, ~6.8K tokens)
+- Agent schema: dynamically loaded from `backend/data/schema_metadata.json` (51 tables across 10 datasets, ~10.9K tokens)
 - Schema refresh: `cd backend && python scripts/extract_schema.py <datasets...>`
 - LLM: Gemini 2.5 Flash via Vertex AI (`GOOGLE_GENAI_USE_VERTEXAI=true`)
 - MySQL: local via Homebrew (`MYSQL_URL=mysql+aiomysql://root@localhost:3306/gen_analytics`)
@@ -72,7 +72,7 @@ streamlit run app.py                   # Streamlit on port 8501
 ## Phase Status
 
 - [x] Phase 1: Hello World Agent (scaffolding, BigQuery, execute_sql, Gemini, ADK agent, Streamlit UI)
-- [x] Phase 2: Full Schema Extraction (101 tables, dynamic loading, 8/8 test queries pass)
+- [x] Phase 2: Full Schema Extraction (51 curated tables across 10 datasets, dynamic loading, 8/8 test queries pass)
 - [x] Phase 3: Validation & Self-Correction (validate_sql, safety module, cost guards, human-in-the-loop)
 - [x] Phase 4: Visualization & Polish (suggest_viz, Plotly charts, thinking steps, session sidebar)
 - [x] Phase 5: Business & Domain Context (table enrichments, 3 domain rules, glossary/examples as data files for eval)

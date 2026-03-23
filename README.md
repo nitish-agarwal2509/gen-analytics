@@ -24,12 +24,12 @@ React Chat UI  --SSE-->  ADK SSE Server (Google ADK)  -->  Gemini 2.5 Flash  -->
                          ├── sql_specialist (validate + self-correct)
                          └── viz_recommender
                               |
-                        Full schema (101 tables) in system prompt
+                        Full schema (51 tables across 10 datasets) in system prompt
 ```
 
 **Key design choices:**
 - **Multi-agent orchestration** -- root orchestrator routes to specialized sub-agents (schema_explorer, sql_specialist, viz_recommender) via ADK `transfer_to_agent`.
-- **Full schema in context** -- all 101 table schemas (~6.8K tokens) injected into the system prompt. No RAG needed; Gemini's 1M context handles it easily.
+- **Full schema in context** -- all 51 table schemas (~10.9K tokens) across 10 datasets injected into sub-agent prompts. No RAG needed; Gemini's 1M context handles it easily.
 - **Validate-before-execute** -- every query is dry-run validated before execution (free, catches errors, estimates cost).
 - **Self-correction** -- sql_specialist retries up to 3 times on validation failure, using error context to fix SQL.
 - **Human-in-the-loop** -- queries scanning >500 GB require user approval before execution.

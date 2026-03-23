@@ -16,7 +16,7 @@
 |  └── viz_recommender — chart type recommendation                 |
 |  Root tools: execute_sql                                         |
 |  Sub-agent tools: validate_sql, get_sample_data, suggest_viz     |
-|  Full terse schema (101 tables) in sub-agent prompts             |
+|  Full terse schema (51 tables) in sub-agent prompts             |
 +------------------------------------------------------------------+
               |                           |
 +------------------------+    +------------------------+
@@ -46,7 +46,7 @@
 | Agent Framework | **Google ADK** (multi-agent) | Sub-agents with `transfer_to_agent` routing |
 | LLM | **Gemini 2.5 Flash** (Vertex AI) | All agents use same model |
 | Database | **MySQL 8.0** | Sessions, saved queries, audit log (via SQLAlchemy async) |
-| Schema Strategy | Full terse schema in prompt | 101 tables, ~6.8K tokens |
+| Schema Strategy | Full terse schema in prompt | 51 tables, ~10.9K tokens |
 | Frontend | **Vite + React + shadcn/ui** | ADK SSE streaming, dark mode |
 | E2E Tests | Playwright | Mock + real backend tests |
 
@@ -261,7 +261,7 @@ gen-analytics/
 | ADK for multi-agent | Native sub-agents | `transfer_to_agent`, `after_tool_callback`, `DatabaseSessionService` — all built-in |
 | ADK over LangGraph | No rewrite needed | Same orchestration patterns, already using ADK from Phase 1 |
 | Gemini via Vertex AI | No rate limits | Pay-as-go, auth via service account |
-| Full schema in context | Highest accuracy | 101 tables (~6.8K tokens) fits easily in Gemini's 1M context |
+| Full schema in context | Highest accuracy | 51 tables (~10.9K tokens) fits easily in Gemini's 1M context |
 | MySQL over SQLite | Production-ready | Concurrent access, ADK native support, Cloud SQL for deployment |
 | Flat sub-agents over SequentialAgent | Reliable transfers | SequentialAgent doesn't transfer back to parent; flat sub-agents with explicit transfer work reliably |
 | Streamlit → Vite + React | Production frontend | shadcn/ui + Tailwind, ADK SSE streaming |
